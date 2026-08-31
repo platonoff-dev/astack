@@ -3,8 +3,8 @@
 My agentic-AI workbench — subagents, skills and tool configs — packaged as a
 plugin that both **Claude Code** and **Codex** install from the same repo.
 
-**It is empty on purpose.** The scaffolding is done; components get added one at
-a time.
+The scaffolding is done; components get added one at a time. One vendored skill
+so far — see [Vendoring someone else's skill](#vendoring-someone-elses-skill).
 
 ```
 .claude-plugin/
@@ -12,6 +12,9 @@ a time.
 └── marketplace.json      a one-entry marketplace pointing at this repo ("./")
 .codex-plugin/plugin.json the same plugin, Codex's manifest
 .agents/plugins/marketplace.json   the same marketplace, Codex's manifest
+skills/unslop/            vendored from cursor/plugins (MIT)
+vendor.json               the pin for every vendored component
+scripts/vendor.py         sync / check / update / add
 AGENTS.md ← CLAUDE.md     repo instructions, one file, symlinked
 ```
 
@@ -45,7 +48,7 @@ codex plugin list
 ```
 
 Both are installed and enabled right now from the local path
-`~/dev/personal/ai-bench`, reporting 0 components.
+`~/dev/personal/ai-bench`, reporting 1 skill.
 
 ## The dev loop
 
@@ -70,6 +73,54 @@ codex plugin add ai-bench@ai-bench
 Claude Code needs a restart to apply; Codex needs a new thread. Codex's own
 convention for a throwaway iteration is a build-metadata cachebuster —
 `0.1.0+codex.local-20260831-140000` — rather than burning version numbers.
+
+## Vendoring someone else's skill
+
+Third-party skills are **committed into this repo**, not linked. Both harnesses
+install a plugin by copying the repo tree and neither initialises git
+submodules, so a submodule or subtree would arrive empty on someone else's
+`plugin install`. Reproducibility comes from `vendor.json` instead — repo,
+subdirectory, branch, and the exact commit the working copy came from.
+
+| Command | What it does |
+|---|---|
+| `scripts/vendor.py add --name N --repo URL --path DIR [--ref main] [--license MIT] [--license-path P]` | register an upstream skill and fetch it |
+| `scripts/vendor.py sync [name…]` | re-materialise from the pinned commits (idempotent) |
+| `scripts/vendor.py check [name…]` | local edits? upstream moved? exit 1 if either |
+| `scripts/vendor.py update [name…]` | move the pin to the branch head and rewrite |
+
+Fetching is a sparse, blob-filtered, depth-1 fetch of just the one subdirectory
+at the pinned SHA — plain git, so any host works, and ~250 KB rather than a
+full clone.
+
+**Never hand-edit a vendored directory.** `sync` and `update` replace it
+wholesale, so an edit is silently lost on the next run; `check` reports it as
+`EDITED`. If you want different behaviour, add your own skill alongside it
+rather than patching the copy — that keeps `check` meaningful.
+
+`check` distinguishes the two ways a pin goes wrong:
+
+```
+ok       unslop: matches pin, and pin is main head
+EDITED   unslop: differs from its pinned commit fd878692de15
+STALE    unslop: main moved to fd878692de15 and the content changed
+```
+
+It also stays quiet when the branch has moved but the vendored path itself
+hasn't, which is the common case in a busy monorepo.
+
+### Vendored now
+
+| Skill | Upstream | Licence |
+|---|---|---|
+| `unslop` — cut AI tells from writing | [cursor/plugins `pstack/skills/unslop`](https://github.com/cursor/plugins/tree/main/pstack/skills/unslop) | MIT, © Lauren Tan |
+
+The upstream `LICENSE` is copied in beside each vendored `SKILL.md`; MIT
+requires the notice to travel with the copy.
+
+Note `unslop`'s own description ends "Must always apply." — it is written to
+match nearly every writing task, so expect it to fire often. Left as upstream
+wrote it.
 
 ## Validating a change
 

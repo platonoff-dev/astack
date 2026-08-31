@@ -13,15 +13,13 @@ The repo is both the marketplace and its single plugin: `.claude-plugin/` and
 `.codex-plugin/` hold the plugin manifests, and each harness's marketplace
 manifest lists this repo as its one entry with source `./`.
 
-**The repo is currently empty of components** — no agents, no skills, no
-commands, no hooks, no MCP servers. Both harnesses report 0 components and that
-is the intended state. Components get added deliberately, one at a time. Do not
-scaffold placeholder components; create a directory only when something real
-goes in it.
+Components get added deliberately, one at a time. Do not scaffold placeholder
+components; create a directory only when something real goes in it. Right now
+there is one skill, `skills/unslop`, vendored from `cursor/plugins`.
 
 There is no build, no test suite and no lint. The artifacts are Markdown
-definitions and JSON config; they are validated by the two validators in the
-README and by running them.
+definitions and JSON config, validated by the two plugin validators in the
+README, by `scripts/vendor.py check`, and by running them.
 
 ## Two things that will bite
 
@@ -46,6 +44,34 @@ Keep any component's text harness-neutral so one file serves both: name both
 instruction files ("the repo's `CLAUDE.md` / `AGENTS.md`") rather than either
 alone, and never blanket-rename `claude`→`codex` in a component — it corrupts
 real filesystem paths like `.claude/skills/…`.
+
+## Vendored third-party components
+
+`vendor.json` pins every component copied in from someone else's repo, and
+`scripts/vendor.py` materialises, diffs and bumps them. The README has the
+command table.
+
+**The files are committed on purpose.** Both harnesses install a plugin by
+copying the repo tree and neither initialises git submodules, so a submodule or
+subtree would arrive empty on someone else's `plugin install`. That constraint is
+what rules out every link-based approach; the pin plus a re-materialising script
+is the substitute.
+
+Rules that keep this honest:
+
+- **Never hand-edit a vendored directory.** `sync` and `update` replace it
+  wholesale, so the edit is lost; `check` reports it as `EDITED`. Wanting
+  different behaviour means adding your own skill alongside, not patching the
+  copy.
+- **Carry the upstream licence.** `license_path` in the entry copies the
+  upstream `LICENSE` in beside the `SKILL.md`. MIT and Apache-2.0 both require
+  the notice to travel with the copy; check the licence before vendoring at all.
+- **Pin a commit, not a branch.** `ref` says which branch to follow on `update`;
+  `commit` is what `sync` actually reproduces. Never drop the commit.
+- **A vendored skill keeps its upstream `name:`.** If you later install the
+  upstream plugin itself, both copies claim that name — pick one.
+- After `update`, bump the plugin version in both manifests and reinstall, or
+  neither harness sees the new content.
 
 ## Conventions when adding a component
 

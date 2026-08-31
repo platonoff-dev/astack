@@ -1,7 +1,7 @@
 {
   "name": "ai-bench",
-  "version": "0.1.0",
-  "description": "Anatolii's agentic-AI workbench: subagents, skills and tool configs. Empty for now; components get added one at a time.",
+  "version": "0.2.0",
+  "description": "Anatolii's agentic-AI workbench: subagents, skills and tool configs, including skills vendored from other repos with a pinned commit.",
   "author": {
     "name": "Anatolii Platonov",
     "url": "https://github.com/platonoff-dev"
