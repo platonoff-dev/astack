@@ -1,0 +1,19 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "ai-bench",
+  "description": "Anatolii's agentic-AI workbench.",
+  "owner": {
+    "name": "Anatolii Platonov"
+  },
+  "plugins": [
+    {
+      "name": "ai-bench",
+      "description": "Anatolii's agentic-AI workbench: subagents, skills and tool configs.",
+      "author": {
+        "name": "Anatolii Platonov"
+      },
+      "category": "development",
+      "source": "./"
+    }
+  ]
+}

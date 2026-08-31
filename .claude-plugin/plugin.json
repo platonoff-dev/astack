@@ -1,0 +1,12 @@
+{
+  "name": "ai-bench",
+  "version": "0.1.0",
+  "description": "Anatolii's agentic-AI workbench: subagents, skills and tool configs. Empty for now; components get added one at a time.",
+  "author": {
+    "name": "Anatolii Platonov",
+    "url": "https://github.com/platonoff-dev"
+  },
+  "homepage": "https://github.com/platonoff-dev/ai-bench",
+  "repository": "https://github.com/platonoff-dev/ai-bench",
+  "license": "MIT"
+}
