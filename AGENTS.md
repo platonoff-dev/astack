@@ -14,12 +14,15 @@ The repo is both the marketplace and its single plugin: `.claude-plugin/` and
 manifest lists this repo as its one entry with source `./`.
 
 Components get added deliberately, one at a time. Do not scaffold placeholder
-components; create a directory only when something real goes in it. Right now
-there is one skill, `skills/unslop`, vendored from `cursor/plugins`.
+components; create a directory only when something real goes in it. The plugin
+ships `skills/task-intake`, written here, and `skills/unslop`, vendored from
+`cursor/plugins`.
 
-There is no build, no test suite and no lint. The artifacts are Markdown
-definitions and JSON config, validated by the two plugin validators in the
-README, by `scripts/vendor.py check`, and by running them.
+There is no build or lint setup. The artifacts are Markdown definitions, JSON
+config, and small Python helpers. Validate with the two plugin validators in the
+README, `scripts/vendor.py check`, and the task-intake checker's regression
+checks. Trial skill behavior on real work; passing a format check is not proof
+that its instructions make good decisions.
 
 ## Two things that will bite
 
@@ -94,6 +97,38 @@ degrades every other skill in the set.
 and requires strict semver; Claude's is the more permissive of the two, so
 validate against Codex's first. Keep `name`, `version` and `description`
 identical across the two files.
+
+## Repo-level components
+
+Not everything here belongs in the plugin. `.agents/skills/<name>/` holds skills
+that serve *this* repo's own upkeep and are never shipped to anyone installing
+the plugin, with a symlink at `.claude/skills/<name>` so both harnesses find them
+(same direction as `CLAUDE.md → AGENTS.md`: the `.agents` copy is the real one).
+A fresh Claude Code session resolves that symlink and lists the skill, so it is
+the layout to copy for the next one.
+
+They are read live from the working tree, so **a repo-level skill needs no
+version bump and no reinstall** — the one rule from "Two things that will bite"
+that does not apply here.
+
+`prior-art` is the first: deciding what to take from someone else's agent setup.
+It is deliberately paired with, but separate from, vendoring:
+
+| | reads | writes | question it answers |
+|---|---|---|---|
+| `vendor.json` + `scripts/vendor.py` | upstream at a pin | `skills/<name>/`, committed | what do we *use* |
+| `prior-art.json` + `scripts/prior_art.py` | upstream at head, or a locally installed tree | `.cache/prior-art/`, gitignored | what do we *read* |
+
+Conflating them is how a reading copy quietly becomes a dependency. `prior_art.py
+diff` exits 1 when a source moved since a decision cited it — for a git source
+that means the commit moved, for a local one that the content digest changed,
+reported alongside the tool version that changed it.
+
+Decisions land in `docs/decisions/NNN-slug.md`, rejections included — an
+unrecorded rejection gets researched again. `prior-art.json` also carries
+`candidates`, proposed sources that stay untracked until Anatolii approves one
+with `prior_art.py approve <name>`. Never enrol a source or vendor a skill on
+your own judgement.
 
 ## Sibling repos
 

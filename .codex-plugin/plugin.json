@@ -1,6 +1,6 @@
 {
   "name": "ai-bench",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Anatolii's agentic-AI workbench: subagents, skills and tool configs, including skills vendored from other repos with a pinned commit.",
   "author": {
     "name": "Anatolii Platonov",
@@ -8,5 +8,17 @@
   },
   "homepage": "https://github.com/platonoff-dev/ai-bench",
   "repository": "https://github.com/platonoff-dev/ai-bench",
-  "license": "MIT"
+  "license": "MIT",
+  "interface": {
+    "displayName": "AI Bench",
+    "shortDescription": "Task intake and plain writing for coding agents",
+    "longDescription": "Check incoming tasks against current evidence, prepare compact Markdown briefs, and edit drafts to remove formulaic AI wording. Task intake works with local text or a configured issue tracker.",
+    "developerName": "Anatolii Platonov",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write"],
+    "defaultPrompt": [
+      "Use task-intake to check this ticket before implementation.",
+      "Use unslop to edit this draft."
+    ]
+  }
 }

@@ -1,0 +1,98 @@
+{
+  "sources": [
+    {
+      "name": "pstack",
+      "repo": "https://github.com/cursor/plugins.git",
+      "paths": [
+        "pstack"
+      ],
+      "ref": "main",
+      "why": "Cursor's in-house plugin: skills, commands and subagents shipped as one opinionated stack. Already the source of the vendored unslop skill.",
+      "upstream": "https://github.com/cursor/plugins/tree/main/pstack",
+      "read": {
+        "commit": "fd878692de15a3069c21c8f429eb0b9f2fe178fa",
+        "date": "2026-08-31"
+      }
+    },
+    {
+      "name": "mattpocock-skills",
+      "repo": "https://github.com/mattpocock/skills.git",
+      "ref": "main",
+      "why": "One person's skill set for TDD, diagnosis, domain modelling and writing for agents. Installed here as a plugin, so it can also be watched in use.",
+      "upstream": "https://github.com/mattpocock/skills",
+      "read": {
+        "commit": "a97b873866675db1084216f49dec798070377603",
+        "date": "2026-08-31"
+      }
+    },
+    {
+      "name": "anthropic-skills",
+      "repo": "https://github.com/anthropics/skills.git",
+      "ref": "main",
+      "upstream": "https://github.com/anthropics/skills",
+      "why": "Anthropic's own skills, including skill-creator. The format's authors writing in the format \u2014 the closest thing to a spec for what a SKILL.md is supposed to be."
+    },
+    {
+      "name": "codex-system-skills",
+      "upstream": "local checkout, ships with Codex",
+      "why": "Codex's own bundled skills, already on disk. The only source that shows what the other harness expects of a skill; no fetch needed, read it in place.",
+      "path": "~/.codex/skills/.system",
+      "version_cmd": "codex --version"
+    }
+  ],
+  "candidates": [
+    {
+      "name": "superpowers",
+      "repo": "https://github.com/obra/superpowers.git",
+      "ref": "main",
+      "upstream": "https://github.com/obra/superpowers",
+      "why": "Jesse Vincent's plugin: brainstorm -> plan -> TDD pipeline with subagents, and skills that write skills. Prior art for a setup that is a system rather than a bag of tips.",
+      "proposed": "2026-08-31"
+    },
+    {
+      "name": "humanlayer",
+      "repo": "https://github.com/humanlayer/humanlayer.git",
+      "paths": [
+        ".claude"
+      ],
+      "ref": "main",
+      "upstream": "https://github.com/humanlayer/humanlayer",
+      "why": "The research -> plan -> implement command trio behind their context-engineering talk. Prior art for spending the context window deliberately, which is the constraint every long session hits.",
+      "proposed": "2026-08-31"
+    },
+    {
+      "name": "hooks-mastery",
+      "repo": "https://github.com/disler/claude-code-hooks-mastery.git",
+      "ref": "main",
+      "upstream": "https://github.com/disler/claude-code-hooks-mastery",
+      "why": "Worked hook examples. Hooks are the one component type this repo has none of, and the only one that runs without asking the model nicely.",
+      "proposed": "2026-08-31"
+    },
+    {
+      "name": "wshobson-agents",
+      "repo": "https://github.com/wshobson/agents.git",
+      "ref": "main",
+      "upstream": "https://github.com/wshobson/agents",
+      "why": "Dozens of role-play subagents. Proposed as a negative control: read it to see what description-matching looks like when it collapses, not to take anything.",
+      "proposed": "2026-08-31"
+    }
+  ],
+  "reading": [
+    {
+      "url": "https://www.anthropic.com/engineering/claude-code-best-practices",
+      "why": "The harness authors on how they use it."
+    },
+    {
+      "url": "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents",
+      "why": "Why context budget, not model quality, is usually the limit."
+    },
+    {
+      "url": "https://www.anthropic.com/engineering/building-effective-agents",
+      "why": "Workflow versus agent, and when a subagent is the wrong answer."
+    },
+    {
+      "url": "https://www.anthropic.com/engineering/writing-tools-for-agents",
+      "why": "Tool and description design \u2014 the same discipline a skill description needs."
+    }
+  ]
+}
