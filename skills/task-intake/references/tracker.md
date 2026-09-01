@@ -1,16 +1,19 @@
 # Tracker adapter
 
-Keep intake independent of Jira, GitHub Issues, Linear, or local files. Use the
-project's existing tracker instructions, often `docs/agents/issue-tracker.md`.
-Do not infer its tracker from where the Git remote is hosted. If no mapping
-exists, use supplied text or an accessible URL and save a local draft. Ask which
-tracker to use only when access or publication requires that decision.
+Keep intake independent of Jira, GitHub Issues, Linear, or local files. At the
+target repository root, read `.local/tracker.md` first when it exists. This is
+checkout-local configuration and must be gitignored. Otherwise use explicit
+repository instructions, such as `docs/agents/issue-tracker.md`. Do not infer a
+tracker from where the Git remote is hosted. If no mapping exists, use supplied
+text or an accessible URL and save a local draft. Ask which tracker to use only
+when access or publication requires that decision.
 
 An adapter can be a short project document mapping these operations to available
-MCP tools, CLI commands, or APIs. Do not scaffold a server, install an integration,
-or add other tracker implementations during intake. Do not store credentials in
-the document. Read the provider's current tool schema or documentation when an
-operation or format is unknown.
+MCP tools, CLI commands, or APIs. It is an operation map, not evidence that a tool
+is installed, authenticated, or authorized to write. Do not scaffold a server,
+install an integration, or add other tracker implementations during intake. Do
+not store credentials in the document. Read the provider's current tool schema
+or documentation when an operation or format is unknown.
 
 | Operation | Contract |
 |---|---|

@@ -2,6 +2,8 @@
 
 - **Date:** 2026-09-01
 - **Verdict:** adopt skeleton; defer every playbook body
+- **Status:** the empty-playbook rule remains; decision 006 supersedes the skill
+  name and entrypoint boundary
 - **Touches:** `skills/work-on-task/`, `skills/task-intake/`, both plugin
   manifests, README
 

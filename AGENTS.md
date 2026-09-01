@@ -15,13 +15,13 @@ manifest lists this repo as its one entry with source `./`.
 
 Components get added deliberately, one at a time. Do not scaffold placeholder
 components; create a directory only when something real goes in it. The plugin
-ships `skills/task-intake` and `skills/work-on-task`, written here, plus
+ships `skills/main` and `skills/task-intake`, written here, plus
 `skills/unslop` and `skills/thermo-nuclear-code-quality-review`, vendored from
 `cursor/plugins`.
 
-Decision 005 makes one narrow exception: the nine empty files under
-`skills/work-on-task/references/playbooks/` reserve routes for later decisions.
-Do not add content to one without its own research, decision, trial, and entry in
+Decisions 005 and 006 make one narrow exception: the nine empty files under
+`skills/main/references/playbooks/` reserve routes for later decisions. Do not
+add content to one without its own research, decision, trial, and entry in
 `ADOPTED_PLAYBOOKS`.
 
 There is no build or lint setup. The artifacts are Markdown definitions, JSON
@@ -135,6 +135,18 @@ unrecorded rejection gets researched again. `prior-art.json` also carries
 `candidates`, proposed sources that stay untracked until Anatolii approves one
 with `prior_art.py approve <name>`. Never enrol a source or vendor a skill on
 your own judgement.
+
+## Local checkout configuration
+
+`.local/` is gitignored configuration for this checkout. It is not a place for
+secrets or for policy that every clone needs. Put durable shared rules in
+`AGENTS.md`, a skill, or another committed document instead.
+
+When tracker work is involved, read `.local/tracker.md` if it exists. It maps
+task reads, related-work searches, brief reads, and authorized publication to
+this checkout's available tracker interface. The mapping does not prove that an
+interface is installed or authenticated, and it does not grant permission to
+write. Recreate it explicitly in another worktree, VM, or clone when needed.
 
 ## Sibling repos
 

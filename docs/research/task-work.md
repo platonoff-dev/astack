@@ -1,8 +1,9 @@
 # Researching routed task playbooks
 
 Status update on 2026-09-01: decision 005 supersedes the provisional playbook
-bodies described below. The router was renamed `work-on-task`; all nine route
-files are empty pending separate research and decisions.
+bodies described below, and decision 006 later renames the router `main` as the
+generic work entrypoint. All nine route files remain empty pending separate
+research and decisions.
 
 Read on 2026-09-01. This report asks how work should continue after task intake.
 It compares tracked agent setups, current primary research, a local trial of a

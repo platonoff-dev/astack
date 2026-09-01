@@ -55,7 +55,7 @@ installed skill. No tracker is required.
    with existing or explicit authorization; a completed draft is not permission.
 
 Intake-only requests end here. If the caller also requested work, hand the same
-brief to `work-on-task`, which checks whether the named playbook has been
-adopted. An empty file adds no procedure and must not be presented as one. The
-brief does not override project instructions, newer user decisions, or evidence
-discovered while working the task.
+brief to `main`, which checks whether the named playbook has been adopted. An
+empty file adds no procedure and must not be presented as one. The brief does
+not override project instructions, newer user decisions, or evidence discovered
+while working the task.

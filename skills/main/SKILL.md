@@ -1,11 +1,19 @@
 ---
-name: work-on-task
-description: Continue an evidence-backed task through its selected adopted playbook. Use after task-intake or when a current brief already names a playbook. Empty playbook files are reserved placeholders, not instructions; raw, stale, or unclear requests need task-intake first.
+name: main
+description: Main entrypoint for starting or resuming evidence-backed work. Use a current brief when it names a playbook, or run task-intake first when the request is new, stale, or unclear. Continue through the selected adopted playbook when work was requested. Empty playbooks are reserved placeholders, not instructions.
 ---
 
-# Work on a task
+# Main
 
-**Load the selected playbook without inventing policy for an empty route.**
+**Establish the current route, then load its playbook without inventing policy
+for an empty route.**
+
+## Entering the work
+
+Use a current evidence-backed brief when it already names `Playbook`. Run
+`task-intake` first when no such brief exists or material evidence may be stale,
+contradictory, or unresolved. An intake-only request ends with the brief. When
+the caller requested the work itself, continue from the same brief after intake.
 
 ## Hard rules
 

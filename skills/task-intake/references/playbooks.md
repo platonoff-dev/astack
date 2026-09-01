@@ -1,9 +1,9 @@
 # Reserved playbook routes
 
 Task intake records one route in `Playbook`. The files exist so each route can
-be researched and adopted separately. They are intentionally empty in version
-0.6.0. A route name does not yet define a procedure, entry condition, completion
-check, or transition.
+be researched and adopted separately. They remain intentionally empty in
+version 0.8.0. A route name does not yet define a procedure, entry condition,
+completion check, or transition.
 
 | Playbook | Status |
 |---|---|
@@ -24,5 +24,5 @@ name a secondary concern, but no modifier has adopted behavior yet.
 Do not derive detailed rules from the route's English name or from external
 playbooks. Every playbook needs its own prior-art review, decision record,
 instructions, and behavioral trial. When one is adopted, update its file, the
-adopted set in `work-on-task/scripts/check_playbooks.py`, this status table, and
+adopted set in `main/scripts/check_playbooks.py`, this status table, and
 the plugin version in the same change.

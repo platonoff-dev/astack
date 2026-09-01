@@ -3,7 +3,7 @@
 My agentic-AI workbench — subagents, skills and tool configs — packaged as a
 plugin that both **Claude Code** and **Codex** install from the same repo.
 
-Four skills ship in the plugin: `task-intake` and `work-on-task`, written here,
+Four skills ship in the plugin: `main` and `task-intake`, written here,
 plus `unslop` and `thermo-nuclear-code-quality-review`, vendored from
 `cursor/plugins`.
 Components get added one at a time.
@@ -16,7 +16,7 @@ Components get added one at a time.
 .agents/plugins/marketplace.json   the same marketplace, Codex's manifest
 skills/unslop/            vendored from cursor/plugins (MIT)
 skills/task-intake/       evidence checks, Markdown briefs, tracker contract
-skills/work-on-task/      router with separately adopted playbook files
+skills/main/              main work entrypoint and playbook router
 skills/thermo-nuclear-code-quality-review/  strict maintainability review (MIT)
 vendor.json               the pin for every vendored component
 scripts/vendor.py         sync / check / update / add
@@ -56,11 +56,12 @@ codex plugin add ai-bench@ai-bench
 codex plugin list
 ```
 
-Version 0.6.0 renames `task-work` to `work-on-task` and removes the provisional
-playbook instructions. All nine route files are empty until each receives its
-own research, decision, and trial. Use the list/details commands above to check
-the installed version. See the [review skill notes](#strict-code-quality-review)
-for its invocation setting and the Codex validator limitation.
+Version 0.8.0 keeps `main` as the generic work entrypoint and adds the
+`.local/tracker.md` convention for checkout-specific tracker instructions. All
+nine route files remain empty until each receives its own research, decision,
+and trial. Use the list/details commands above to check the installed version.
+See the [review skill notes](#strict-code-quality-review) for its invocation
+setting and the Codex validator limitation.
 
 ## The dev loop
 
@@ -74,7 +75,7 @@ So after adding or editing a component, bump the version in **both** manifests
 and reinstall:
 
 ```sh
-V=0.6.0
+V=0.8.0
 sed -i '' "s/\"version\": \".*\"/\"version\": \"$V\"/" \
   .claude-plugin/plugin.json .codex-plugin/plugin.json
 
@@ -85,6 +86,23 @@ codex plugin add ai-bench@ai-bench
 Claude Code needs a restart to apply; Codex needs a new thread. Codex's own
 convention for a throwaway iteration is a build-metadata cachebuster —
 `0.1.0+codex.local-20260831-140000` — rather than burning version numbers.
+
+## Local project configuration
+
+`.local/` holds configuration for one checkout and is gitignored. This repo's
+`.local/tracker.md` records how to work with its tracker. The file is not
+committed or included in a published plugin source, so another clone, worktree,
+or VM does not inherit it.
+
+`task-intake` uses the same convention in any target repository: read
+`.local/tracker.md` first when it exists, then fall back to committed repository
+instructions. The file maps operations to available tools. It must not contain
+credentials, and its presence does not prove authentication or authorize a
+tracker write. Rules that every checkout needs still belong in `AGENTS.md` or a
+committed skill.
+
+The adaptation from Matt Pocock's committed tracker document is recorded in
+[decision 007](docs/decisions/007-local-tracker-adapter.md).
 
 ## Task intake
 
@@ -100,21 +118,27 @@ change product code or silently update a tracker.
 
 The [brief format](skills/task-intake/references/brief.md) targets 250-400 words
 with no minimum and a warning above 600. The checker validates structure, not
-truth. The [tracker contract](skills/task-intake/references/tracker.md) maps reads,
-search, and authorized brief publication to the project's existing tools. No
-Jira account, new service, or tracker installation is required.
+truth. The [tracker contract](skills/task-intake/references/tracker.md) reads an
+optional `.local/tracker.md` and maps reads, search, and authorized brief
+publication to the project's existing tools. No Jira account, new service, or
+tracker installation is required.
 
 The adoption and first trial are recorded in
 [decision 002](docs/decisions/002-task-intake.md).
 
-## Work on a task
+## Main
 
-Use [work-on-task](skills/work-on-task/SKILL.md) to inspect the playbook selected
-by intake. It is currently a router skeleton, not an adopted task procedure.
+Use [main](skills/main/SKILL.md) as the generic entrypoint for new or resumed
+work. It uses a current evidence-backed brief when one exists and runs
+`task-intake` first when the request is new, stale, or unclear. An intake-only
+request still ends with the brief. Otherwise `main` continues through the
+selected playbook.
+
+`main` is currently a router skeleton, not an adopted task procedure.
 
 The router reserves one file for `investigation`, `bug-fix`, `feature`,
 `refactor`, `performance`, `migration`, `decision`, `split`, or `no-change`.
-All nine files are empty in 0.6.0. An empty file adds no instructions; the skill
+All nine files are empty in 0.8.0. An empty file adds no instructions; the skill
 must say that no ai-bench playbook was applied. Ordinary work can still proceed
 under the user's request and target repository instructions.
 
@@ -123,7 +147,9 @@ behavioral trial. The route checker keeps an explicit adopted set, currently
 empty, and fails if a placeholder gains content without being adopted.
 [Decision 005](docs/decisions/005-empty-playbook-skeleton.md) supersedes the
 provisional bodies adopted in
-[decision 004](docs/decisions/004-task-work-playbooks.md).
+[decision 004](docs/decisions/004-task-work-playbooks.md). The generic entrypoint
+name and intake handoff are recorded in
+[decision 006](docs/decisions/006-main-entrypoint.md).
 
 ## Strict code quality review
 
@@ -242,9 +268,9 @@ python3 -B scripts/vendor.py check
 uvx --with pyyaml python \
   ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/task-intake
 uvx --with pyyaml python \
-  ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/work-on-task
+  ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/main
 python3 -B skills/task-intake/scripts/test_check_brief.py
-python3 -B skills/work-on-task/scripts/check_playbooks.py
+python3 -B skills/main/scripts/check_playbooks.py
 # To check an actual brief:
 python3 skills/task-intake/scripts/check_brief.py /path/to/brief.md
 ```
