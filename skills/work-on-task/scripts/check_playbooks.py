@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check that intake routes, router links, and playbook files match."""
+"""Check intake routes, router links, files, and adopted playbook status."""
 
 from __future__ import annotations
 
@@ -12,6 +12,7 @@ SKILL_DIR = Path(__file__).resolve().parents[1]
 REPO_ROOT = SKILL_DIR.parents[1]
 INTAKE_CHECKER = REPO_ROOT / "skills" / "task-intake" / "scripts" / "check_brief.py"
 ROUTE_ROW = re.compile(r"^\| `([a-z0-9-]+)` \| \[[^]]+\]\((references/playbooks/([a-z0-9-]+)\.md)\) \|$")
+ADOPTED_PLAYBOOKS: set[str] = set()
 
 
 def intake_playbooks() -> set[str]:
@@ -26,7 +27,9 @@ def intake_playbooks() -> set[str]:
 def main() -> int:
     errors: list[str] = []
     declared = intake_playbooks()
-    files = {path.stem for path in (SKILL_DIR / "references" / "playbooks").glob("*.md")}
+    playbook_paths = list((SKILL_DIR / "references" / "playbooks").glob("*.md"))
+    files = {path.stem for path in playbook_paths}
+    content = {path.stem: path.read_text(encoding="utf-8").strip() for path in playbook_paths}
 
     routes: set[str] = set()
     for line in (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8").splitlines():
@@ -48,11 +51,24 @@ def main() -> int:
         if extra:
             errors.append(f"{label} not accepted by intake: {', '.join(extra)}")
 
+    unknown_adopted = sorted(ADOPTED_PLAYBOOKS - declared)
+    if unknown_adopted:
+        errors.append(f"adopted playbooks not accepted by intake: {', '.join(unknown_adopted)}")
+    for route in sorted(declared & files):
+        if route in ADOPTED_PLAYBOOKS and not content[route]:
+            errors.append(f"adopted playbook is empty: {route}")
+        if route not in ADOPTED_PLAYBOOKS and content[route]:
+            errors.append(f"placeholder playbook has content but no adoption decision: {route}")
+
     for error in errors:
         print(f"ERROR: {error}")
     if errors:
         return 1
-    print(f"OK: {len(declared)} intake routes have one router row and playbook file")
+    placeholders = len(declared - ADOPTED_PLAYBOOKS)
+    print(
+        f"OK: {len(declared)} routes mapped; "
+        f"{len(ADOPTED_PLAYBOOKS)} adopted; {placeholders} empty placeholders"
+    )
     return 0
 
 

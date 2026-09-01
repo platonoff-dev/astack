@@ -1,5 +1,9 @@
 # Researching routed task playbooks
 
+Status update on 2026-09-01: decision 005 supersedes the provisional playbook
+bodies described below. The router was renamed `work-on-task`; all nine route
+files are empty pending separate research and decisions.
+
 Read on 2026-09-01. This report asks how work should continue after task intake.
 It compares tracked agent setups, current primary research, a local trial of a
 flat implementation guide, and the final router design chosen after review.
@@ -77,7 +81,7 @@ and production impact work the same way when they change checks or constraints.
 
 ## Component shape
 
-The shipped component is `skills/task-work/`:
+The 0.5.0 candidate component was `skills/task-work/`:
 
 ```text
 SKILL.md

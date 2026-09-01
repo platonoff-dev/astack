@@ -15,9 +15,14 @@ manifest lists this repo as its one entry with source `./`.
 
 Components get added deliberately, one at a time. Do not scaffold placeholder
 components; create a directory only when something real goes in it. The plugin
-ships `skills/task-intake` and `skills/task-work`, written here, plus
+ships `skills/task-intake` and `skills/work-on-task`, written here, plus
 `skills/unslop` and `skills/thermo-nuclear-code-quality-review`, vendored from
 `cursor/plugins`.
+
+Decision 005 makes one narrow exception: the nine empty files under
+`skills/work-on-task/references/playbooks/` reserve routes for later decisions.
+Do not add content to one without its own research, decision, trial, and entry in
+`ADOPTED_PLAYBOOKS`.
 
 There is no build or lint setup. The artifacts are Markdown definitions, JSON
 config, and small Python helpers. Validate with the two plugin validators in the

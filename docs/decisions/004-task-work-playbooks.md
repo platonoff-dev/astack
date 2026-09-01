@@ -2,6 +2,8 @@
 
 - **Date:** 2026-09-01
 - **Verdict:** adopt
+- **Status:** superseded by decision 005; the router remains and the provisional
+  playbook bodies were removed
 - **Touches:** `skills/task-work/`, `skills/task-intake/`, both plugin manifests,
   README, research records
 

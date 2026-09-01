@@ -3,7 +3,7 @@
 My agentic-AI workbench — subagents, skills and tool configs — packaged as a
 plugin that both **Claude Code** and **Codex** install from the same repo.
 
-Four skills ship in the plugin: `task-intake` and `task-work`, written here,
+Four skills ship in the plugin: `task-intake` and `work-on-task`, written here,
 plus `unslop` and `thermo-nuclear-code-quality-review`, vendored from
 `cursor/plugins`.
 Components get added one at a time.
@@ -16,7 +16,7 @@ Components get added one at a time.
 .agents/plugins/marketplace.json   the same marketplace, Codex's manifest
 skills/unslop/            vendored from cursor/plugins (MIT)
 skills/task-intake/       evidence checks, Markdown briefs, tracker contract
-skills/task-work/         direct router and focused task playbooks
+skills/work-on-task/      router with separately adopted playbook files
 skills/thermo-nuclear-code-quality-review/  strict maintainability review (MIT)
 vendor.json               the pin for every vendored component
 scripts/vendor.py         sync / check / update / add
@@ -56,11 +56,11 @@ codex plugin add ai-bench@ai-bench
 codex plugin list
 ```
 
-Version 0.5.0 adds `task-work` and changes task intake to route directly to a
-playbook. It also includes the 0.4.0 `thermo-nuclear-code-quality-review`
-addition. Use the list/details commands above to check the installed version.
-See the [review skill notes](#strict-code-quality-review) for its invocation
-setting and the Codex validator limitation.
+Version 0.6.0 renames `task-work` to `work-on-task` and removes the provisional
+playbook instructions. All nine route files are empty until each receives its
+own research, decision, and trial. Use the list/details commands above to check
+the installed version. See the [review skill notes](#strict-code-quality-review)
+for its invocation setting and the Codex validator limitation.
 
 ## The dev loop
 
@@ -74,7 +74,7 @@ So after adding or editing a component, bump the version in **both** manifests
 and reinstall:
 
 ```sh
-V=0.5.0
+V=0.6.0
 sed -i '' "s/\"version\": \".*\"/\"version\": \"$V\"/" \
   .claude-plugin/plugin.json .codex-plugin/plugin.json
 
@@ -107,23 +107,22 @@ Jira account, new service, or tracker installation is required.
 The adoption and first trial are recorded in
 [decision 002](docs/decisions/002-task-intake.md).
 
-## Task playbooks
+## Work on a task
 
-Use [task-work](skills/task-work/SKILL.md) to carry an evidence-backed task
-through the playbook selected by intake. A current, specific user request can
-supply the brief directly when its outcome, evidence, constraints, route, and
-checks are already clear.
+Use [work-on-task](skills/work-on-task/SKILL.md) to inspect the playbook selected
+by intake. It is currently a router skeleton, not an adopted task procedure.
 
-The router loads one focused file for `investigation`, `bug-fix`, `feature`,
+The router reserves one file for `investigation`, `bug-fix`, `feature`,
 `refactor`, `performance`, `migration`, `decision`, `split`, or `no-change`.
-Investigation is task work. When it establishes the next job, the same brief
-changes `Playbook` and continues without a generic implementation phase.
-Modifiers such as `performance`, `migration`, or `security` add checks and
-constraints without starting a second full playbook.
+All nine files are empty in 0.6.0. An empty file adds no instructions; the skill
+must say that no ai-bench playbook was applied. Ordinary work can still proceed
+under the user's request and target repository instructions.
 
-Each playbook names its entry facts, work sequence, completion evidence, and
-exit routes. The intake checker rejects the legacy `Work type` plus `Next action`
-schema. The research and adoption decision are recorded in
+Each playbook will receive its own prior-art review, decision, instructions, and
+behavioral trial. The route checker keeps an explicit adopted set, currently
+empty, and fails if a placeholder gains content without being adopted.
+[Decision 005](docs/decisions/005-empty-playbook-skeleton.md) supersedes the
+provisional bodies adopted in
 [decision 004](docs/decisions/004-task-work-playbooks.md).
 
 ## Strict code quality review
@@ -243,9 +242,9 @@ python3 -B scripts/vendor.py check
 uvx --with pyyaml python \
   ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/task-intake
 uvx --with pyyaml python \
-  ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/task-work
+  ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/work-on-task
 python3 -B skills/task-intake/scripts/test_check_brief.py
-python3 -B skills/task-work/scripts/check_playbooks.py
+python3 -B skills/work-on-task/scripts/check_playbooks.py
 # To check an actual brief:
 python3 skills/task-intake/scripts/check_brief.py /path/to/brief.md
 ```

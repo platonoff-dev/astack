@@ -19,7 +19,6 @@ PLAYBOOKS = {
     "split",
     "no-change",
 }
-CHANGE_PLAYBOOKS = {"bug-fix", "feature", "refactor", "performance", "migration"}
 REQUIRED_FIELDS = ("Source", "Checked", "Playbook")
 FIELDS = REQUIRED_FIELDS + ("Modifiers",)
 LEGACY_FIELDS = {"Work type", "Next action"}
@@ -101,7 +100,6 @@ def check(text: str) -> tuple[list[str], list[str]]:
         elif playbook in modifiers:
             errors.append("Modifiers must not repeat the primary Playbook")
 
-    evidenced = 0
     for entry in list_items(sections.get("Evidence", []), r"- "):
         match = re.fullmatch(r"- (supported|contradicted|unresolved):\s*(.+)", entry)
         if not match:
@@ -111,28 +109,6 @@ def check(text: str) -> tuple[list[str], list[str]]:
         if status != "unresolved":
             if not LINK.search(claim):
                 errors.append(f"{status} evidence needs an inline Markdown source link")
-            else:
-                evidenced += 1
-    if playbook in CHANGE_PLAYBOOKS | {"no-change"} and not evidenced:
-        errors.append(f"{playbook} needs at least one supported or contradicted evidence entry")
-
-    questions = sections.get("Questions", [])
-    if playbook in CHANGE_PLAYBOOKS | {"no-change"} and questions:
-        errors.append(f"{playbook} cannot carry Questions; route to decision or independent work")
-    if playbook == "decision" and not questions:
-        errors.append("decision requires a nonempty Questions section")
-    if playbook in CHANGE_PLAYBOOKS | {"investigation"}:
-        checks = sections.get("Completion checks", [])
-        if not any(re.fullmatch(r"- (?:\[[ xX]\] )?\S.*", line) for line in checks):
-            errors.append(f"{playbook} requires at least one Completion checks bullet")
-    if playbook == "split":
-        items = list_items(sections.get("Breakdown", []), r"\d+\. ")
-        children = [line for line in items if re.match(r"\d+\. \S", line)]
-        if len(children) < 2:
-            errors.append("split requires at least two numbered children in Breakdown")
-        for child in children:
-            if not re.search(r"Check:\s*\S", child) or not re.search(r"Depends on:\s*\S", child):
-                errors.append("each child needs Check: and Depends on: in its numbered item")
 
     words = len(text.split())
     if words > 600:

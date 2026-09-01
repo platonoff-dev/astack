@@ -1,6 +1,6 @@
 ---
 name: task-intake
-description: Check an incoming or resumed ticket against current evidence and route it to a focused playbook. Use for task intake, stale or misleading tickets, unclear scope, or deciding whether work needs investigation, a change, a decision, a split, or no change. Reads the task and relevant repository; writes a compact Markdown brief. Does not manage a backlog or execute the selected playbook during intake.
+description: Check an incoming or resumed ticket against current evidence and assign a reserved playbook route. Use for task intake, stale or misleading tickets, unclear scope, or deciding whether work needs investigation, a change, a decision, a split, or no change. Reads the task and relevant repository; writes a compact Markdown brief. Does not manage a backlog or execute playbook work during intake.
 ---
 
 # Task intake
@@ -34,11 +34,11 @@ installed skill. No tracker is required.
    cheapest useful check. Search related work where available. Record supported,
    contradicted, and unresolved claims. Recheck material claims on pickup,
    including those in our own generated briefs.
-3. **Choose the playbook.** Use [playbooks.md](references/playbooks.md) to select
-   the current job and any proof modifiers. Stop inspection when there is enough
-   evidence to route the task. Substantial reproduction or profiling belongs in
-   the `investigation` playbook, not intake. Investigation is task work, not an
-   intake failure or a separate ticket by default.
+3. **Choose the route.** Use [playbooks.md](references/playbooks.md) to name the
+   task's current job and any modifiers. The files are placeholders until each
+   playbook receives its own decision; do not infer a procedure from the name.
+   Stop inspection when there is enough evidence to justify the route and its
+   uncertainty. Substantial follow-up work belongs after intake.
 4. **Resolve human decisions.** Show the provisional understanding, then ask
    small rounds of questions that change correctness, scope, or authorization.
    State what was checked, a recommendation when justified, and what each answer
@@ -55,7 +55,7 @@ installed skill. No tracker is required.
    with existing or explicit authorization; a completed draft is not permission.
 
 Intake-only requests end here. If the caller also requested work, hand the same
-brief directly to `task-work`, which loads the named playbook. Do not insert a
-generic implementation action. No extra approval ceremony for a ready task. The
+brief to `work-on-task`, which checks whether the named playbook has been
+adopted. An empty file adds no procedure and must not be presented as one. The
 brief does not override project instructions, newer user decisions, or evidence
 discovered while working the task.

@@ -45,25 +45,22 @@ Material constraints, exclusions, risk controls, and safe stated assumptions.
 Concrete action justified by this brief, including any execution boundary.
 ```
 
-`Playbook` selects exactly one route from [playbooks.md](playbooks.md).
-`Modifiers` is optional. Use comma-separated lowercase names only when each one
-adds a constraint or completion check. A modifier does not start another full
-playbook.
+`Playbook` selects exactly one reserved route from
+[playbooks.md](playbooks.md). The route files are placeholders until adopted;
+the field does not claim that a procedure exists. `Modifiers` is optional. Use
+comma-separated lowercase names for secondary concerns without inventing
+modifier behavior.
 
 `Outcome`, `Evidence`, and `Next step` are always present. Include `Scope` when
-there are material constraints or exclusions. `Completion checks` is required
-for `investigation`, `bug-fix`, `feature`, `refactor`, `performance`, and
-`migration`, with at least one bullet for the proposed work. Investigation
-checks answer its bounded question, not the whole requested change.
+there are material constraints or exclusions. Include `Completion checks` when
+the current task has an observable result. An empty playbook does not define
+which checks apply.
 
 `Questions` contains only unresolved human blockers; omit it when there are
 none. Keep technical uncertainty in evidence and safe assumptions in scope.
-`decision` requires questions. Change playbooks and `no-change` cannot carry
-unresolved human blockers. `investigation` or `split` may retain questions, but
-the next step must say which work can proceed without their answers. Record
-resolved answers with their source, then remove them from this section.
+Record resolved answers with their source, then remove them from this section.
 
-For `split`, add `## Breakdown` with at least two proposed children:
+When proposing a split, `## Breakdown` can describe proposed children:
 
 ```markdown
 1. Outcome delivered. Check: its observable result. Depends on: none.
