@@ -34,9 +34,9 @@ work. Writing this draft does not create remote issues or change task status.
 
 ## Remote publication
 
-1. Finish the local draft and resolve blockers for its chosen next action. A
-   brief that asks for a decision may be published as such, never as ready to
-   implement. Honor existing authorization; otherwise present the exact draft
+1. Finish the local draft and resolve blockers for its chosen playbook. A brief
+   routed to `decision` may be published as such, never as ready for a change
+   playbook. Honor existing authorization; otherwise present the exact draft
    and request publication permission. Do not ask again for an action already
    authorized in this session or by project policy.
 2. Reread the source and existing brief. Reconcile new discussion or human edits

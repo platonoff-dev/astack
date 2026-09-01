@@ -9,6 +9,16 @@
       "license": "MIT",
       "license_path": "pstack/LICENSE",
       "upstream": "https://github.com/cursor/plugins/tree/main/pstack/skills/unslop"
+    },
+    {
+      "name": "thermo-nuclear-code-quality-review",
+      "repo": "https://github.com/cursor/plugins.git",
+      "path": "cursor-team-kit/skills/thermo-nuclear-code-quality-review",
+      "ref": "main",
+      "commit": "fd878692de15a3069c21c8f429eb0b9f2fe178fa",
+      "license": "MIT",
+      "license_path": "cursor-team-kit/LICENSE",
+      "upstream": "https://github.com/cursor/plugins/tree/main/cursor-team-kit/skills/thermo-nuclear-code-quality-review"
     }
   ]
 }

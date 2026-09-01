@@ -1,11 +1,11 @@
 ---
 name: task-intake
-description: Check an incoming or resumed ticket against current evidence before planning implementation. Use for task intake, stale or misleading tickets, unclear scope, or deciding whether work needs investigation or splitting. Reads the task and relevant repository; writes a compact Markdown brief and justified next action. Does not manage a backlog or implement the task during intake.
+description: Check an incoming or resumed ticket against current evidence and route it to a focused playbook. Use for task intake, stale or misleading tickets, unclear scope, or deciding whether work needs investigation, a change, a decision, a split, or no change. Reads the task and relevant repository; writes a compact Markdown brief. Does not manage a backlog or execute the selected playbook during intake.
 ---
 
 # Task intake
 
-**Turn a task into an evidence-backed next action and a small working brief.**
+**Turn a task into an evidence-backed playbook route and a small working brief.**
 
 Accept a ticket URL, exported file, or conversation and a target repository.
 Keep one brief in the project's existing task workspace; otherwise use
@@ -34,25 +34,28 @@ installed skill. No tracker is required.
    cheapest useful check. Search related work where available. Record supported,
    contradicted, and unresolved claims. Recheck material claims on pickup,
    including those in our own generated briefs.
-3. **Choose the next action.** Use [work-types.md](references/work-types.md) to
-   distinguish work type, risk, and scope. Stop inspection when there is enough
-   evidence to choose `implement`, `investigate`, `decide`, `split`, or `no-change`.
-   Substantial reproduction or profiling belongs in investigation, not intake.
+3. **Choose the playbook.** Use [playbooks.md](references/playbooks.md) to select
+   the current job and any proof modifiers. Stop inspection when there is enough
+   evidence to route the task. Substantial reproduction or profiling belongs in
+   the `investigation` playbook, not intake. Investigation is task work, not an
+   intake failure or a separate ticket by default.
 4. **Resolve human decisions.** Show the provisional understanding, then ask
    small rounds of questions that change correctness, scope, or authorization.
    State what was checked, a recommendation when justified, and what each answer
    changes. Ask as soon as a question blocks useful progress; keep independent
    checks moving. Record answers and their source. When unavailable, retain the
-   blocker; never invent product policy. Routine reversible choices need no
-   interview. Do not re-ask settled questions unless new evidence conflicts.
+   blocker; route the task to `decision` rather than inventing product policy.
+   Routine reversible choices need no interview. Do not re-ask settled questions
+   unless new evidence conflicts.
 5. **Prepare the handoff.** Follow [brief.md](references/brief.md), then run
    `python3 <skill-dir>/scripts/check_brief.py <brief.md>`, resolving `skill-dir`
    to this skill's actual installed directory. Fix errors and review warnings.
-   The checker validates structure, not truth. Return the brief, next action,
-   and outstanding blockers. Publish only through the tracker contract with
-   existing or explicit authorization; a completed draft is not permission.
+   The checker validates structure, not truth. Return the brief, selected
+   playbook, and outstanding blockers. Publish only through the tracker contract
+   with existing or explicit authorization; a completed draft is not permission.
 
-Intake-only requests end here. If the caller also requested execution, continue
-as a separate phase once its blockers are resolved. No extra approval ceremony
-for a ready task. The brief does not override project instructions, newer user
-decisions, or evidence discovered during implementation.
+Intake-only requests end here. If the caller also requested work, hand the same
+brief directly to `task-work`, which loads the named playbook. Do not insert a
+generic implementation action. No extra approval ceremony for a ready task. The
+brief does not override project instructions, newer user decisions, or evidence
+discovered while working the task.

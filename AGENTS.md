@@ -15,7 +15,8 @@ manifest lists this repo as its one entry with source `./`.
 
 Components get added deliberately, one at a time. Do not scaffold placeholder
 components; create a directory only when something real goes in it. The plugin
-ships `skills/task-intake`, written here, and `skills/unslop`, vendored from
+ships `skills/task-intake` and `skills/task-work`, written here, plus
+`skills/unslop` and `skills/thermo-nuclear-code-quality-review`, vendored from
 `cursor/plugins`.
 
 There is no build or lint setup. The artifacts are Markdown definitions, JSON

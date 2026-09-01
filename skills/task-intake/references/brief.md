@@ -21,8 +21,8 @@ brief in a code fence. Replace the template text with actual findings.
 
 Source: Ticket URL, source file, or identified conversation
 Checked: Date; source revision/update or unknown; repository revision and worktree state; relevant environment
-Work type: bug
-Next action: investigate
+Playbook: investigation
+Modifiers: performance
 
 ## Outcome
 Problem and desired result, distinguishing unconfirmed intent.
@@ -45,18 +45,21 @@ Material constraints, exclusions, risk controls, and safe stated assumptions.
 Concrete action justified by this brief, including any execution boundary.
 ```
 
-`Work type` accepts the values in [work-types.md](work-types.md), separated by
-commas when needed. `Next action` is exactly one of its five actions.
+`Playbook` selects exactly one route from [playbooks.md](playbooks.md).
+`Modifiers` is optional. Use comma-separated lowercase names only when each one
+adds a constraint or completion check. A modifier does not start another full
+playbook.
 
 `Outcome`, `Evidence`, and `Next step` are always present. Include `Scope` when
 there are material constraints or exclusions. `Completion checks` is required
-for `implement` and `investigate`, with at least one bullet for the proposed
-work. Investigation checks answer its question, not the whole feature request.
+for `investigation`, `bug-fix`, `feature`, `refactor`, `performance`, and
+`migration`, with at least one bullet for the proposed work. Investigation
+checks answer its bounded question, not the whole requested change.
 
 `Questions` contains only unresolved human blockers; omit it when there are
-none. Keep nonblocking technical uncertainty in evidence and safe assumptions
-in scope. `decide` requires questions. `implement` and `no-change` cannot carry
-unresolved human blockers. `investigate` or `split` may retain questions, but
+none. Keep technical uncertainty in evidence and safe assumptions in scope.
+`decision` requires questions. Change playbooks and `no-change` cannot carry
+unresolved human blockers. `investigation` or `split` may retain questions, but
 the next step must say which work can proceed without their answers. Record
 resolved answers with their source, then remove them from this section.
 
@@ -83,7 +86,8 @@ evidence entries. Exit 0 means structurally valid, possibly with a size warning.
 Neither verdict verifies sources, correctness, permissions, link accessibility,
 or the sufficiency of acceptance checks. Review those yourself.
 
-At implementation pickup, read the current brief and new source activity; recheck
-material claims against the current repository and environment. New evidence can
-reopen a decision. Keep execution logs outside the brief; update the shared
-handoff when its outcome, constraints, evidence, or next action changes.
+At task pickup, read the current brief and new source activity; recheck material
+claims against the current repository and environment. New evidence can change
+the playbook without creating another task. Keep execution logs outside the
+brief; update the shared handoff when its outcome, constraints, evidence,
+playbook, or next step changes.

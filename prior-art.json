@@ -10,8 +10,8 @@
       "why": "Cursor's in-house plugin: skills, commands and subagents shipped as one opinionated stack. Already the source of the vendored unslop skill.",
       "upstream": "https://github.com/cursor/plugins/tree/main/pstack",
       "read": {
-        "commit": "fd878692de15a3069c21c8f429eb0b9f2fe178fa",
-        "date": "2026-08-31"
+        "commit": "b9ddc83c32972210b8a94d389130713e8eed346e",
+        "date": "2026-09-01"
       }
     },
     {
@@ -22,7 +22,7 @@
       "upstream": "https://github.com/mattpocock/skills",
       "read": {
         "commit": "a97b873866675db1084216f49dec798070377603",
-        "date": "2026-08-31"
+        "date": "2026-09-01"
       }
     },
     {
@@ -30,14 +30,22 @@
       "repo": "https://github.com/anthropics/skills.git",
       "ref": "main",
       "upstream": "https://github.com/anthropics/skills",
-      "why": "Anthropic's own skills, including skill-creator. The format's authors writing in the format \u2014 the closest thing to a spec for what a SKILL.md is supposed to be."
+      "why": "Anthropic's own skills, including skill-creator. The format's authors writing in the format \u2014 the closest thing to a spec for what a SKILL.md is supposed to be.",
+      "read": {
+        "commit": "3b3fad96af16a10759d930941b4520ba0c40edae",
+        "date": "2026-09-01"
+      }
     },
     {
       "name": "codex-system-skills",
       "upstream": "local checkout, ships with Codex",
       "why": "Codex's own bundled skills, already on disk. The only source that shows what the other harness expects of a skill; no fetch needed, read it in place.",
       "path": "~/.codex/skills/.system",
-      "version_cmd": "codex --version"
+      "version_cmd": "codex --version",
+      "read": {
+        "digest": "18682dc33320e960829af044dc243b3e082335a9174c85c263556862a01842ae",
+        "date": "2026-09-01"
+      }
     }
   ],
   "candidates": [

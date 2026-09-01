@@ -1,6 +1,6 @@
 # Inspecting evidence
 
-Start with the claims that determine the next action. For "exports time out;
+Start with the claims that determine the playbook. For "exports time out;
 increase the client timeout", distinguish the observed failure, its proposed
 cause, whether it persists, and whether longer waiting is acceptable. The last
 question may require a product decision even when the technical facts are known.
@@ -49,8 +49,8 @@ reporter's captured evidence from your own reproduction. Contradiction requires
 comparable conditions; one successful run does not disprove an intermittent bug.
 Approved requirements establish intent; tests and code alone cannot.
 
-Stop once the next action is justified. If reaching the relevant environment,
+Stop once the playbook is justified. If reaching the relevant environment,
 instrumenting the system, or establishing a benchmark becomes substantial work,
-return `investigate` with the exact question and next useful experiment. Do not
+route to `investigation` with the exact question and next useful experiment. Do not
 require a root cause before permitting investigation. Reopen conclusions when
 new evidence changes them.

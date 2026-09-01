@@ -3,8 +3,10 @@
 My agentic-AI workbench — subagents, skills and tool configs — packaged as a
 plugin that both **Claude Code** and **Codex** install from the same repo.
 
-Two skills ship in the plugin: `task-intake`, written here, and `unslop`,
-vendored from `cursor/plugins`. Components get added one at a time.
+Four skills ship in the plugin: `task-intake` and `task-work`, written here,
+plus `unslop` and `thermo-nuclear-code-quality-review`, vendored from
+`cursor/plugins`.
+Components get added one at a time.
 
 ```
 .claude-plugin/
@@ -14,6 +16,8 @@ vendored from `cursor/plugins`. Components get added one at a time.
 .agents/plugins/marketplace.json   the same marketplace, Codex's manifest
 skills/unslop/            vendored from cursor/plugins (MIT)
 skills/task-intake/       evidence checks, Markdown briefs, tracker contract
+skills/task-work/         direct router and focused task playbooks
+skills/thermo-nuclear-code-quality-review/  strict maintainability review (MIT)
 vendor.json               the pin for every vendored component
 scripts/vendor.py         sync / check / update / add
 .agents/skills/prior-art/ repo-level skill, not shipped in the plugin
@@ -52,8 +56,11 @@ codex plugin add ai-bench@ai-bench
 codex plugin list
 ```
 
-After installing version 0.3.0, both should expose `task-intake` and `unslop`.
-Use the list/details commands above to check the installed version.
+Version 0.5.0 adds `task-work` and changes task intake to route directly to a
+playbook. It also includes the 0.4.0 `thermo-nuclear-code-quality-review`
+addition. Use the list/details commands above to check the installed version.
+See the [review skill notes](#strict-code-quality-review) for its invocation
+setting and the Codex validator limitation.
 
 ## The dev loop
 
@@ -67,7 +74,7 @@ So after adding or editing a component, bump the version in **both** manifests
 and reinstall:
 
 ```sh
-V=0.3.0
+V=0.5.0
 sed -i '' "s/\"version\": \".*\"/\"version\": \"$V\"/" \
   .claude-plugin/plugin.json .codex-plugin/plugin.json
 
@@ -82,12 +89,13 @@ convention for a throwaway iteration is a build-metadata cachebuster —
 ## Task intake
 
 Use [task-intake](skills/task-intake/SKILL.md) to check an incoming or resumed
-ticket before planning implementation. For example: "Use task-intake to assess
+ticket before choosing how to work it. For example: "Use task-intake to assess
 PROJ-123 against this repository." A pasted task or local file works too.
 
 It inspects consequential claims, separates evidence from proposed solutions,
-and writes a compact Markdown brief with one next action: implement, investigate,
-decide, split, or no-change. Human blockers remain explicit. Intake does not
+and writes a compact Markdown brief with one selected playbook and optional
+proof modifiers. Investigation, change work, decisions, splitting, and verified
+no-change are direct routes. Human blockers remain explicit. Intake does not
 change product code or silently update a tracker.
 
 The [brief format](skills/task-intake/references/brief.md) targets 250-400 words
@@ -98,6 +106,49 @@ Jira account, new service, or tracker installation is required.
 
 The adoption and first trial are recorded in
 [decision 002](docs/decisions/002-task-intake.md).
+
+## Task playbooks
+
+Use [task-work](skills/task-work/SKILL.md) to carry an evidence-backed task
+through the playbook selected by intake. A current, specific user request can
+supply the brief directly when its outcome, evidence, constraints, route, and
+checks are already clear.
+
+The router loads one focused file for `investigation`, `bug-fix`, `feature`,
+`refactor`, `performance`, `migration`, `decision`, `split`, or `no-change`.
+Investigation is task work. When it establishes the next job, the same brief
+changes `Playbook` and continues without a generic implementation phase.
+Modifiers such as `performance`, `migration`, or `security` add checks and
+constraints without starting a second full playbook.
+
+Each playbook names its entry facts, work sequence, completion evidence, and
+exit routes. The intake checker rejects the legacy `Work type` plus `Next action`
+schema. The research and adoption decision are recorded in
+[decision 004](docs/decisions/004-task-work-playbooks.md).
+
+## Strict code quality review
+
+Use [thermo-nuclear-code-quality-review](skills/thermo-nuclear-code-quality-review/SKILL.md)
+for a demanding review of code structure, branching, abstractions, and module
+boundaries. Name the comparison base and whether you want findings or edits. For
+example: "Use thermo-nuclear-code-quality-review to review this branch against
+main. Report findings only."
+
+The upstream skill declares `disable-model-invocation: true`, so it is intended
+for explicit invocation. Its 1,922 words and lack of a runnable quality check
+exceed this repo's usual adoption filter. It is vendored unchanged at Anatolii's
+request, with the limitations recorded in
+[decision 003](docs/decisions/003-thermo-nuclear-code-quality-review.md).
+The companion Cursor subagent and the rest of Team Kit are not included.
+
+The bundled Codex plugin validator rejects this upstream invocation setting:
+``frontmatter field `disable-model-invocation` must be false``.
+Codex CLI 0.146.0 nevertheless discovers the unchanged skill as enabled through
+its local `plugin/read` API. Discovery does not prove that Codex enforces the
+upstream invocation restriction. Its [documented invocation policy](https://learn.chatgpt.com/docs/build-skills#optional-metadata)
+uses `agents/openai.yaml`, which this upstream skill does not supply.
+Keep the validation failure visible and invoke the skill explicitly. Any
+compatibility adaptation needs a separate decision under the vendoring rules.
 
 ## Vendoring someone else's skill
 
@@ -139,6 +190,7 @@ hasn't, which is the common case in a busy monorepo.
 | Skill | Upstream | Licence |
 |---|---|---|
 | `unslop` — cut AI tells from writing | [cursor/plugins `pstack/skills/unslop`](https://github.com/cursor/plugins/tree/main/pstack/skills/unslop) | MIT, © Lauren Tan |
+| `thermo-nuclear-code-quality-review`, strict maintainability review | [cursor/plugins `cursor-team-kit/skills/thermo-nuclear-code-quality-review`](https://github.com/cursor/plugins/tree/main/cursor-team-kit/skills/thermo-nuclear-code-quality-review) | MIT, © 2026 Cursor |
 
 The upstream `LICENSE` is copied in beside each vendored `SKILL.md`; MIT
 requires the notice to travel with the copy.
@@ -187,14 +239,20 @@ uvx --with pyyaml python \
   ~/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py .
 claude plugin validate .                     # marketplace manifest
 claude plugin validate .claude-plugin/plugin.json
+python3 -B scripts/vendor.py check
 uvx --with pyyaml python \
   ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/task-intake
+uvx --with pyyaml python \
+  ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/task-work
 python3 -B skills/task-intake/scripts/test_check_brief.py
+python3 -B skills/task-work/scripts/check_playbooks.py
 # To check an actual brief:
 python3 skills/task-intake/scripts/check_brief.py /path/to/brief.md
 ```
 
-The Codex manifest includes the required display metadata for the two shipped
-skills. The brief checker and its regression checks use only Python's standard
-library. These checks do not verify tracker access or the truth of an intake
-brief's evidence.
+The Codex manifest includes display metadata for all four shipped skills. Its
+bundled validator currently fails on the review skill's upstream invocation
+setting, as described above. The brief checker, its regressions, and the
+playbook-route check use only Python's standard library. These checks do not
+verify classification quality, review quality, tracker access, or the truth of
+an intake brief's evidence.

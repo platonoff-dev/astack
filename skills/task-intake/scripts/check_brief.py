@@ -8,10 +8,23 @@ import re
 from pathlib import Path
 
 
-WORK_TYPES = {"bug", "feature", "refactor", "performance", "migration", "investigation"}
-ACTIONS = {"implement", "investigate", "decide", "split", "no-change"}
-FIELDS = ("Source", "Checked", "Work type", "Next action")
+PLAYBOOKS = {
+    "investigation",
+    "bug-fix",
+    "feature",
+    "refactor",
+    "performance",
+    "migration",
+    "decision",
+    "split",
+    "no-change",
+}
+CHANGE_PLAYBOOKS = {"bug-fix", "feature", "refactor", "performance", "migration"}
+REQUIRED_FIELDS = ("Source", "Checked", "Playbook")
+FIELDS = REQUIRED_FIELDS + ("Modifiers",)
+LEGACY_FIELDS = {"Work type", "Next action"}
 LINK = re.compile(r"\[[^\]\n]+\]\((?:<[^>\n]+>|[^\s)]+)\)")
+MODIFIER = re.compile(r"[a-z0-9][a-z0-9-]*")
 
 
 def list_items(lines: list[str], pattern: str) -> list[str]:
@@ -60,24 +73,33 @@ def check(text: str) -> tuple[list[str], list[str]]:
                 if key in fields:
                     errors.append(f"duplicate field: {key}")
                 fields[key] = value.strip()
+            elif sep and key in LEGACY_FIELDS:
+                errors.append(f"legacy field is not supported: {key}; use Playbook and optional Modifiers")
 
     if fence:
         errors.append("unclosed code fence")
     if not title:
         errors.append("missing task title (# ...)")
-    for field in FIELDS:
+    for field in REQUIRED_FIELDS:
         if not fields.get(field):
             errors.append(f"missing or empty field: {field}")
     for heading in ("Outcome", "Evidence", "Next step"):
         if not sections.get(heading):
             errors.append(f"missing or empty section: {heading}")
 
-    types = {value.strip() for value in fields.get("Work type", "").split(",")}
-    if not types <= WORK_TYPES:
-        errors.append("Work type must use: " + ", ".join(sorted(WORK_TYPES)))
-    action = fields.get("Next action", "")
-    if action not in ACTIONS:
-        errors.append("Next action must be one of: " + ", ".join(sorted(ACTIONS)))
+    playbook = fields.get("Playbook", "")
+    if playbook not in PLAYBOOKS:
+        errors.append("Playbook must be one of: " + ", ".join(sorted(PLAYBOOKS)))
+
+    if "Modifiers" in fields:
+        raw_modifiers = fields["Modifiers"]
+        modifiers = [value.strip() for value in raw_modifiers.split(",")]
+        if not raw_modifiers or any(not MODIFIER.fullmatch(value) for value in modifiers):
+            errors.append("Modifiers must be a comma-separated list of lowercase names")
+        elif len(modifiers) != len(set(modifiers)):
+            errors.append("Modifiers must not repeat")
+        elif playbook in modifiers:
+            errors.append("Modifiers must not repeat the primary Playbook")
 
     evidenced = 0
     for entry in list_items(sections.get("Evidence", []), r"- "):
@@ -91,19 +113,19 @@ def check(text: str) -> tuple[list[str], list[str]]:
                 errors.append(f"{status} evidence needs an inline Markdown source link")
             else:
                 evidenced += 1
-    if action in {"implement", "no-change"} and not evidenced:
-        errors.append(f"{action} needs at least one supported or contradicted evidence entry")
+    if playbook in CHANGE_PLAYBOOKS | {"no-change"} and not evidenced:
+        errors.append(f"{playbook} needs at least one supported or contradicted evidence entry")
 
     questions = sections.get("Questions", [])
-    if action in {"implement", "no-change"} and questions:
-        errors.append(f"{action} cannot carry Questions; resolve blockers or change Next action")
-    if action == "decide" and not questions:
-        errors.append("decide requires a nonempty Questions section")
-    if action in {"implement", "investigate"}:
+    if playbook in CHANGE_PLAYBOOKS | {"no-change"} and questions:
+        errors.append(f"{playbook} cannot carry Questions; route to decision or independent work")
+    if playbook == "decision" and not questions:
+        errors.append("decision requires a nonempty Questions section")
+    if playbook in CHANGE_PLAYBOOKS | {"investigation"}:
         checks = sections.get("Completion checks", [])
         if not any(re.fullmatch(r"- (?:\[[ xX]\] )?\S.*", line) for line in checks):
-            errors.append(f"{action} requires at least one Completion checks bullet")
-    if action == "split":
+            errors.append(f"{playbook} requires at least one Completion checks bullet")
+    if playbook == "split":
         items = list_items(sections.get("Breakdown", []), r"\d+\. ")
         children = [line for line in items if re.match(r"\d+\. \S", line)]
         if len(children) < 2:
