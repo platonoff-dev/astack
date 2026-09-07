@@ -1,6 +1,6 @@
 {
   "name": "ai-bench",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "Anatolii's agentic-AI workbench: subagents, skills and tool configs, including skills vendored from other repos with a pinned commit.",
   "author": {
     "name": "Anatolii Platonov",
@@ -11,14 +11,15 @@
   "license": "MIT",
   "interface": {
     "displayName": "AI Bench",
-    "shortDescription": "Work entrypoint, local tracker, review, and writing",
-    "longDescription": "Start or resume evidence-backed work through a generic main entrypoint, route it to separately adopted playbooks, review code structure and maintainability, and edit drafts to remove formulaic AI wording. Task intake can use checkout-specific tracker instructions from .local/tracker.md.",
+    "shortDescription": "Work entrypoint, model setup, review, and writing",
+    "longDescription": "Start or resume evidence-backed work through a generic main entrypoint, configure per-role model overrides for Claude Code and Codex pstack-derived skills, review code structure and maintainability, and edit drafts to remove formulaic AI wording. Task intake can use checkout-specific tracker instructions from .local/tracker.md.",
     "developerName": "Anatolii Platonov",
     "category": "Productivity",
     "capabilities": ["Read", "Write"],
     "defaultPrompt": [
       "Use task-intake to check this ticket and choose its playbook.",
       "Use main to start or resume this work through its selected playbook.",
+      "Use setup-pstack to configure model overrides for this harness.",
       "Use thermo-nuclear-code-quality-review to review this branch's changes.",
       "Use unslop to edit this draft."
     ]

@@ -3,10 +3,9 @@
 My agentic-AI workbench — subagents, skills and tool configs — packaged as a
 plugin that both **Claude Code** and **Codex** install from the same repo.
 
-Four skills ship in the plugin: `main` and `task-intake`, written here,
-plus `unslop` and `thermo-nuclear-code-quality-review`, vendored from
-`cursor/plugins`.
-Components get added one at a time.
+Five skills ship in the plugin: `main`, `task-intake` and `setup-pstack`,
+written here, plus `unslop` and `thermo-nuclear-code-quality-review`, vendored
+from `cursor/plugins`. Components get added one at a time.
 
 ```
 .claude-plugin/
@@ -17,6 +16,7 @@ Components get added one at a time.
 skills/unslop/            vendored from cursor/plugins (MIT)
 skills/task-intake/       evidence checks, Markdown briefs, tracker contract
 skills/main/              main work entrypoint and playbook router
+skills/setup-pstack/      per-role pstack model rule for Claude Code and Codex
 skills/thermo-nuclear-code-quality-review/  strict maintainability review (MIT)
 vendor.json               the pin for every vendored component
 scripts/vendor.py         sync / check / update / add
@@ -56,12 +56,12 @@ codex plugin add ai-bench@ai-bench
 codex plugin list
 ```
 
-Version 0.8.0 keeps `main` as the generic work entrypoint and adds the
-`.local/tracker.md` convention for checkout-specific tracker instructions. All
-nine route files remain empty until each receives its own research, decision,
-and trial. Use the list/details commands above to check the installed version.
-See the [review skill notes](#strict-code-quality-review) for its invocation
-setting and the Codex validator limitation.
+Version 0.9.0 adds `setup-pstack`, which writes pstack's per-role model rule
+where Claude Code or Codex loads it. `main` remains the generic work entrypoint
+and all nine route files remain empty until each receives its own research,
+decision, and trial. Use the list/details commands above to check the installed version. See
+the [review skill notes](#strict-code-quality-review) for its invocation setting
+and the Codex validator limitation.
 
 ## The dev loop
 
@@ -75,7 +75,7 @@ So after adding or editing a component, bump the version in **both** manifests
 and reinstall:
 
 ```sh
-V=0.8.0
+V=0.9.0
 sed -i '' "s/\"version\": \".*\"/\"version\": \"$V\"/" \
   .claude-plugin/plugin.json .codex-plugin/plugin.json
 
@@ -138,7 +138,7 @@ selected playbook.
 
 The router reserves one file for `investigation`, `bug-fix`, `feature`,
 `refactor`, `performance`, `migration`, `decision`, `split`, or `no-change`.
-All nine files are empty in 0.8.0. An empty file adds no instructions; the skill
+All nine files are empty in 0.9.0. An empty file adds no instructions; the skill
 must say that no ai-bench playbook was applied. Ordinary work can still proceed
 under the user's request and target repository instructions.
 
@@ -150,6 +150,33 @@ provisional bodies adopted in
 [decision 004](docs/decisions/004-task-work-playbooks.md). The generic entrypoint
 name and intake handoff are recorded in
 [decision 006](docs/decisions/006-main-entrypoint.md).
+
+## Pstack model setup
+
+Use [setup-pstack](skills/setup-pstack/SKILL.md) inside Claude Code or Codex to
+choose the model each pstack role runs on. It writes a managed block, one line
+per role, to the file that harness loads into every session: for Claude Code
+`~/.claude/rules/pstack-models.md`, for Codex the home `AGENTS.md` (or
+`AGENTS.override.md` when that exists). Bytes outside the block are preserved.
+Nothing is written under `~/.cursor/`, and the other harness's file is left
+alone: configure each harness from inside it.
+
+Values are what that harness can actually spawn. On Claude Code that is one of
+the Agent tool's model aliases (`sonnet`, `opus`, `haiku`, `fable`). On Codex it
+is a model slug, optionally `slug@effort`, checked against Codex's own models
+cache when present. `inherit-parent` and `auto` mean "no override". A panel role
+lists one entry per subagent to spawn. The bundled `pstack_models.py` detects
+the harness and its models, shows the current mapping, validates, and writes;
+the skill asks before writing. Account entitlement still has to come from the
+running harness.
+
+The role labels are pstack's, so its skills can read the rule from context; the
+block says it stands in for the Cursor rule those skills name. No other shipped
+skill consumes the rule yet. Each later pstack-derived consumer needs its own
+decision and adaptation to read it. See
+[decision 008](docs/decisions/008-setup-pstack.md) for why this is a skill
+written here rather than a vendored copy. The format is documented in
+[the rule format reference](skills/setup-pstack/references/rule-format.md).
 
 ## Strict code quality review
 
@@ -197,7 +224,9 @@ full clone.
 **Never hand-edit a vendored directory.** `sync` and `update` replace it
 wholesale, so an edit is silently lost on the next run; `check` reports it as
 `EDITED`. If you want different behaviour, add your own skill alongside it
-rather than patching the copy — that keeps `check` meaningful.
+rather than patching the copy — that keeps `check` meaningful. `setup-pstack`
+is the worked example: its upstream is Cursor-only, so the adaptation is a skill
+written here that borrows the role labels, not a patched copy.
 
 `check` distinguishes the two ways a pin goes wrong:
 
@@ -269,15 +298,18 @@ uvx --with pyyaml python \
   ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/task-intake
 uvx --with pyyaml python \
   ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/main
+uvx --with pyyaml python \
+  ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/setup-pstack
 python3 -B skills/task-intake/scripts/test_check_brief.py
 python3 -B skills/main/scripts/check_playbooks.py
+python3 -B skills/setup-pstack/scripts/test_pstack_models.py
 # To check an actual brief:
 python3 skills/task-intake/scripts/check_brief.py /path/to/brief.md
 ```
 
-The Codex manifest includes display metadata for all four shipped skills. Its
+The Codex manifest includes display metadata for all five shipped skills. Its
 bundled validator currently fails on the review skill's upstream invocation
-setting, as described above. The brief checker, its regressions, and the
-playbook-route check use only Python's standard library. These checks do not
-verify classification quality, review quality, tracker access, or the truth of
-an intake brief's evidence.
+setting, as described above. The brief, playbook-route, and pstack model rule
+checks use only Python's standard library. These checks do not verify
+classification quality, review quality, tracker access, model entitlement, or
+the truth of an intake brief's evidence.

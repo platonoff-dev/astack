@@ -15,9 +15,12 @@ manifest lists this repo as its one entry with source `./`.
 
 Components get added deliberately, one at a time. Do not scaffold placeholder
 components; create a directory only when something real goes in it. The plugin
-ships `skills/main` and `skills/task-intake`, written here, plus
-`skills/unslop` and `skills/thermo-nuclear-code-quality-review`, vendored from
-`cursor/plugins`.
+ships `skills/main`, `skills/task-intake` and `skills/setup-pstack`, written
+here, plus `skills/unslop` and `skills/thermo-nuclear-code-quality-review`,
+vendored from `cursor/plugins`. `setup-pstack` borrows pstack's role labels but
+is not a vendored copy: upstream writes a Cursor rule, so the mechanism here is
+its own and writes where Claude Code and Codex actually load rules
+(decision 008).
 
 Decisions 005 and 006 make one narrow exception: the nine empty files under
 `skills/main/references/playbooks/` reserve routes for later decisions. Do not

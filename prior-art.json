@@ -10,8 +10,8 @@
       "why": "Cursor's in-house plugin: skills, commands and subagents shipped as one opinionated stack. Already the source of the vendored unslop skill.",
       "upstream": "https://github.com/cursor/plugins/tree/main/pstack",
       "read": {
-        "commit": "b9ddc83c32972210b8a94d389130713e8eed346e",
-        "date": "2026-09-01"
+        "commit": "7314f723a487ec406b6369fe5865ba034cfed166",
+        "date": "2026-09-03"
       }
     },
     {
