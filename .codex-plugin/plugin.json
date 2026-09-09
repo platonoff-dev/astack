@@ -1,27 +1,32 @@
 {
-  "name": "ai-bench",
-  "version": "0.9.0",
-  "description": "Anatolii's agentic-AI workbench: subagents, skills and tool configs, including skills vendored from other repos with a pinned commit.",
+  "name": "astack",
+  "version": "2.0.1",
+  "description": "pstack, decoupled from Cursor for Claude Code and Codex, with per-role model configuration, a tracker adapter, and Anatolii's own work skills.",
   "author": {
     "name": "Anatolii Platonov",
     "url": "https://github.com/platonoff-dev"
   },
-  "homepage": "https://github.com/platonoff-dev/ai-bench",
-  "repository": "https://github.com/platonoff-dev/ai-bench",
+  "homepage": "https://github.com/platonoff-dev/astack",
+  "repository": "https://github.com/platonoff-dev/astack",
   "license": "MIT",
   "interface": {
-    "displayName": "AI Bench",
-    "shortDescription": "Work entrypoint, model setup, review, and writing",
-    "longDescription": "Start or resume evidence-backed work through a generic main entrypoint, configure per-role model overrides for Claude Code and Codex pstack-derived skills, review code structure and maintainability, and edit drafts to remove formulaic AI wording. Task intake can use checkout-specific tracker instructions from .local/tracker.md.",
+    "displayName": "astack",
+    "shortDescription": "Rigorous agent workflows: the rigor router, principles, review panels, ticket work",
+    "longDescription": "pstack's workflow stack — the rigor router, the principle skills, architect/arena/interrogate design panels, swarm verification, how/why code archaeology — decoupled from Cursor so it runs natively on Claude Code and Codex. Adds per-role model configuration via setup-pstack, a tracker adapter via setup-tracker that keeps every organisation-specific value out of the plugin, plus Anatolii's own work skills: task-interview, pick-next, merge-brief and weekly-report.",
     "developerName": "Anatolii Platonov",
     "category": "Productivity",
-    "capabilities": ["Read", "Write"],
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
     "defaultPrompt": [
-      "Use task-intake to check this ticket and choose its playbook.",
-      "Use main to start or resume this work through its selected playbook.",
-      "Use setup-pstack to configure model overrides for this harness.",
-      "Use thermo-nuclear-code-quality-review to review this branch's changes.",
-      "Use unslop to edit this draft."
+      "Use rigor to work this task end to end.",
+      "Use setup-pstack to configure which model each role runs on.",
+      "Use setup-tracker to configure my issue tracker.",
+      "Use task-interview to clarify this task through an adaptive interview.",
+      "Use pick-next to choose what to work on next.",
+      "Use merge-brief before I merge this MR.",
+      "Use weekly-report to write my section of the weekly status."
     ]
   }
 }

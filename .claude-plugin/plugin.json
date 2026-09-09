@@ -1,12 +1,13 @@
 {
-  "name": "ai-bench",
-  "version": "0.9.0",
-  "description": "Anatolii's agentic-AI workbench: subagents, skills and tool configs, including skills vendored from other repos with a pinned commit.",
+  "name": "astack",
+  "version": "2.0.1",
+  "description": "pstack, decoupled from Cursor for Claude Code and Codex, with per-role model configuration, a tracker adapter, and Anatolii's own work skills.",
   "author": {
     "name": "Anatolii Platonov",
     "url": "https://github.com/platonoff-dev"
   },
-  "homepage": "https://github.com/platonoff-dev/ai-bench",
-  "repository": "https://github.com/platonoff-dev/ai-bench",
-  "license": "MIT"
+  "homepage": "https://github.com/platonoff-dev/astack",
+  "repository": "https://github.com/platonoff-dev/astack",
+  "license": "MIT",
+  "keywords": ["pstack", "rigor", "workflow", "principles", "subagents", "codex", "claude-code"]
 }

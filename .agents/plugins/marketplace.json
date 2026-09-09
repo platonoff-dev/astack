@@ -1,11 +1,11 @@
 {
-  "name": "ai-bench",
+  "name": "astack",
   "interface": {
-    "displayName": "ai-bench"
+    "displayName": "astack"
   },
   "plugins": [
     {
-      "name": "ai-bench",
+      "name": "astack",
       "source": {
         "source": "local",
         "path": "./"

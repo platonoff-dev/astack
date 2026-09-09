@@ -154,7 +154,7 @@ def header(harness: str) -> str:
     return f"""# pstack model configuration ({name})
 
 Per-role subagent models for pstack skills running in {name}. Managed by
-ai-bench's `setup-pstack`; re-run it to change a role. When a pstack skill
+astack's `setup-pstack`; re-run it to change a role. When a pstack skill
 asks for `~/.cursor/rules/pstack-models.mdc`, use these lines instead.
 
 One line per role. `inherit-parent` or `auto` means spawn the subagent with no

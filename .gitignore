@@ -1,3 +1,10 @@
-.cache/
+# .local/ is this checkout's private scratch and configuration area, and the
+# whole tree is ignored — nested paths included. It is where temporary files go:
+# intermediate results, spill files, eval runs, throwaway scripts. This repo is
+# public, so an unignored scratch file is a published one.
 .local/
+
+.cache/
 __pycache__/
+*.pyc
+node_modules/

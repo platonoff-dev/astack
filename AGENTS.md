@@ -5,155 +5,224 @@ file — one source of truth, because two copies drift.
 
 ## What this repo is
 
-Anatolii's agentic-AI workbench, packaged so that **both Claude Code and Codex
-install it as a plugin from this same repo**.
-`git@github.com:platonoff-dev/ai-bench.git`.
+Anatolii's agentic-AI workbench: **[pstack](https://github.com/cursor/plugins/tree/main/pstack)
+decoupled from Cursor**, packaged so that both Claude Code and Codex install it
+as a plugin from this same repo (`git@github.com:platonoff-dev/astack.git`).
 
-The repo is both the marketplace and its single plugin: `.claude-plugin/` and
+The repo is both the marketplace and its single plugin. `.claude-plugin/` and
 `.codex-plugin/` hold the plugin manifests, and each harness's marketplace
 manifest lists this repo as its one entry with source `./`.
 
-Components get added deliberately, one at a time. Do not scaffold placeholder
-components; create a directory only when something real goes in it. The plugin
-ships `skills/main`, `skills/task-intake` and `skills/setup-pstack`, written
-here, plus `skills/unslop` and `skills/thermo-nuclear-code-quality-review`,
-vendored from `cursor/plugins`. `setup-pstack` borrows pstack's role labels but
-is not a vendored copy: upstream writes a Cursor rule, so the mechanism here is
-its own and writes where Claude Code and Codex actually load rules
-(decision 008).
+49 skills ship: 44 from pstack, plus `task-interview`, `pick-next`,
+`merge-brief`, `weekly-report` and `setup-tracker`, written by Anatolii. Two
+subagents ship, both pstack's. `setup-pstack` is the one skill replaced outright
+rather than adapted.
 
-Decisions 005 and 006 make one narrow exception: the nine empty files under
-`skills/main/references/playbooks/` reserve routes for later decisions. Do not
-add content to one without its own research, decision, trial, and entry in
-`ADOPTED_PLAYBOOKS`.
+pstack's `poteto-mode` router ships here as **`rigor`**, its subagent as
+`rigor-agent`. Upstream's frontmatter is `name: Poteto Mode`; Claude Code
+registers that as `/astack:Poteto Mode`, splits it at the space and answers
+"Unknown command: /astack:Poteto". A one-word router is also faster to type.
+`validate.sh` fails any skill whose frontmatter `name` is not its kebab-case
+directory, so a re-import cannot bring the space back. Keep the `rigor` name
+when pulling upstream changes.
 
-There is no build or lint setup. The artifacts are Markdown definitions, JSON
-config, and small Python helpers. Validate with the two plugin validators in the
-README, `scripts/vendor.py check`, and the task-intake checker's regression
-checks. Trial skill behavior on real work; passing a format check is not proof
-that its instructions make good decisions.
+pstack's own `README.md` is kept at `docs/upstream/pstack-README.md` as the
+record of what upstream ships. It is a snapshot, not a live document: it still
+describes `make-bot-ui` and the Cursor rule path, both of which are gone here,
+and calls the router `poteto-mode`.
 
-## Two things that will bite
+## This repo is public, and that is a constraint on every commit
 
-**1. Every change needs a version bump in both manifests.** Both harnesses cache
-a copy of the plugin keyed on its version, so an edit to the working tree is not
-live until the version changes and the plugin is reinstalled. The README has the
-loop. This is the single most likely reason "my change did nothing".
+`github.com/platonoff-dev/astack` is public. Anything committed here is
+published, and a force-push does not unpublish what was already fetched or
+indexed. **Nothing organisation-specific may enter this repo**, and
+`scripts/validate.sh` has a `no organisation-specific content` check that fails
+the run on any of it:
 
-**2. Subagents are the one asymmetry between the harnesses.** Both discover a
-plugin's `skills/`, `commands/` and `.mcp.json` the same way. Claude Code also
-discovers `agents/*.md` from the plugin — **Codex does not look inside a plugin
-for subagents at all.** It reads `$CODEX_HOME/agents/*.toml`, a flat directory of
-TOML files with `name`, `description` and `developer_instructions` keys.
+| Never here | Where it goes instead |
+|---|---|
+| Employer, product, team or internal-repo names; internal hostnames | nowhere — a skill names a *role* |
+| Tracker hosts, project keys, real item keys, custom-field ids, account or document ids | the tracker adapter, outside this repo |
+| A colleague's name, or a quotation from a private channel, document or review | nowhere, ever. Paraphrase the *failure* and drop the person |
+| Real work-item titles, real metrics, real deadlines, unreleased roadmap | an invented worked example that carries the same shape |
+| Internal process that would embarrass someone if read outside | the discipline stated neutrally, or not at all |
 
-So the first subagent added here needs a generation step: `agents/*.md` stays the
-single source of truth and a script converts it to TOML for Codex. Serialise the
-body as a TOML **literal** string (`'''…'''`), never a basic string — role text
-carries backslashes (a `grep -E '\(class\|def\)'`, say) that a basic string reads
-as invalid escapes. Parse the result back with `tomllib` before writing it.
+This was learned the expensive way: the four work skills shipped with a CEO's
+private remarks quoted by name, a squad's Jira ids and a real status report in
+them, and it was public for two days before anyone noticed. The check exists so
+the next re-import or paste cannot repeat it.
+
+The mechanism that makes the work skills possible at all is the **tracker
+adapter** — one TOML file, written by `setup-tracker`, holding every value a
+skill would otherwise hardcode. `pick-next`, `weekly-report` and `merge-brief` read it and stop
+with a clear message when it is absent.
+Its format lives in `skills/setup-tracker/references/adapter-format.md`; the
+file itself lives in `~/.config/pstack/` or in the private repo it describes,
+and **never** inside this one.
+
+When a skill needs a fact it does not have, the answer is a new adapter role,
+not a value in a `SKILL.md`.
+
+## The decoupling is the point, and it is load-bearing
+
+Upstream targets Cursor. Four kinds of coupling were removed, and each one is
+guarded by a check in `scripts/validate.sh` so a re-import cannot quietly
+reintroduce it. **Run `scripts/validate.sh` before every commit.**
+
+| Coupling | What it became |
+|---|---|
+| `~/.cursor/rules/pstack-models.mdc` | `~/.claude/rules/pstack-models.md` (a documented user-level Claude Code load path) or the Codex home `AGENTS.md`, both written by `setup-pstack` |
+| Model slugs (`grok-4.6-fast-xhigh`, …) | **no skill names a model at all.** They name a *role* and defer the value to the model rule |
+| `Task` params (`generalPurpose`, `readonly:`, `environment:`) | `general-purpose`; a read-only agent type (`Explore`) where `readonly: true` was meant; remote/cloud agents described neutrally |
+| `cursor-team-kit`'s `control-ui` / `control-cli` / `deslop` | the project's own `verify-*` skill (which `create-verification-skill` generates), plus `no-comments` and the harness's cleanup pass |
+
+Two rules follow from this:
+
+- **Never write a model slug into a skill.** A slug neither harness can spawn
+  breaks the delegation outright, which is why it is a hard check and not a
+  style preference. Roles live in `setup-pstack`'s `ROLES` list; values live in
+  the rule the user generates.
+- **Never reintroduce a `~/.cursor/` path or a `cursor-team-kit` skill name.**
+  Wanting different behaviour means editing the skill here, not pointing at a
+  plugin nobody installs.
+
+## Three things that will bite
+
+**1. Every change needs a version bump in both manifests.** Both harnesses
+cache a copy of the plugin keyed on its version, so an edit to the working tree
+is not live until the version changes and the plugin is reinstalled. The README
+has the loop. This is the single most likely reason "my change did nothing".
+
+**2. The Codex validator fails by design, and that is not permission to ignore
+it.** 44 skills carry `disable-model-invocation: true`, which is how Claude Code
+is told to invoke them explicitly only. Codex rejects that field and reads
+`<skill>/agents/openai.yaml` with `policy.allow_implicit_invocation: false`
+instead. Both are correct for their harness, so the field cannot be removed —
+and dropping it would make 44 heavy skills auto-fire on description matching.
+`scripts/validate.sh` filters exactly that one error message, counts what it
+filtered, and **fails if the count stops matching the skills that declare it**.
+Every other Codex error still fails the run.
+
+After adding a skill or editing a description, run
+`scripts/sync_codex_policy.py`. It regenerates the `openai.yaml` files from the
+frontmatter; `--check` reports drift without writing.
+
+**3. Subagents are the one asymmetry left.** Both harnesses discover a plugin's
+`skills/` and `.mcp.json` the same way. Claude Code also discovers
+`agents/*.md` — **Codex does not look inside a plugin for subagents at all.** It
+reads `$CODEX_HOME/agents/*.toml`, a flat directory of TOML files with `name`,
+`description` and `developer_instructions`.
+
+So pstack's two agents work on Claude Code and are absent on Codex, and
+`no-comments` degrades there. Closing that gap means a generation step:
+`agents/*.md` stays the single source of truth and a script emits TOML for
+Codex. Serialise the body as a TOML **literal** string (`'''…'''`), never a
+basic string — role text carries backslashes that a basic string reads as
+invalid escapes. Parse the result back with `tomllib` before writing it.
+
+Nothing needs this yet. Prefer a skill over a subagent while that is true: a
+skill loads identically on both harnesses, and `disable-model-invocation` plus
+its `openai.yaml` keeps it from auto-firing.
+
+## Conventions when adding a component
+
+**Skills** — `skills/<name>/SKILL.md` plus optional `references/`, `scripts/`,
+`assets/`, and `agents/openai.yaml` when the skill is explicit-invocation only.
+Keep `SKILL.md` short and push detail into `references/`, loaded on demand.
+
+**The filter for adding a skill at all:** one discipline, with a runnable check,
+in a few hundred words, that says no to things. Reference manuals and grab bags
+are rejected — dozens of trivia skills poison description-matching, which
+degrades every other skill in the set. This filter is why `review-change`,
+`review-design` and `jira-ticket` were dropped rather than carried over:
+`interrogate` and `architect` already cover review, and a field-value manual is
+a reference, not a discipline.
+
+**Playbooks** — a `rigor` playbook is the right home for a workflow that
+routes into existing skills rather than adding a discipline of its own: it adds
+its own gates and delegates every engineering step. Register a new one in
+`rigor/SKILL.md`'s routing list or nothing reaches it. A playbook that exists
+to carry one employer's process does not belong here at all — that was the
+`def-ticket` mistake, and its neutral rewrite was dropped for the same reason:
+nobody but its author routes into it.
+
+**Subagents** — `agents/<name>.md`, YAML frontmatter with `name` and
+`description` only. Never set `tools:`: omitting it is what lets the agent
+inherit `Skill` and delegate. Read "Three things that will bite" first.
+
+**Manifest differences to respect:** the Codex manifest rejects a `hooks` field
+and requires strict semver. Keep `name`, `version` and `description` identical
+across the two files — `validate.sh` checks this.
 
 Keep any component's text harness-neutral so one file serves both: name both
 instruction files ("the repo's `CLAUDE.md` / `AGENTS.md`") rather than either
 alone, and never blanket-rename `claude`→`codex` in a component — it corrupts
 real filesystem paths like `.claude/skills/…`.
 
-## Vendored third-party components
+## Anatolii's own skills
 
-`vendor.json` pins every component copied in from someone else's repo, and
-`scripts/vendor.py` materialises, diffs and bumps them. The README has the
-command table.
+Five ship. All are tracker-neutral; the three work skills get their
+organisation's values from the tracker adapter at runtime:
 
-**The files are committed on purpose.** Both harnesses install a plugin by
-copying the repo tree and neither initialises git submodules, so a submodule or
-subtree would arrive empty on someone else's `plugin install`. That constraint is
-what rules out every link-based approach; the pin plus a re-materialising script
-is the substitute.
+| Skill | Owns |
+|---|---|
+| `task-interview` | a manually invoked adaptive interview that clarifies selected work into a local brief, stopping before design review or delivery |
+| `setup-tracker` | the tracker adapter — writing it, repairing it, and validating it |
+| `pick-next` | what to work on next, under a WIP cap, on the team's work-order ladder |
+| `merge-brief` | the pre-merge comprehension check — it explains a change and quizzes the human, and never reviews |
+| `weekly-report` | one person's weekly status section, from the tracker and the review forge, linted before publication |
 
-Rules that keep this honest:
+The three work skills depend on a tracker, a review forge and a destination
+document being reachable at runtime, and on an adapter existing. That is a
+runtime dependency, not a plugin one — the plugin installs and validates
+without any of them, and each skill says what is missing when it is.
 
-- **Never hand-edit a vendored directory.** `sync` and `update` replace it
-  wholesale, so the edit is lost; `check` reports it as `EDITED`. Wanting
-  different behaviour means adding your own skill alongside, not patching the
-  copy.
-- **Carry the upstream licence.** `license_path` in the entry copies the
-  upstream `LICENSE` in beside the `SKILL.md`. MIT and Apache-2.0 both require
-  the notice to travel with the copy; check the licence before vendoring at all.
-- **Pin a commit, not a branch.** `ref` says which branch to follow on `update`;
-  `commit` is what `sync` actually reproduces. Never drop the commit.
-- **A vendored skill keeps its upstream `name:`.** If you later install the
-  upstream plugin itself, both copies claim that name — pick one.
-- After `update`, bump the plugin version in both manifests and reinstall, or
-  neither harness sees the new content.
+Their organisation-specific ancestors are gone from this repo and from its
+history. Do not re-import them, and do not resolve "the skill used to know
+this" by writing the value back into a `SKILL.md`: add an adapter role.
 
-## Conventions when adding a component
+## `.local/` — where temporary files go
 
-**Subagents** — `agents/<name>.md`, YAML frontmatter with `name` and
-`description` only. Never set `tools:`: omitting it is what lets the agent
-inherit `Skill` and delegate. The `description` is the routing signal, so state
-what it reads and writes, when to run it, and one "never" clause. Body opens
-with the single job in bold, then `## Hard rules`.
+**Every temporary file this repo's work produces belongs under `.local/`**, and
+the whole tree is gitignored, nested paths included. Spill files, intermediate
+results, eval runs, a throwaway script, a scratch draft: `.local/tmp/` for
+anything disposable, a named subdirectory for a run worth keeping
+(`.local/refine-task-validation/`). Clean out `.local/tmp/` whenever; nothing
+depends on it.
 
-**Skills** — `skills/<name>/SKILL.md` plus optional `references/`, `scripts/`,
-`assets/`. Keep `SKILL.md` short and push detail into `references/`, loaded on
-demand.
+Writing a temporary file anywhere else in the tree is the mistake to avoid.
+This repo is public, so a scratch file that escapes the ignore is a published
+one — and scratch files are exactly where unredacted tracker output, real
+ticket keys and pasted document contents accumulate.
 
-**The filter for adding a skill at all:** one discipline, with a runnable check,
-in a few hundred words, that says no to things. Reference manuals and grab bags
-are rejected — dozens of trivia skills poison description-matching, which
-degrades every other skill in the set.
+`.local/` also holds configuration that is true of this checkout only. It is
+not a place for secrets, and not a place for policy every clone needs: durable
+shared rules go in `AGENTS.md` or a skill. The tracker adapter is the same
+principle pointed the other way — organisation values live outside the repo
+entirely, not in an ignored file inside it.
 
-**Manifest differences to respect:** the Codex manifest rejects a `hooks` field
-and requires strict semver; Claude's is the more permissive of the two, so
-validate against Codex's first. Keep `name`, `version` and `description`
-identical across the two files.
+## What this repo used to be
 
-## Repo-level components
+Before 2026-09-07 this was an incremental workbench built one component at a
+time: a `main` router over nine deliberately empty playbooks, `task-intake`,
+`prior-art` and a `vendor.py` pinning mechanism, with decisions recorded under
+`docs/decisions/`. Anatolii replaced it wholesale with decoupled pstack.
 
-Not everything here belongs in the plugin. `.agents/skills/<name>/` holds skills
-that serve *this* repo's own upkeep and are never shipped to anyone installing
-the plugin, with a symlink at `.claude/skills/<name>` so both harnesses find them
-(same direction as `CLAUDE.md → AGENTS.md`: the `.agents` copy is the real one).
-A fresh Claude Code session resolves that symlink and lists the skill, so it is
-the layout to copy for the next one.
-
-They are read live from the working tree, so **a repo-level skill needs no
-version bump and no reinstall** — the one rule from "Two things that will bite"
-that does not apply here.
-
-`prior-art` is the first: deciding what to take from someone else's agent setup.
-It is deliberately paired with, but separate from, vendoring:
-
-| | reads | writes | question it answers |
-|---|---|---|---|
-| `vendor.json` + `scripts/vendor.py` | upstream at a pin | `skills/<name>/`, committed | what do we *use* |
-| `prior-art.json` + `scripts/prior_art.py` | upstream at head, or a locally installed tree | `.cache/prior-art/`, gitignored | what do we *read* |
-
-Conflating them is how a reading copy quietly becomes a dependency. `prior_art.py
-diff` exits 1 when a source moved since a decision cited it — for a git source
-that means the commit moved, for a local one that the content digest changed,
-reported alongside the tool version that changed it.
-
-Decisions land in `docs/decisions/NNN-slug.md`, rejections included — an
-unrecorded rejection gets researched again. `prior-art.json` also carries
-`candidates`, proposed sources that stay untracked until Anatolii approves one
-with `prior_art.py approve <name>`. Never enrol a source or vendor a skill on
-your own judgement.
-
-## Local checkout configuration
-
-`.local/` is gitignored configuration for this checkout. It is not a place for
-secrets or for policy that every clone needs. Put durable shared rules in
-`AGENTS.md`, a skill, or another committed document instead.
-
-When tracker work is involved, read `.local/tracker.md` if it exists. It maps
-task reads, related-work searches, brief reads, and authorized publication to
-this checkout's available tracker interface. The mapping does not prove that an
-interface is installed or authenticated, and it does not grant permission to
-write. Recreate it explicitly in another worktree, VM, or clone when needed.
+That history is not lost: it is in this repo's git log, at tag
+`pre-pstack-reset-20260907`, and in
+`~/dev/personal/ai-bench.backup-20260907.tar.gz`. Read it before reinventing
+something it already rejected — the vendoring rules and the skill-adoption
+filter were both learned there. The `vendor.py` pin-and-rematerialise approach
+is gone because pstack is now the repo's content rather than a dependency; if a
+future component needs vendoring again, that decision record is worth re-reading
+first.
 
 ## Sibling repos
 
-Siblings under `~/dev/personal/` each carry their own `CLAUDE.md`/`AGENTS.md`
-and should be read there, not from here. Two are prior art for a repo-local
-(non-plugin) skill layout: `life-assistant/.agents/skills/manage-life/` and
-`opportunity-scout/.agents/skills/research-opportunities/`.
+Sibling checkouts each carry their own `CLAUDE.md`/`AGENTS.md` and should be
+read there, not from here. Project-specific skills deliberately stay in their
+own repos, where both harnesses already load them from `.agents/skills/` or
+`.claude/skills/`. Vendoring them here would create two drifting copies of each
+and push the plugin past 120 skills, which is what wrecks
+description-matching — and would drag their organisation's details into a
+public repo.

@@ -30,9 +30,12 @@ how critics: fable, opus, sonnet
 ```
 
 Every one of the eighteen roles must have a line. Upstream lets a missing line
-fall back to the skill's default, but those defaults are Cursor model slugs
-that neither Claude Code nor Codex can spawn, so here a missing role is an
-error rather than a silent fallback.
+fall back to a model slug written into the skill body, and those slugs were
+Cursor's. The adapted skills here name no slugs at all — they describe the
+shape of the choice instead ("four runners, spread across model families") and
+defer the value to this block. A complete block is therefore the only place a
+real model name lives, which is why a missing role is an error here rather
+than a silent fallback.
 
 The roles, in the order the script writes them:
 
@@ -70,8 +73,9 @@ A pstack-derived skill adapted for this plugin must:
 
 1. read the role lines from the block in its own harness's file, which is
    already in context because the harness loaded it;
-2. treat a Cursor-path reference in upstream text (`~/.cursor/rules/…`) as
-   pointing at this block;
+2. read a Cursor-path reference (`~/.cursor/rules/…`) as pointing at this
+   block — no shipped skill still carries one, but a re-import from upstream
+   will reintroduce them, so treat one as a decoupling miss and fix it;
 3. pass values through untranslated, omitting both overrides for the aliases;
 4. spawn one subagent per configured panel entry;
 5. stop with a message naming `setup-pstack` when a configured value is

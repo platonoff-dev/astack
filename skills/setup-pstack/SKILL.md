@@ -9,7 +9,7 @@ Write the pstack model rule for the harness this session runs in: a managed
 block at `~/.claude/rules/pstack-models.md` for Claude Code, or inside the
 Codex home `AGENTS.md` for Codex. Each harness loads that file into every new
 session, so pstack-derived skills read their per-role models from context. The
-role labels follow pstack's `poteto-mode`; the mechanism is this plugin's own.
+role labels follow pstack's `rigor`; the mechanism is this plugin's own.
 
 Everything below uses `scripts/pstack_models.py` from this skill's directory.
 
