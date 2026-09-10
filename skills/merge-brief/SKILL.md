@@ -44,6 +44,11 @@ Do **not** use:
 
 ## Input
 
+Before external reads, follow
+[astack's adapter loading procedure](../setup-astack/references/using-adapters.md)
+for the `review` and `tracker` roles. Read the selected guides; include their
+paths and the selected index/tracker paths in the briefer's context below.
+
 - MR IID: `1234`, `!1234`
 - Full MR URL
 - A branch name (most recent open MR for that branch)
@@ -63,8 +68,8 @@ derive them from `git remote -v` and say which remote you used.
 | Commit subjects | `git log origin/<target>..HEAD --oneline` |
 | Tracker item, description, acceptance criteria, **all comments** | the tracker's get-item call |
 
-Tool names differ between environments; use whatever calls this session has
-rather than a name from memory.
+Use the selected guides' access routes after checking availability in this
+session; with no guide, use current tools rather than names from memory.
 
 **Writes: nothing.** No request comment, no tracker comment, no file. The Brief and
 the score live in the conversation and nowhere else.

@@ -24,6 +24,10 @@ import re
 import sys
 from pathlib import Path
 
+# Both skills ship together. Import by plugin-relative path in either harness.
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "setup-astack" / "scripts"))
+import astack_adapter as aa  # noqa: E402
+
 try:
     import tomllib
 except ModuleNotFoundError:  # pragma: no cover - depends on the interpreter
@@ -140,6 +144,28 @@ def candidates(cwd: Path) -> list[tuple[Path, str]]:
 
 def resolve(cwd: Path | None = None) -> tuple[Path, str]:
     cwd = (cwd or Path.cwd()).resolve()
+    # Explicit legacy overrides remain strongest, including with a new index.
+    explicit = os.environ.get(ENV_VAR)
+    if explicit is not None:
+        path = Path(explicit).expanduser()
+        if not path.is_absolute():
+            path = cwd / path
+        if not explicit.strip() or not path.is_file():
+            raise AdapterError(f"${ENV_VAR}: {path}: no such file")
+        return path, f"${ENV_VAR}"
+    try:
+        selected = aa.resolve(cwd)
+        if selected:
+            index, _ = selected
+            data = aa.load(index)
+            if "tracker_adapter" not in data:
+                raise AdapterError(
+                    f"{index}: tracker_adapter is not configured. Run /setup-tracker; "
+                    "no legacy tracker is borrowed when an astack index is selected."
+                )
+            return aa.reference(index, data["tracker_adapter"]), f"astack index {index}"
+    except (aa.AdapterError, OSError, ValueError, RuntimeError) as exc:
+        raise AdapterError(str(exc)) from exc
     for path, why in candidates(cwd):
         if path.is_file():
             return path, why
@@ -369,7 +395,7 @@ def main(argv: list[str] | None = None) -> int:
         else:
             print(render(adapter, path, why))
         return 0
-    except AdapterError as exc:
+    except (AdapterError, OSError) as exc:
         print(exc, file=sys.stderr)
         return 1
 

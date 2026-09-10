@@ -29,6 +29,11 @@ asks; it publishes only after the human has read the draft and said so.
 
 ## The adapter comes first
 
+Before external reads, follow
+[astack's adapter loading procedure](../setup-astack/references/using-adapters.md)
+for the `tracker`, `review` and `report` roles. Read the selected guides for
+access and destination procedures. Guides do not waive the publication gate.
+
 The tracker, the review forge, the destination document, the block titles and
 the reader profile all come from the tracker adapter — none of them is named in
 this skill.
@@ -94,8 +99,9 @@ that file once per run; it is short, and it is the reader.
 `lint.txt` for the run. Nothing about the report is written into a repository.
 
 Tool names differ between environments — a hosted connector, a self-hosted
-MCP server, a bare CLI. Use whatever search, read and edit calls exist in the
-session; never hardcode a tool name from memory. If the tracker or the
+MCP server, a bare CLI. Use the selected guides' routes after checking current
+availability, or current session tools when no guide exists. Never assume a
+remembered tool name is available. If the tracker or the
 destination is unreachable, say so and stop; do not write a report from memory.
 
 ## Procedure

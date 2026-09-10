@@ -14,7 +14,7 @@ The repo is both a plugin and its marketplace. `.claude-plugin/` and
 `.codex-plugin/` contain the plugin manifests; `.claude-plugin/marketplace.json`
 and `.agents/plugins/marketplace.json` point to this repo with source `./`.
 
-Five original skills ship: `task-interview`, `setup-tracker`, `pick-next`,
+Six skills ship: `task-interview`, `setup-astack`, `setup-tracker`, `pick-next`,
 `merge-brief`, and `weekly-report`. There are no bundled agents or automations.
 
 ## Public repository
@@ -23,9 +23,15 @@ This repository is public. Never commit organisation-specific names, internal
 hosts, real tracker keys, account identifiers, private quotations, credentials,
 or unpublished work details. Use invented examples.
 
-Tracker values belong in an adapter outside this plugin:
+System access instructions and configuration belong in a private adapter outside
+this plugin. `setup-astack` owns the index (`~/.config/astack/adapter.toml` by
+default) and its linked Markdown guides. Only astack skills load these guides;
+do not inject them into general harness instructions or install them as skills.
+
+Tracker values remain in the mapping file outside this plugin:
 `~/.config/astack/tracker-adapter.toml`, or the private repository it describes.
-`setup-tracker` owns its format and validation. Extend adapter roles when a
+The system index can link this file. `setup-tracker` owns its format and
+validation. Extend adapter roles when a
 skill needs another tracker fact; do not hardcode the value in the skill.
 
 Keep project-specific skills in their own repositories. Read a sibling repo's

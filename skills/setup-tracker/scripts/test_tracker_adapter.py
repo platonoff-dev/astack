@@ -6,9 +6,15 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import tracker_adapter as ta  # noqa: E402
+
+# Keep even direct test runs inside the repository's ignored scratch area.
+SCRATCH = Path(__file__).resolve().parents[3] / ".local/tmp"
+SCRATCH.mkdir(parents=True, exist_ok=True)
+tempfile.tempdir = str(SCRATCH)
 
 MINIMAL = """
 [tracker]
@@ -92,13 +98,15 @@ class Schema(unittest.TestCase):
 
 class Resolution(unittest.TestCase):
     def setUp(self):
-        self.env = os.environ.pop(ta.ENV_VAR, None)
         self.tmp = Path(tempfile.mkdtemp()).resolve()
         (self.tmp / ".git").mkdir()
-
-    def tearDown(self):
-        if self.env is not None:
-            os.environ[ta.ENV_VAR] = self.env
+        env = {k: v for k, v in os.environ.items()
+               if k not in (ta.ENV_VAR, ta.aa.ENV_VAR)}
+        for p in (patch.dict(os.environ, env, clear=True),
+                  patch.object(ta, "USER_PATH", self.tmp / "user/tracker-adapter.toml"),
+                  patch.object(ta.aa, "USER_PATH", self.tmp / "user/adapter.toml")):
+            p.start()
+            self.addCleanup(p.stop)
 
     def test_env_var_wins(self):
         chosen = write(MINIMAL, self.tmp / "elsewhere")
@@ -120,13 +128,13 @@ class Resolution(unittest.TestCase):
         self.assertEqual(why, "project .agents/")
 
     def test_search_stops_at_the_repository_root(self):
-        outside = write(MINIMAL, self.tmp.parent / ".agents")
-        try:
-            with self.assertRaises(ta.AdapterError) as caught:
-                ta.resolve(self.tmp)
-            self.assertIn("no tracker adapter found", str(caught.exception))
-        finally:
-            outside.unlink()
+        write(MINIMAL, self.tmp / ".agents")
+        inner = self.tmp / "inner"
+        inner.mkdir()
+        (inner / ".git").mkdir()
+        with self.assertRaises(ta.AdapterError) as caught:
+            ta.resolve(inner)
+        self.assertIn("no tracker adapter found", str(caught.exception))
 
     def test_missing_adapter_lists_where_it_looked(self):
         with self.assertRaises(ta.AdapterError) as caught:

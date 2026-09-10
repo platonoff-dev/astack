@@ -8,6 +8,7 @@ plugin, built one useful component at a time.
 | Skill | Purpose |
 |---|---|
 | [task-interview](skills/task-interview/SKILL.md) | Clarify selected work through an adaptive interview, ending in a local brief. |
+| [setup-astack](skills/setup-astack/SKILL.md) | Discover external systems and configure private access guides for astack skills. |
 | [setup-tracker](skills/setup-tracker/SKILL.md) | Configure and validate the private tracker adapter used by the work skills. |
 | [pick-next](skills/pick-next/SKILL.md) | Recommend the next item from your queue or an epic, accounting for capacity and priorities. |
 | [merge-brief](skills/merge-brief/SKILL.md) | Explain a proposed change and check your understanding before you decide whether to merge. |
@@ -35,15 +36,57 @@ codex plugin add astack@astack
 
 Start a new task after installation.
 
-## Tracker configuration
+## External-system setup
 
-Use `setup-tracker` to configure the work skills. Organisation-specific values
-stay outside this public plugin. The adapter resolves from:
+Run `/astack:setup-astack` in Claude Code or `$setup-astack` in Codex. Setup
+inspects available tools and project context, tries scoped read-only operations,
+and asks about missing conventions. It writes a private index plus operating
+guides for the systems your astack workflows need. Providers are unrestricted;
+one system may serve several roles, such as tracker, review forge, or report
+destination.
+
+The default layout is:
+
+```text
+~/.config/astack/
+  adapter.toml
+  systems/
+    issues.md
+    reviews.md
+    documents.md
+  tracker-adapter.toml   # optional; existing mappings can also be linked elsewhere
+```
+
+Only needed files are created. Astack's skills explicitly load relevant guides;
+ordinary harness requests are unaffected. Setup does not install connectors,
+configure credentials, or change harness instructions. A successful local
+validation does not prove live access; setup reports observed checks and gaps.
+
+The index resolves from `$ASTACK_ADAPTER`, then project
+`.agents/astack/adapter.toml` or `.claude/astack/adapter.toml` up to the repository
+root, then `~/.config/astack/adapter.toml`. Outside a repository only the current
+directory and user default are checked. An invalid selected index or missing
+explicit path is an error, with no fallback to a different workspace.
+
+Organisation-specific values and guides stay outside this public plugin. Use a
+project bundle only in a verified private repository. See the
+[index and guide format](skills/setup-astack/references/adapter-format.md).
+
+### Existing tracker adapters
+
+`setup-tracker` still configures and validates field/status mappings. A new index
+can link an existing mapping file without moving or rewriting it. Resolution is:
 
 1. `$ASTACK_TRACKER_ADAPTER`, when set.
-2. `.agents/tracker-adapter.toml` or `.claude/tracker-adapter.toml` in the
+2. `tracker_adapter` in the selected astack index.
+3. If no astack index exists, `.agents/tracker-adapter.toml` or
+   `.claude/tracker-adapter.toml` in the
    current project, searched up to its repository root.
-3. `~/.config/astack/tracker-adapter.toml`.
+4. If no astack index exists, `~/.config/astack/tracker-adapter.toml`.
+
+An index without a tracker link is a partial setup; it does not borrow a legacy
+tracker implicitly. An explicit tracker override remains available for a run
+against another tracker; verify that any system guides match that workspace.
 
 Only put a project adapter in a private repository. Existing adapters at other
 user-level paths can be selected explicitly with `$ASTACK_TRACKER_ADAPTER`.

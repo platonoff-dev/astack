@@ -18,15 +18,29 @@ private repository they describe, or in the user's home.
 Everything below uses `scripts/tracker_adapter.py` from this skill's directory.
 The full field reference is [`references/adapter-format.md`](references/adapter-format.md).
 
+For external access guidance, follow
+[astack's adapter loading procedure](../setup-astack/references/using-adapters.md)
+for the `tracker` role. `setup-astack` owns the system index and guides; this
+skill still owns the tracker mappings. It can be used on its own or as the
+tracker configuration step within `setup-astack`.
+
 ## Where the adapter goes
 
-Resolved in this order; the first file that exists wins.
+Resolved in this order. Explicit missing paths and invalid selected indexes are
+errors, not a reason to switch workspaces.
 
 | Place | Use it when |
 |---|---|
 | `$ASTACK_TRACKER_ADAPTER` | a one-off run against another tracker |
+| `tracker_adapter` in the selected astack index | a system bundle configured with `setup-astack` |
 | `<repo>/.agents/tracker-adapter.toml` or `<repo>/.claude/…` | the tracker belongs to *this* project. Searched upward, stopping at the repository root |
 | `~/.config/astack/tracker-adapter.toml` | one tracker across all your work |
+
+The last two locations apply only when no astack index exists. An index without
+`tracker_adapter` means its tracker is not configured, even if a legacy default
+exists. An explicit tracker override wins; verify that any selected guides
+describe the same workspace. See
+[index resolution](../setup-astack/references/adapter-format.md).
 
 Prefer the project file when the repository is private: the adapter is then
 versioned next to the code it describes, and a colleague gets it for free.
@@ -41,8 +55,10 @@ repository is private, write the user file and say why.
 
 1. **Locate.** Run `tracker_adapter.py path`. If it names a file, this is a
    repair, not a first run: load it with `show` and start from those values.
-   If it reports none, decide the destination by the table above — ask the
-   user which, naming the trade-off, rather than guessing.
+   If the selected index has no tracker link, create the mapping beside that
+   index unless the user selected another private location. If neither exists,
+   use the user file by default; use a project file when project scope is wanted
+   and visibility is verified private. State the chosen destination.
 2. **Discover, do not invent.** Read the real values out of the tracker with
    whatever tool this session has: the project's issue-type and field metadata
    for field ids, the workflow's own status list, the project's label list, an
@@ -59,6 +75,9 @@ repository is private, write the user file and say why.
    `tracker_adapter.py validate <file>`. It checks the shape, that the key
    pattern compiles, that no status carries two buckets, and that every bucket
    role is mapped. Fix what it reports and rerun; do not hand-wave an error.
+   When configuring an index that lacks `tracker_adapter`, add that path to the
+   selected index and validate it with `setup-astack`'s helper as well. Preserve
+   unrelated fields. Do not replace a link for a one-off tracker override.
 5. **Report.** Print `tracker_adapter.py show`, say which file was written and
    which skills now read it, and — if the file went into a repository — that
    it must not reach a public remote. Confirm the repository's `.gitignore` or
@@ -70,6 +89,8 @@ repository is private, write the user file and say why.
   plausible one; only reading the tracker can.
 - Every value is a cache. When a skill reports that one stopped working, fix
   it here in the same change rather than working around it downstream.
-- Write only the adapter. Do not touch harness settings or unrelated project files.
+- Write only tracker mappings and, when needed, their link in the selected astack
+  index. Leave system guides to `setup-astack`; do not touch harness settings or
+  unrelated project files.
 - Do not put a credential, token or API key in the adapter. It holds
   identifiers and names only; authentication belongs to the tools.

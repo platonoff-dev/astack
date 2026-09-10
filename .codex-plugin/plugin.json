@@ -1,7 +1,7 @@
 {
   "name": "astack",
-  "version": "3.0.0",
-  "description": "Anatolii's personal skills for Claude Code and Codex: task interviews, tracker setup, work selection, merge comprehension, and weekly reports.",
+  "version": "3.1.0",
+  "description": "Anatolii's personal skills for Claude Code and Codex: task interviews, external-system setup, work selection, merge comprehension, and weekly reports.",
   "author": {
     "name": "Anatolii Platonov",
     "url": "https://github.com/platonoff-dev"
@@ -12,7 +12,7 @@
   "interface": {
     "displayName": "astack",
     "shortDescription": "Personal skills for task planning, merge comprehension, and weekly reports",
-    "longDescription": "Anatolii's personal skills for Claude Code and Codex: task interviews, tracker setup, work selection, merge comprehension, and weekly reports.",
+    "longDescription": "Anatolii's personal skills for Claude Code and Codex: task interviews, external-system setup, work selection, merge comprehension, and weekly reports.",
     "developerName": "Anatolii Platonov",
     "category": "Productivity",
     "capabilities": [
@@ -20,7 +20,7 @@
       "Write"
     ],
     "defaultPrompt": [
-      "Use setup-tracker to configure my issue tracker.",
+      "Use setup-astack to configure the external systems my astack skills use.",
       "Use task-interview to clarify this task through an adaptive interview.",
       "Use pick-next to choose what to work on next.",
       "Use merge-brief before I merge this MR.",

@@ -23,6 +23,11 @@ filed — is not this skill's job. It only reads, and records only what changes 
 
 ## The adapter comes first
 
+Before external reads, follow
+[astack's adapter loading procedure](../setup-astack/references/using-adapters.md)
+for the `tracker` and `review` roles. Read the selected system guides for access
+methods and local conventions. This skill remains read-only.
+
 Every tracker-specific name this skill needs — the project, the field ids, and
 which of your workflow's statuses and labels carry which meaning — lives in the
 tracker adapter, never in this file.
@@ -51,7 +56,8 @@ Don't guess an epic from the branch name; don't scan a whole project either.
 
 ## Step 1 — Fetch the candidates
 
-Use whatever search call the session has, with the adapter's project and field
+Use the selected guide's available search route, or a current session tool when
+no guide exists, with the adapter's project and field
 ids. Ask for the narrowest field list that answers Steps 2 to 4: summary,
 status, issue type, priority, labels, story points, due date, parent, issue
 links, last-updated.
