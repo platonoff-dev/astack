@@ -8,8 +8,7 @@ plugin, built one useful component at a time.
 | Skill | Purpose |
 |---|---|
 | [task-interview](skills/task-interview/SKILL.md) | Clarify selected work through an adaptive interview, ending in a local brief. |
-| [setup-astack](skills/setup-astack/SKILL.md) | Discover external systems and configure private access guides for astack skills. |
-| [setup-tracker](skills/setup-tracker/SKILL.md) | Configure and validate the private tracker adapter used by the work skills. |
+| [setup-astack](skills/setup-astack/SKILL.md) | Create and refine private service access guides and tracker mappings, including connector corrections. |
 | [pick-next](skills/pick-next/SKILL.md) | Recommend the next item from your queue or an epic, accounting for capacity and priorities. |
 | [merge-brief](skills/merge-brief/SKILL.md) | Explain a proposed change and check your understanding before you decide whether to merge. |
 | [weekly-report](skills/weekly-report/SKILL.md) | Draft your weekly status section from source evidence, with approval before publication. |
@@ -45,6 +44,16 @@ guides for the systems your astack workflows need. Providers are unrestricted;
 one system may serve several roles, such as tracker, review forge, or report
 destination.
 
+Guides describe reusable service access, operations, and gotchas. A document
+service configured while preparing a report can also support later document
+searches or authorized edits; reporting rules stay with the reporting workflow.
+
+Run setup again to add a service or correct an existing guide. For example:
+`$setup-astack The Jira connector misses later comments. Update its guide to
+fetch all pages.` Use `/astack:setup-astack` with the same request in Claude Code.
+A targeted correction updates the relevant instructions in place, preserving
+other systems and avoiding a fresh setup interview.
+
 The default layout is:
 
 ```text
@@ -74,7 +83,7 @@ project bundle only in a verified private repository. See the
 
 ### Existing tracker adapters
 
-`setup-tracker` still configures and validates field/status mappings. A new index
+`setup-astack` also configures and validates field/status mappings. A new index
 can link an existing mapping file without moving or rewriting it. Resolution is:
 
 1. `$ASTACK_TRACKER_ADAPTER`, when set.
@@ -90,7 +99,7 @@ against another tracker; verify that any system guides match that workspace.
 
 Only put a project adapter in a private repository. Existing adapters at other
 user-level paths can be selected explicitly with `$ASTACK_TRACKER_ADAPTER`.
-See the [adapter format](skills/setup-tracker/references/adapter-format.md).
+See the [adapter format](skills/setup-astack/references/tracker-format.md).
 
 `task-interview` is explicitly invoked: `$task-interview` in Codex or
 `/astack:task-interview` in Claude Code. It ends with a brief and a next action;

@@ -39,13 +39,13 @@ the reader profile all come from the tracker adapter — none of them is named i
 this skill.
 
 ```bash
-python3 <setup-tracker>/scripts/tracker_adapter.py show --json
+python3 <setup-astack>/scripts/tracker_adapter.py show --json
 ```
 
 `report.destination` of `none`, or no adapter at all, means **draft-only**: do
 the whole run and stop at Gate 2 rather than failing. Everything else — the
 project key, the epic statuses that count as in progress, the field ids — comes
-from the same file. Run `/setup-tracker` when a value is missing rather than
+from the same file. Run `/setup-astack` when a value is missing rather than
 inventing one.
 
 ## Invocation

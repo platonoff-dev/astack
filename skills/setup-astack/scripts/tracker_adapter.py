@@ -24,9 +24,7 @@ import re
 import sys
 from pathlib import Path
 
-# Both skills ship together. Import by plugin-relative path in either harness.
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "setup-astack" / "scripts"))
-import astack_adapter as aa  # noqa: E402
+import astack_adapter as aa
 
 try:
     import tomllib
@@ -160,7 +158,7 @@ def resolve(cwd: Path | None = None) -> tuple[Path, str]:
             data = aa.load(index)
             if "tracker_adapter" not in data:
                 raise AdapterError(
-                    f"{index}: tracker_adapter is not configured. Run /setup-tracker; "
+                    f"{index}: tracker_adapter is not configured. Run /setup-astack; "
                     "no legacy tracker is borrowed when an astack index is selected."
                 )
             return aa.reference(index, data["tracker_adapter"]), f"astack index {index}"
@@ -172,7 +170,7 @@ def resolve(cwd: Path | None = None) -> tuple[Path, str]:
     raise AdapterError(
         "no tracker adapter found. Looked for:\n  "
         + "\n  ".join(f"{p}  ({w})" for p, w in candidates(cwd))
-        + "\nRun /setup-tracker, or tracker_adapter.py init, to write one."
+        + "\nRun /setup-astack, or tracker_adapter.py init, to write one."
     )
 
 

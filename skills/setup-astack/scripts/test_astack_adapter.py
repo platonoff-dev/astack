@@ -14,10 +14,9 @@ from pathlib import Path
 from unittest.mock import patch
 
 import astack_adapter as aa
+import tracker_adapter as ta
 
 REPO = Path(__file__).resolve().parents[3]
-sys.path.insert(0, str(REPO / "skills/setup-tracker/scripts"))
-import tracker_adapter as ta  # noqa: E402
 
 
 class BundleTests(unittest.TestCase):

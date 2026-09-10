@@ -27,7 +27,7 @@ in verified private repositories. The user directory is the first-setup default.
 
 ```toml
 version = 1
-# Optional: existing mapping file owned and validated by setup-tracker.
+# Optional: existing mapping file owned and validated by setup-astack.
 tracker_adapter = "tracker-adapter.toml"
 
 [systems.issues]
@@ -50,12 +50,12 @@ roles = ["report"]
 instructions = "systems/documents.md"
 
 [systems.documents.facts]
-report_location = "https://docs.example.com/team-reports"
+base_url = "https://docs.example.com"
 ```
 
 `version` must be the integer `1`. `tracker_adapter` is optional and must point
 to an existing file when supplied. Its contents use the existing
-[tracker format](../../setup-tracker/references/adapter-format.md).
+[tracker format](tracker-format.md).
 `systems` is required but can be an empty table for a partial setup.
 
 Each system has a local identifier made of lowercase letters, digits, hyphens
@@ -64,6 +64,9 @@ a nonempty list of distinct `roles`, and an `instructions` path to a readable,
 nonempty Markdown file. Optional `facts` is a TOML table of system-specific
 configuration. Unknown structural keys are rejected to catch mistakes; keys
 inside `facts` are open. No provider or role allowlist is imposed.
+
+Roles are discovery labels for consumers, not limits on a service's purpose or
+permissions. A `report` role does not make a document service report-only.
 
 Multiple systems may serve one role. Consumers select by the user's URL,
 project, or other supplied context; if still ambiguous, ask. Do not combine
@@ -76,11 +79,13 @@ or copied ticket/document bodies. The validator is not a secret scanner.
 
 ## System guide
 
-Write a short Markdown guide adapted to the system. Include what changes how
-the harness performs the required operations:
+Write a short Markdown guide to accessing the service, reusable across tasks.
+Let the current request bound what to investigate, without turning its workflow
+into a service restriction. Include what changes how the harness operates:
 
-- **Scope and facts:** what the system is for and which index or tracker fields
-  identify the workspace. Avoid duplicating their literal values.
+- **Workspace and facts:** which account or workspace the guide covers and which
+  index or tracker fields identify it. Avoid duplicating their literal values or
+  defining the service by one consuming skill.
 - **Access:** the observed connector, MCP tool, or CLI route; any observed
   difference between Claude Code and Codex. Mark untested routes as untested.
   Authentication is managed by those tools, never by the guide.
@@ -88,9 +93,12 @@ the harness performs the required operations:
   completeness rules; required metadata or transitions for supported writes.
   Document only tool syntax actually inspected. Commands are instructions for
   the agent to assess, not an executable configuration hook.
-- **Conventions:** workflow meanings, destination selection, section ownership,
-  or other local constraints. Preserve astack skill boundaries: a read-only
-  skill stays read-only and publication still requires its approval step.
+- **Service conventions and gotchas:** search scope, identifier formats,
+  supported content formats, update/replace behavior, permissions, or other
+  constraints that apply across tasks. Keep workflow-specific layouts, audience,
+  cadence, decision rules, and section ownership in the consuming skill or
+  private workflow configuration. Link to existing settings when relevant;
+  do not copy the workflow into the guide. A guide grants no write authority.
 - **Evidence and gaps:** date, interface and scope of each check, result, and
   concise source pointers. Distinguish user-supplied rules from observed facts.
   Record unavailable operations and the next useful check without claiming
@@ -98,3 +106,13 @@ the harness performs the required operations:
 
 No fixed heading layout is required. A partial guide is useful if its limits
 are clear. Create additional files only when the guide needs supporting detail.
+
+For example, a document-service guide may explain how to search the workspace,
+retrieve a complete document, and safely use the interface's update operation
+once a write is authorized. Weekly-report headings and which status section to
+edit belong to the reporting workflow. Document untested operations as gaps;
+do not invent procedures merely to make the guide appear general-purpose.
+
+On later setup runs, edit the affected instructions in place. Replace obsolete
+advice, preserve unrelated rules, and distinguish user-supplied corrections from
+observed checks. Repeating a correction should not append duplicate rules.

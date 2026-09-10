@@ -141,7 +141,7 @@ class Resolution(unittest.TestCase):
             ta.resolve(self.tmp)
         message = str(caught.exception)
         self.assertIn(".agents/", message)
-        self.assertIn("/setup-tracker", message)
+        self.assertIn("/setup-astack", message)
 
 
 class Resolved(unittest.TestCase):

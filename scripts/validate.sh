@@ -243,7 +243,7 @@ fi
 
 # ------------------------------------------------------------- unit tests
 head_ "bundled tests"
-for t in skills/setup-tracker/scripts/test_tracker_adapter.py skills/setup-astack/scripts/test_astack_adapter.py; do
+for t in skills/setup-astack/scripts/test_tracker_adapter.py skills/setup-astack/scripts/test_astack_adapter.py; do
   if out=$(python3 -B "$t" 2>&1); then
     pass "$(basename "$t"): $(printf '%s' "$out" | grep -oE 'Ran [0-9]+ tests?' | head -1)"
   else

@@ -55,7 +55,7 @@ paths and the selected index/tracker paths in the briefer's context below.
 - Nothing — the open MR for the **current local branch**
 
 If several match, list them and ask. The forge and the project path come from
-the tracker adapter's `[review]` table (`/setup-tracker`); with no adapter,
+the tracker adapter's `[review]` table (`/setup-astack`); with no adapter,
 derive them from `git remote -v` and say which remote you used.
 
 ## Reads and writes

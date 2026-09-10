@@ -33,11 +33,11 @@ which of your workflow's statuses and labels carry which meaning — lives in th
 tracker adapter, never in this file.
 
 ```bash
-python3 <setup-tracker>/scripts/tracker_adapter.py show --json
+python3 <setup-astack>/scripts/tracker_adapter.py show --json
 ```
 
 No adapter, or one that fails validation → **stop and say so**, pointing at
-`/setup-tracker`. Do not fall back to guessing status names from what the query
+`/setup-astack`. Do not fall back to guessing status names from what the query
 returned: a status you silently misfile is a wrong pick that looks right. The
 roles used below are `active`, `parked`, `blocked`, `excluded`, `shovel_ready`,
 the label roles, and `support` / `release` / `epic`.
