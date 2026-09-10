@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "skills": [
+    {
+      "name": "why",
+      "repo": "https://github.com/cursor/plugins.git",
+      "path": "pstack/skills/why",
+      "ref": "main",
+      "license": "MIT",
+      "license_path": "pstack/LICENSE",
+      "commit": "4ceb6bb36383ba5b735317f4885902c5249c02ed",
+      "patches": [
+        "vendor/patches/why-claude-codex.patch"
+      ]
+    },
+    {
+      "name": "how",
+      "repo": "https://github.com/cursor/plugins.git",
+      "path": "pstack/skills/how",
+      "ref": "main",
+      "license": "MIT",
+      "license_path": "pstack/LICENSE",
+      "commit": "4ceb6bb36383ba5b735317f4885902c5249c02ed",
+      "patches": [
+        "vendor/patches/how-claude-codex.patch"
+      ]
+    }
+  ]
+}

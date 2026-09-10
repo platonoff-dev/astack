@@ -243,7 +243,12 @@ fi
 
 # ------------------------------------------------------------- unit tests
 head_ "bundled tests"
-for t in skills/setup-astack/scripts/test_tracker_adapter.py skills/setup-astack/scripts/test_astack_adapter.py; do
+if out=$(python3 -B scripts/vendor.py verify 2>&1); then
+  pass "$out"
+else
+  fail "vendor registry"; printf '%s\n' "$out" | sed 's/^/           /'
+fi
+for t in scripts/test_vendor.py skills/setup-astack/scripts/test_tracker_adapter.py skills/setup-astack/scripts/test_astack_adapter.py; do
   if out=$(python3 -B "$t" 2>&1); then
     pass "$(basename "$t"): $(printf '%s' "$out" | grep -oE 'Ran [0-9]+ tests?' | head -1)"
   else

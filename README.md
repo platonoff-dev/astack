@@ -12,8 +12,11 @@ plugin, built one useful component at a time.
 | [pick-next](skills/pick-next/SKILL.md) | Recommend the next item from your queue or an epic, accounting for capacity and priorities. |
 | [merge-brief](skills/merge-brief/SKILL.md) | Explain a proposed change and check your understanding before you decide whether to merge. |
 | [weekly-report](skills/weekly-report/SKILL.md) | Draft your weekly status section from source evidence, with approval before publication. |
+| [why](skills/why/SKILL.md) | Investigate code rationale through available history and sources, separating evidence from inference. |
+| [how](skills/how/SKILL.md) | Explain runtime flow, subsystem boundaries, and code placement from implementation evidence. |
 
-No bundled router, agents, or automations. Each skill owns its own workflow.
+No bundled router, agent definitions, or automations. Each skill owns its own
+workflow and can use the harness's available delegation tools.
 
 ## Install
 
@@ -105,6 +108,34 @@ See the [adapter format](skills/setup-astack/references/tracker-format.md).
 `/astack:task-interview` in Claude Code. It ends with a brief and a next action;
 it does not launch delivery.
 
+## Vendoring skills
+
+Import individual skills from different Git repositories, keep exact commit
+pins, check for upstream changes, and update selected skills or all of them:
+
+```sh
+python3 -B scripts/vendor.py add --name example-skill \
+  --repo https://github.com/example/skill-library.git \
+  --path skills/example-skill --ref main --license MIT
+python3 -B scripts/vendor.py check
+python3 -B scripts/vendor.py update example-skill
+```
+
+The URL above is an invented example; replace it with the repository and skill
+you choose. `check` reports local edits and changes to the skill or its license,
+ignoring unrelated upstream commits. `update` without names updates all
+registered skills. `sync` reproduces the pinned versions. Updates preserve
+repeatable compatibility patches and refuse to discard local edits by default.
+
+`why` and `how` are vendored from Cursor's pstack with their MIT license, exact
+commit pins, and compatibility patches. Both are self-contained and explicitly
+invoked: `$why` / `$how` in Codex or `/astack:why` / `/astack:how` in Claude Code.
+They pass no model or reasoning-effort overrides, use available host tools, and
+can run in the parent when delegation is unavailable. `why` adapts to the sources
+you can access; no particular forge, connector, or warehouse schema is required.
+See [vendoring details](docs/vendoring.md) for licenses, patches, exit codes,
+and the validation and reinstall steps.
+
 ## Development
 
 ```sh
@@ -126,4 +157,5 @@ ignored `.local/` directory.
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+Original astack code is MIT. See [LICENSE](LICENSE). Imported skills retain
+their upstream licenses, recorded in `vendor.json` and copied with each skill.

@@ -14,8 +14,9 @@ The repo is both a plugin and its marketplace. `.claude-plugin/` and
 `.codex-plugin/` contain the plugin manifests; `.claude-plugin/marketplace.json`
 and `.agents/plugins/marketplace.json` point to this repo with source `./`.
 
-Five skills ship: `task-interview`, `setup-astack`, `pick-next`, `merge-brief`,
-and `weekly-report`. There are no bundled agents or automations.
+Seven skills ship: `task-interview`, `setup-astack`, `pick-next`, `merge-brief`,
+`weekly-report`, `why`, and `how`. There are no bundled agent definitions or
+automations; skills may delegate through the harness when available.
 
 ## Public repository
 
@@ -63,3 +64,21 @@ Every temporary file produced while working here belongs under `.local/`, which
 is ignored recursively. Use `.local/tmp/` for disposable files and a named
 subdirectory for a run worth retaining. Never track anything under `.local/`.
 Keep private tracker adapters outside this plugin, including its ignored tree.
+
+## Vendoring
+
+Use `python3 -B scripts/vendor.py` to import third-party skills. `vendor.json`
+records each source repository, skill path, tracked ref, exact commit, license,
+and ordered compatibility patches. See [docs/vendoring.md](docs/vendoring.md)
+for `add`, `check`, `update`, and `sync` usage.
+
+Use `check` to inspect upstream changes; update only the requested skills.
+Do not hand-edit registered skill directories. Keep adaptations in
+`vendor/patches/<name>.patch`, then reproduce with `sync`; preserve upstream
+licenses and invocation policies. `--force` explicitly discards local edits,
+so save any wanted changes as a patch first. Review imported instructions and
+their dependencies before use; copying a skill does not authorize running it.
+
+After a vendor change, run the policy sync and validator and bump both plugin
+versions. Do not import related skills or agents unless requested. Vendoring
+changes this source tree; it does not refresh installed plugin caches.

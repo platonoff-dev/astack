@@ -1,7 +1,7 @@
 {
   "name": "astack",
-  "version": "3.2.1",
-  "description": "Anatolii's personal skills for Claude Code and Codex: task interviews, external-system setup, work selection, merge comprehension, and weekly reports.",
+  "version": "3.4.0",
+  "description": "Anatolii's personal skills for Claude Code and Codex: task interviews, external-system setup, work selection, code explanations and rationale, merge comprehension, and weekly reports.",
   "author": {
     "name": "Anatolii Platonov",
     "url": "https://github.com/platonoff-dev"
@@ -11,8 +11,8 @@
   "license": "MIT",
   "interface": {
     "displayName": "astack",
-    "shortDescription": "Personal skills for task planning, merge comprehension, and weekly reports",
-    "longDescription": "Anatolii's personal skills for Claude Code and Codex: task interviews, external-system setup, work selection, merge comprehension, and weekly reports.",
+    "shortDescription": "Personal skills for planning, code understanding, and reports",
+    "longDescription": "Anatolii's personal skills for Claude Code and Codex: task interviews, external-system setup, work selection, code explanations and rationale, merge comprehension, and weekly reports.",
     "developerName": "Anatolii Platonov",
     "category": "Productivity",
     "capabilities": [
@@ -24,7 +24,9 @@
       "Use task-interview to clarify this task through an adaptive interview.",
       "Use pick-next to choose what to work on next.",
       "Use merge-brief before I merge this MR.",
-      "Use weekly-report to write my section of the weekly status."
+      "Use weekly-report to write my section of the weekly status.",
+      "Use how to explain this subsystem and its boundaries.",
+      "Use why to investigate the rationale behind this code."
     ]
   }
 }
