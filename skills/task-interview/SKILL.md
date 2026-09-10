@@ -90,4 +90,4 @@ next action. Return the brief and path without another question when wrapping up
 Refinement authorizes scoped reading and local drafts. Experiment execution,
 publication, messaging, shared-system changes, and implementation require separate
 authorization; respect authorization already given and workspace rules. A ready
-brief does not launch `architect`, `interrogate`, or a delivery playbook.
+brief does not launch design review or delivery.

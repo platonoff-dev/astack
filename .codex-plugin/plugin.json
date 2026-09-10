@@ -1,7 +1,7 @@
 {
   "name": "astack",
-  "version": "2.0.1",
-  "description": "pstack, decoupled from Cursor for Claude Code and Codex, with per-role model configuration, a tracker adapter, and Anatolii's own work skills.",
+  "version": "3.0.0",
+  "description": "Anatolii's personal skills for Claude Code and Codex: task interviews, tracker setup, work selection, merge comprehension, and weekly reports.",
   "author": {
     "name": "Anatolii Platonov",
     "url": "https://github.com/platonoff-dev"
@@ -11,8 +11,8 @@
   "license": "MIT",
   "interface": {
     "displayName": "astack",
-    "shortDescription": "Rigorous agent workflows: the rigor router, principles, review panels, ticket work",
-    "longDescription": "pstack's workflow stack — the rigor router, the principle skills, architect/arena/interrogate design panels, swarm verification, how/why code archaeology — decoupled from Cursor so it runs natively on Claude Code and Codex. Adds per-role model configuration via setup-pstack, a tracker adapter via setup-tracker that keeps every organisation-specific value out of the plugin, plus Anatolii's own work skills: task-interview, pick-next, merge-brief and weekly-report.",
+    "shortDescription": "Personal skills for task planning, merge comprehension, and weekly reports",
+    "longDescription": "Anatolii's personal skills for Claude Code and Codex: task interviews, tracker setup, work selection, merge comprehension, and weekly reports.",
     "developerName": "Anatolii Platonov",
     "category": "Productivity",
     "capabilities": [
@@ -20,8 +20,6 @@
       "Write"
     ],
     "defaultPrompt": [
-      "Use rigor to work this task end to end.",
-      "Use setup-pstack to configure which model each role runs on.",
       "Use setup-tracker to configure my issue tracker.",
       "Use task-interview to clarify this task through an adaptive interview.",
       "Use pick-next to choose what to work on next.",

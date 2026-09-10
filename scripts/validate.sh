@@ -2,7 +2,7 @@
 # Validate the plugin against both harnesses' own validators, plus the local
 # checks. Exits non-zero on any real failure.
 #
-# One class of Codex error is expected and filtered: 44 skills carry
+# One class of Codex error is expected and filtered: explicit-only skills carry
 # `disable-model-invocation: true`, which is how Claude Code is told to invoke
 # them explicitly only. Codex rejects that field and reads
 # `<skill>/agents/openai.yaml` (`policy.allow_implicit_invocation: false`)
@@ -17,6 +17,9 @@
 set -uo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit 2
+mkdir -p .local/tmp || exit 2
+export TMPDIR="$PWD/.local/tmp"
+export PYTHONDONTWRITEBYTECODE=1
 
 QUIET=0
 [[ "${1:-}" == "-q" ]] && QUIET=1
@@ -74,13 +77,23 @@ fi
 # ----------------------------------------------------------------- Codex
 head_ "Codex validator (expected disable-model-invocation errors filtered)"
 VAL="$CODEX_SYS/plugin-creator/scripts/validate_plugin.py"
-if [[ -f "$VAL" ]] && need uvx; then
-  out=$(uvx --with pyyaml python "$VAL" . 2>&1)
+validator=()
+if python3 -B -c 'import yaml' >/dev/null 2>&1; then
+  validator=(python3 -B)
+elif need uvx; then
+  validator=(uvx --cache-dir "$PWD/.local/tmp/uv-cache" --with pyyaml python -B)
+fi
+if [[ -f "$VAL" && ${#validator[@]} -gt 0 ]]; then
+  validator_rc=0
+  out=$("${validator[@]}" "$VAL" . 2>&1) || validator_rc=$?
   expected=$(printf '%s\n' "$out" | grep -c "$EXPECTED_RE")
   other=$(printf '%s\n' "$out" | grep -v "$EXPECTED_RE" | grep -E '^- ' || true)
   if [[ -n "$other" ]]; then
     fail "Codex reported errors beyond the expected class"
     printf '%s\n' "$other" | sed 's/^/           /'
+  elif [[ "$validator_rc" -ne 0 && "$expected" -eq 0 ]]; then
+    fail "Codex validator could not complete"
+    printf '%s\n' "$out" | sed 's/^/           /'
   else
     pass "no Codex errors outside the expected class ($expected filtered)"
   fi
@@ -91,7 +104,7 @@ if [[ -f "$VAL" ]] && need uvx; then
     pass "filtered count matches the $declared skills that declare it"
   fi
 else
-  say "   skip    Codex validator or uvx unavailable"
+  say "   skip    Codex validator or Python YAML dependency unavailable"
 fi
 
 # ------------------------------------------------ Codex invocation policy
@@ -118,10 +131,7 @@ for p in skills:
     for key in ("name", "description"):
         if not re.search(rf"^{key}:\s*\S", fm, re.M):
             bad.append(f"{p.parent.name}: frontmatter `{key}` missing or empty")
-    # The slash command is the frontmatter name. Upstream shipped `name: Poteto
-    # Mode`; Claude Code registered `/astack:Poteto Mode`, split it at the
-    # space and answered "Unknown command: /astack:Poteto". The directory is
-    # the one name both harnesses agree on, so the frontmatter must equal it.
+    # Both harnesses must register the same command name.
     m = re.search(r"^name:\s*(.+?)\s*$", fm, re.M)
     name = m.group(1).strip("'\"") if m else ""
     if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", p.parent.name):
@@ -140,14 +150,13 @@ if python3 - <<'PY'
 import re, sys
 from pathlib import Path
 shipped = {p.parent.name for p in Path("skills").glob("*/SKILL.md")}
-playbooks = {p.stem for p in Path("skills/rigor/playbooks").glob("*.md")}
 # Slash names that belong to the harness, not to this plugin.
 harness = {
     "loop", "simplify", "code-review", "init", "memory", "context", "compact",
     "goal", "model", "doctor", "hooks", "permissions", "config", "artifacts",
     "review", "run", "skill-doctor", "import",
 }
-known = shipped | playbooks | harness
+known = shipped | harness
 bad = []
 for p in Path("skills").rglob("*.md"):
     for m in re.finditer(r"(?<![\w/`.])/([a-z][a-z0-9]+(?:-[a-z0-9]+)+)\b", p.read_text(encoding="utf-8")):
@@ -162,18 +171,13 @@ PY
 then pass "no dangling /skill references"; else fail "a skill references a slash-name nothing ships"; fi
 
 # --------------------------------------------- organisation-specific content
-# This repository is PUBLIC. Anything committed here is published, and a
-# force-push does not unpublish what was already fetched or indexed. The four
-# work skills once shipped with a CEO's private remarks quoted by name, a
-# squad's tracker ids and a real status report; this check exists so a
-# re-import, a paste or a "just this once" cannot repeat it. Organisation
-# values belong in the tracker adapter, which lives outside this repo.
+# Organisation values belong in the tracker adapter outside this public repo.
 head_ "no organisation-specific content"
 
 # Tracker hosts, wiki hosts, internal forges, tenant ids, account ids.
 hosts=$(grep -rnEi \
   '[a-z0-9-]+\.(atlassian\.net|slite\.com|zendesk\.com)|gitlab\.(corp|internal)[a-z.]*|[a-z0-9-]+\.corp\.[a-z.]+' \
-  skills agents docs README.md AGENTS.md automations --exclude-dir=node_modules \
+  skills README.md AGENTS.md --exclude-dir=node_modules \
   --include='*.md' --include='*.py' --include='*.ts' --include='*.mjs' --include='*.sh' \
   --include='*.yaml' 2>/dev/null \
   | grep -viE '\bexample\.|tracker\.example|your-|<[a-z-]+>' || true)
@@ -188,7 +192,7 @@ fi
 # ids. A `customfield_*` key is the tell that a tracker's own schema leaked in.
 ids=$(grep -rnE \
   'customfield_[0-9]{4,}|[0-9]{6}:[0-9a-f]{8}-[0-9a-f]{4}|\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b' \
-  skills agents docs README.md AGENTS.md automations --exclude-dir=node_modules 2>/dev/null \
+  skills README.md AGENTS.md --exclude-dir=node_modules 2>/dev/null \
   | grep -viE 'adapter-format\.md|tracker_adapter\.py|test_tracker_adapter\.py' || true)
 if [[ -z "$ids" ]]; then
   pass "no tenant, account or custom-field identifiers"
@@ -203,7 +207,7 @@ fi
 # The allowlist is the point: a real key is unknowable from outside this repo,
 # so a prefix that is not a known placeholder or standard has to become one.
 KEY_OK='PROJ|KEY|EPIC|TASK|ABC|XXX|NNN|ENG|BUG|SENTRY|SHA|ISO|CVE|RFC|IEEE|UTF|ASD|STE|ADR|GH|PR|MR'
-keys=$(grep -rnoE '\b[A-Z]{2,6}-[0-9]{3,6}\b' skills agents docs README.md AGENTS.md automations \
+keys=$(grep -rnoE '\b[A-Z]{2,6}-[0-9]{3,6}\b' skills README.md AGENTS.md \
   --exclude-dir=node_modules 2>/dev/null | grep -vE ":($KEY_OK)-" || true)
 if [[ -z "$keys" ]]; then
   pass "no work-item keys outside the placeholder allowlist"
@@ -217,7 +221,7 @@ fi
 # version of a private remark with a name and a date on it.
 quotes=$(grep -rnEi \
   '#[a-z0-9][a-z0-9_-]*-private|(said|wrote|asked|commented|quoted)[^.]{0,30}, [0-9]{2}/[0-9]{2}/[0-9]{4}|\(CEO, [0-9]' \
-  skills agents docs README.md AGENTS.md automations --exclude-dir=node_modules \
+  skills README.md AGENTS.md --exclude-dir=node_modules \
   --include='*.md' --include='*.py' 2>/dev/null || true)
 if [[ -z "$quotes" ]]; then
   pass "no dated attributions or private-channel references"
@@ -237,50 +241,9 @@ else
   printf '%s\n' "$local_tracked" | sed 's/^/           /'
 fi
 
-# ----------------------------------------------------------- Cursor decoupling
-head_ "Cursor decoupling"
-hits=$(grep -rn -i 'cursor' skills agents --include='*.md' 2>/dev/null \
-        | grep -v 'cursor location' | grep -v 'precursor' \
-        | grep -v 'setup-pstack' || true)
-if [[ -z "$hits" ]]; then
-  pass "no Cursor coupling left in skills or agents"
-else
-  fail "Cursor references remain"; printf '%s\n' "$hits" | sed 's/^/           /'
-fi
-# Every file type: worktree-audit.sh once read chats from ~/.cursor/projects.
-paths=$(grep -rn '\.cursor/\|api2\.cursor\.sh\|cursor-team-kit\|control-ui\|control-cli' skills agents --exclude-dir=node_modules 2>/dev/null | grep -v 'setup-pstack' || true)
-if [[ -z "$paths" ]]; then
-  pass "no Cursor paths or cursor-team-kit skill names"
-else
-  fail "Cursor paths or absent-plugin skill names remain"; printf '%s\n' "$paths" | sed 's/^/           /'
-fi
-
-# A named model slug is the failure that breaks a delegation outright: neither
-# harness can spawn Cursor's slugs, so no skill may name one. Values live in the
-# pstack model rule, written by /setup-pstack.
-# Scripts count too: check-plan.mjs once required a plan to name Cursor's slug
-# while its playbook had already been decoupled. setup-pstack's tests hold fake
-# slugs on purpose, as fixtures for validating the model rule.
-slugs=$(grep -rnE 'claude-fable-5|claude-opus-5|gpt-5\.[0-9]|grok-4\.' skills agents --exclude-dir=node_modules 2>/dev/null \
-        | grep -v 'skills/setup-pstack/scripts/' || true)
-if [[ -z "$slugs" ]]; then
-  pass "no hardcoded model slugs"
-else
-  fail "a skill names a model slug this harness cannot spawn"; printf '%s\n' "$slugs" | sed 's/^/           /'
-fi
-
-# Cursor Task-tool parameters that neither harness accepts.
-params=$(grep -rn 'generalPurpose\|`readonly`\|environment: "cloud"\|environment: "local"\|`Task`' skills agents --include='*.md' 2>/dev/null || true)
-if [[ -z "$params" ]]; then
-  pass "no Cursor subagent-tool parameters"
-else
-  fail "Cursor Task-tool parameters remain"; printf '%s\n' "$params" | sed 's/^/           /'
-fi
-
 # ------------------------------------------------------------- unit tests
 head_ "bundled tests"
-for t in skills/setup-pstack/scripts/test_pstack_models.py \
-         skills/setup-tracker/scripts/test_tracker_adapter.py; do
+for t in skills/setup-tracker/scripts/test_tracker_adapter.py; do
   if out=$(python3 -B "$t" 2>&1); then
     pass "$(basename "$t"): $(printf '%s' "$out" | grep -oE 'Ran [0-9]+ tests?' | head -1)"
   else
@@ -290,7 +253,12 @@ done
 
 # weekly-report's helpers are stdlib-only: compile them all, then actually run
 # the one that needs no arguments.
-if out=$(python3 -B -m compileall -q skills/weekly-report/scripts 2>&1); then
+if out=$(python3 -B - <<'PYCOMPILE' 2>&1
+from pathlib import Path
+for path in Path("skills/weekly-report/scripts").glob("*.py"):
+    compile(path.read_bytes(), str(path), "exec")
+PYCOMPILE
+); then
   n=$(ls skills/weekly-report/scripts/*.py | wc -l | tr -d ' ')
   pass "weekly-report: $n scripts compile"
 else
@@ -302,7 +270,6 @@ if out=$(python3 -B skills/weekly-report/scripts/week_window.py 2>&1) \
 else
   fail "week_window.py did not run"; printf '%s\n' "$out" | tail -10 | sed 's/^/           /'
 fi
-find skills -name '__pycache__' -type d -exec rm -rf {} + 2>/dev/null
 
 # --------------------------------------------------------------- summary
 say ""

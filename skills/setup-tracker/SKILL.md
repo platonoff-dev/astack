@@ -24,9 +24,9 @@ Resolved in this order; the first file that exists wins.
 
 | Place | Use it when |
 |---|---|
-| `$PSTACK_TRACKER_ADAPTER` | a one-off run against another tracker |
+| `$ASTACK_TRACKER_ADAPTER` | a one-off run against another tracker |
 | `<repo>/.agents/tracker-adapter.toml` or `<repo>/.claude/…` | the tracker belongs to *this* project. Searched upward, stopping at the repository root |
-| `~/.config/pstack/tracker-adapter.toml` | one tracker across all your work |
+| `~/.config/astack/tracker-adapter.toml` | one tracker across all your work |
 
 Prefer the project file when the repository is private: the adapter is then
 versioned next to the code it describes, and a colleague gets it for free.
@@ -70,7 +70,6 @@ repository is private, write the user file and say why.
   plausible one; only reading the tracker can.
 - Every value is a cache. When a skill reports that one stopped working, fix
   it here in the same change rather than working around it downstream.
-- Write only the adapter. Do not touch harness settings, the model rule that
-  `setup-pstack` owns, or any project file.
+- Write only the adapter. Do not touch harness settings or unrelated project files.
 - Do not put a credential, token or API key in the adapter. It holds
   identifiers and names only; authentication belongs to the tools.

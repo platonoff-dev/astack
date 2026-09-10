@@ -29,10 +29,10 @@ try:
 except ModuleNotFoundError:  # pragma: no cover - depends on the interpreter
     sys.exit("tracker_adapter.py needs Python 3.11 or newer (tomllib).")
 
-ENV_VAR = "PSTACK_TRACKER_ADAPTER"
+ENV_VAR = "ASTACK_TRACKER_ADAPTER"
 BASENAME = "tracker-adapter.toml"
 PROJECT_DIRS = (".agents", ".claude")
-USER_PATH = Path.home() / ".config" / "pstack" / BASENAME
+USER_PATH = Path.home() / ".config" / "astack" / BASENAME
 
 STATUS_ROLES = ("active", "parked", "blocked", "excluded", "shovel_ready")
 LABEL_ROLES = (
@@ -54,7 +54,7 @@ TEMPLATE = '''\
 #
 # Nothing in this file belongs in a public repository. Keep it in the private
 # repository it describes (.agents/tracker-adapter.toml) or in your home
-# (~/.config/pstack/tracker-adapter.toml). Every value is a cache, not an
+# (~/.config/astack/tracker-adapter.toml). Every value is a cache, not an
 # authority: when one stops working, verify it against the tracker and correct
 # it here in the same change.
 

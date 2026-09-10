@@ -8,7 +8,7 @@
   "plugins": [
     {
       "name": "astack",
-      "description": "pstack, decoupled from Cursor for Claude Code and Codex, with per-role model configuration, a tracker adapter, and Anatolii's own work skills.",
+      "description": "Anatolii's personal skills for Claude Code and Codex: task interviews, tracker setup, work selection, merge comprehension, and weekly reports.",
       "author": {
         "name": "Anatolii Platonov"
       },

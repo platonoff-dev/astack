@@ -19,8 +19,8 @@ description: |
 # merge-brief
 
 An agent can drive a ticket from To Do to merge-ready without you reading a
-line of it. Everything in that pipeline checks the *code* — CI, BugBot,
-RPM tests, `interrogate`. Nothing checks the *human* who clicks Merge.
+line of it. Automated tests and code review check the *code*. This skill checks
+the understanding of the *human* who clicks Merge.
 
 This skill checks the human. It explains the change in English, then asks
 whether the explanation landed. It has no authority: it cannot block, does
@@ -34,10 +34,8 @@ not post, does not merge, and never gets a vote on the change itself.
 
 Do **not** use:
 
-- To find bugs — that is `/interrogate`. This skill *explains*, it never
-  judges. No lenses, no consensus, no verdict on the code.
-- To review a design doc — that is `/architect` in review mode, or
-  `/interrogate` against the doc.
+- To find bugs or review a design document. Request a separate code or design
+  review for that. This skill explains; it gives no verdict on the code.
 - As a quality gate. It grades you, not the change, and it grades nothing
   that anyone else sees.
 - On a colleague's request under review. It will run, but the "Why" sources
@@ -203,7 +201,7 @@ Your call — nothing is blocked.
    "why not X". Banned: file names, line numbers, counts, values, and
    anything answerable by quoting the Brief.
 7. **You explain; you do not review.** If you spot a real bug, one line
-   under `risk` pointing at `/interrogate`. No severities, no verdict.
+   under `risk` recommending a separate code review. No severities, no verdict.
 
 ### Question examples (give these verbatim too)
 
@@ -229,7 +227,7 @@ grading it, re-read the cited hunk in the diff.
 - The answer is wrong → Miss, explain the nuance.
 - **The answer is right and the change is wrong** → say so:
   `"your answer contradicts the change and I think you're right: <one
-  line>. Run /interrogate on !N before merging."` Do not score it. Do not
+  line>. Request a code review of !N before merging."` Do not score it. Do not
   argue.
 
 A comprehension check that punishes the developer for catching a real bug
@@ -273,7 +271,7 @@ can fire while nobody is watching):
 | Guess why the change was made | `not recorded` is information; a plausible invention is a lie. |
 | Grade a correct dispute as a Miss | Punishes the one behavior you most want. Worst failure this skill has. |
 | Post the Brief or the score anywhere | By merge time reviewers already approved, and a recorded score has no reader. |
-| Grow lenses, severities, or a verdict | That is `interrogate`. This skill explains. |
+| Grow lenses, severities, or a verdict | That belongs in a code review. This skill explains. |
 | Run the quiz on an unattended tick | Nobody is there. Brief now, quiz when they reply. |
 | Re-brief an unchanged `head_sha` on every parent tick | Burns a subagent to re-read the same diff. |
 | Block, gate, or nag about the merge | It has no authority. State the score and get out of the way. |
@@ -285,6 +283,6 @@ can fire while nobody is watching):
 - "Why not recorded — no investigation comment, no request description.
   Brief covers what, not why."
 - "Diff is <n> lines — nuance coverage may be partial."
-- "Your answer contradicts the change and I think you're right — run
-  /interrogate on !<n> before merging."
+- "Your answer contradicts the change and I think you're right — request
+  a code review of !<n> before merging."
 - "merge-brief: <k>/<n>. Your call — nothing is blocked."

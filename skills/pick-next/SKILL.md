@@ -203,21 +203,8 @@ Blocked (2): PROJ-208 ← PROJ-212 · PROJ-181 ← PROJ-208
 When Step 3 refuses to pick, replace the `Next:` block with the reason and what
 would free a slot — same header, no ranking section.
 
-Drop any section that is empty. If the pick carries a label that names a way in,
-add one `Open with:` line for it. These route into this plugin, so they work
-wherever it is installed:
-
-| Label | Entry point |
-|---|---|
-| `research` | `/how` over the subsystem, then `/why` for the decision history |
-| `prototype` | the `prototype` playbook in **rigor** |
-| `tdd` | the **tdd** skill |
-| `diagnosing-bugs` | the `bug-fix` playbook in **rigor** |
-| `domain-modeling` | the **principle-model-the-domain** skill |
-| `codebase-design` | the **architect** skill |
-
-Otherwise there is no default way in: name the pick and stop. The `Open with:`
-line stays absent until the labels are actually in use.
+Drop any section that is empty. Name the pick and stop; starting its work is a
+separate user decision.
 
 ## Anti-patterns
 

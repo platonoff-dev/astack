@@ -1,7 +1,7 @@
 {
   "name": "astack",
-  "version": "2.0.1",
-  "description": "pstack, decoupled from Cursor for Claude Code and Codex, with per-role model configuration, a tracker adapter, and Anatolii's own work skills.",
+  "version": "3.0.0",
+  "description": "Anatolii's personal skills for Claude Code and Codex: task interviews, tracker setup, work selection, merge comprehension, and weekly reports.",
   "author": {
     "name": "Anatolii Platonov",
     "url": "https://github.com/platonoff-dev"
@@ -9,5 +9,10 @@
   "homepage": "https://github.com/platonoff-dev/astack",
   "repository": "https://github.com/platonoff-dev/astack",
   "license": "MIT",
-  "keywords": ["pstack", "rigor", "workflow", "principles", "subagents", "codex", "claude-code"]
+  "keywords": [
+    "skills",
+    "productivity",
+    "codex",
+    "claude-code"
+  ]
 }
