@@ -16,6 +16,7 @@ plugin, built one useful component at a time.
 | [why](skills/why/SKILL.md) | Investigate code rationale through available history and sources, separating evidence from inference. |
 | [how](skills/how/SKILL.md) | Explain runtime flow, subsystem boundaries, and code placement from implementation evidence. |
 | [bro](skills/bro/SKILL.md) | Restate the last assistant message simply and concisely, without jargon. |
+| [tdd](skills/tdd/SKILL.md) | Fix a bug through a focused failing-then-passing regression test, or explain and use a practical verification alternative. |
 | [unslop](skills/unslop/SKILL.md) | Remove AI writing patterns while preserving meaning and intended tone. |
 
 No bundled router, agent definitions, or automations. Each skill owns its own
@@ -178,6 +179,12 @@ the skill implicitly. This is not a hook that guarantees execution on every turn
 `bro` is also vendored from pstack under MIT, with its instruction text unchanged
 and no compatibility patch. Invoke it explicitly with `$bro` in Codex or
 `/astack:bro` in Claude Code to simplify the previous assistant reply.
+
+`tdd` is vendored from pstack under MIT with its instruction text unchanged
+and no compatibility patch. Invoke `$tdd` in Codex or `/astack:tdd` in Claude
+Code for a bug fix. It favors a cheap, focused regression test and requires an
+explanation and a useful verification alternative when a failing test is
+impractical. Its explicit-only policy is preserved in both harnesses.
 
 See [vendoring details](docs/vendoring.md) for licenses, patches, exit codes,
 and the validation and reinstall steps.
