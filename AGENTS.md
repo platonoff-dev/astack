@@ -44,8 +44,11 @@ own `CLAUDE.md` / `AGENTS.md` before working there.
 - Bump the version in both plugin manifests for every change. Keep their
   `name`, `version`, and `description` identical; use a numeric `MAJOR.MINOR.PATCH`
   version. The Codex manifest must not contain `hooks`.
-- Put skills in `skills/<kebab-case-name>/SKILL.md`. The frontmatter `name`
-  must match the directory. Keep supporting detail in linked references.
+- Put shipped skills in `skills/<kebab-case-name>/SKILL.md`. Repository-only
+  development skills live in `.claude/skills/<kebab-case-name>/SKILL.md`, with
+  matching directory symlinks under `.agents/skills/` for Codex discovery.
+  The frontmatter `name` must match the directory. Keep supporting detail in
+  linked references.
 - Write instructions for both harnesses. Refer to the repo's `CLAUDE.md` /
   `AGENTS.md`; do not require another plugin's commands.
 - Preserve each skill's invocation policy. For explicit-only skills, keep

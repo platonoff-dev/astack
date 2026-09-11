@@ -110,6 +110,19 @@ it does not launch delivery.
 
 ## Vendoring skills
 
+Use the repository-only [adopt](.claude/skills/adopt/SKILL.md) skill from this
+source checkout: `$adopt <source URL or path>` in Codex or
+`/adopt <source URL or path>` in Claude Code. It inspects the selected instructions
+and their dependencies against the target harnesses, prepares a compatibility
+report and complete proposed diffs, and waits for approval or corrections.
+After approval it imports the reviewed source with any required compatibility
+patches and validates the result. Source adoption and plugin installation are
+separate steps.
+
+Standalone agent instructions and non-Git sources receive the same review.
+If they need new packaging support, `adopt` includes that concrete change in
+the proposal; the current vendor helper directly supports Git skill directories.
+
 Import individual skills from different Git repositories, keep exact commit
 pins, check for upstream changes, and update selected skills or all of them:
 
@@ -137,6 +150,19 @@ See [vendoring details](docs/vendoring.md) for licenses, patches, exit codes,
 and the validation and reinstall steps.
 
 ## Development
+
+Use the repository-only [harness-check](.claude/skills/harness-check/SKILL.md)
+skill to weigh a harness improvement, find existing capabilities, and compare
+relevant implementations before deciding what to change. For example:
+`$harness-check I am considering a new review skill. Do we already cover this,
+and what could we learn from other harnesses?` In Claude Code, use
+`/harness-check` with the same request.
+
+`harness-check` provides advice; implementation or adoption starts when requested.
+The repository-only `harness-check` and `adopt` skills live in `.claude/skills/`
+with directory symlinks in `.agents/skills/` so both harnesses read one source.
+They are available in this checkout and are not part of the installed plugin's
+skill catalog. No plugin reinstall is needed for these project skills.
 
 ```sh
 python3 scripts/sync_codex_policy.py

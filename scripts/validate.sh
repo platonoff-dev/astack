@@ -35,6 +35,9 @@ fail() { printf '   FAIL    %s\n' "$*"; RC=1; }
 
 need() { command -v "$1" >/dev/null 2>&1; }
 
+SKILL_ROOTS=(skills)
+[[ -d .claude/skills ]] && SKILL_ROOTS+=(.claude/skills)
+
 # ---------------------------------------------------------------- manifests
 head_ "manifests parse"
 if python3 - <<'PY'
@@ -121,7 +124,8 @@ if python3 - <<'PY'
 import re, sys
 from pathlib import Path
 bad = []
-skills = sorted(Path("skills").glob("*/SKILL.md"))
+project_skills = sorted(Path(".claude/skills").glob("*/SKILL.md"))
+skills = sorted(Path("skills").glob("*/SKILL.md")) + project_skills
 for p in skills:
     text = p.read_text(encoding="utf-8")
     if not text.startswith("---\n"):
@@ -138,6 +142,10 @@ for p in skills:
         bad.append(f"{p.parent.name}: directory is not kebab-case")
     if m and name != p.parent.name:
         bad.append(f"{p.parent.name}: frontmatter `name` is `{name}`, not the directory name")
+for p in project_skills:
+    codex = Path(".agents/skills") / p.parent.name
+    if not codex.is_symlink() or codex.resolve() != p.parent.resolve():
+        bad.append(f"{p.parent.name}: Codex project skill must link to {p.parent}")
 print(f"{len(skills)} skills scanned")
 for b in bad:
     print("  " + b)
@@ -145,7 +153,7 @@ sys.exit(1 if bad else 0)
 PY
 then pass "every skill has a description and a kebab-case name equal to its directory"; else fail "a skill's frontmatter is incomplete or its name is not its directory"; fi
 
-# Dangling in-plugin skill references: a `/name` that no shipped skill answers.
+# Dangling skill references: a `/name` that no skill in its scope answers.
 if python3 - <<'PY'
 import re, sys
 from pathlib import Path
@@ -158,11 +166,13 @@ harness = {
 }
 known = shipped | harness
 bad = []
-for p in Path("skills").rglob("*.md"):
-    for m in re.finditer(r"(?<![\w/`.])/([a-z][a-z0-9]+(?:-[a-z0-9]+)+)\b", p.read_text(encoding="utf-8")):
-        name = m.group(1)
-        if name not in known:
-            bad.append(f"{p.relative_to('skills')}: /{name}")
+project = {p.parent.name for p in Path(".claude/skills").glob("*/SKILL.md")}
+for root, allowed in ((Path("skills"), known), (Path(".claude/skills"), known | project)):
+    for p in root.rglob("*.md"):
+        for m in re.finditer(r"(?<![\w/`.])/([a-z][a-z0-9]+(?:-[a-z0-9]+)+)\b", p.read_text(encoding="utf-8")):
+            name = m.group(1)
+            if name not in allowed:
+                bad.append(f"{p}: /{name}")
 seen = sorted(set(bad))
 for b in seen:
     print("  " + b)
@@ -177,7 +187,7 @@ head_ "no organisation-specific content"
 # Tracker hosts, wiki hosts, internal forges, tenant ids, account ids.
 hosts=$(grep -rnEi \
   '[a-z0-9-]+\.(atlassian\.net|slite\.com|zendesk\.com)|gitlab\.(corp|internal)[a-z.]*|[a-z0-9-]+\.corp\.[a-z.]+' \
-  skills README.md AGENTS.md --exclude-dir=node_modules \
+  "${SKILL_ROOTS[@]}" README.md AGENTS.md --exclude-dir=node_modules \
   --include='*.md' --include='*.py' --include='*.ts' --include='*.mjs' --include='*.sh' \
   --include='*.yaml' 2>/dev/null \
   | grep -viE '\bexample\.|tracker\.example|your-|<[a-z-]+>' || true)
@@ -192,7 +202,7 @@ fi
 # ids. A `customfield_*` key is the tell that a tracker's own schema leaked in.
 ids=$(grep -rnE \
   'customfield_[0-9]{4,}|[0-9]{6}:[0-9a-f]{8}-[0-9a-f]{4}|\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b' \
-  skills README.md AGENTS.md --exclude-dir=node_modules 2>/dev/null \
+  "${SKILL_ROOTS[@]}" README.md AGENTS.md --exclude-dir=node_modules 2>/dev/null \
   | grep -viE 'adapter-format\.md|tracker_adapter\.py|test_tracker_adapter\.py' || true)
 if [[ -z "$ids" ]]; then
   pass "no tenant, account or custom-field identifiers"
@@ -207,7 +217,7 @@ fi
 # The allowlist is the point: a real key is unknowable from outside this repo,
 # so a prefix that is not a known placeholder or standard has to become one.
 KEY_OK='PROJ|KEY|EPIC|TASK|ABC|XXX|NNN|ENG|BUG|SENTRY|SHA|ISO|CVE|RFC|IEEE|UTF|ASD|STE|ADR|GH|PR|MR'
-keys=$(grep -rnoE '\b[A-Z]{2,6}-[0-9]{3,6}\b' skills README.md AGENTS.md \
+keys=$(grep -rnoE '\b[A-Z]{2,6}-[0-9]{3,6}\b' "${SKILL_ROOTS[@]}" README.md AGENTS.md \
   --exclude-dir=node_modules 2>/dev/null | grep -vE ":($KEY_OK)-" || true)
 if [[ -z "$keys" ]]; then
   pass "no work-item keys outside the placeholder allowlist"
@@ -221,7 +231,7 @@ fi
 # version of a private remark with a name and a date on it.
 quotes=$(grep -rnEi \
   '#[a-z0-9][a-z0-9_-]*-private|(said|wrote|asked|commented|quoted)[^.]{0,30}, [0-9]{2}/[0-9]{2}/[0-9]{4}|\(CEO, [0-9]' \
-  skills README.md AGENTS.md --exclude-dir=node_modules \
+  "${SKILL_ROOTS[@]}" README.md AGENTS.md --exclude-dir=node_modules \
   --include='*.md' --include='*.py' 2>/dev/null || true)
 if [[ -z "$quotes" ]]; then
   pass "no dated attributions or private-channel references"
