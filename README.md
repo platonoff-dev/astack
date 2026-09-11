@@ -18,6 +18,11 @@ plugin, built one useful component at a time.
 | [bro](skills/bro/SKILL.md) | Restate the last assistant message simply and concisely, without jargon. |
 | [tdd](skills/tdd/SKILL.md) | Fix a bug through a focused failing-then-passing regression test, or explain and use a practical verification alternative. |
 | [unslop](skills/unslop/SKILL.md) | Remove AI writing patterns while preserving meaning and intended tone. |
+| [principle-boundary-discipline](skills/principle-boundary-discipline/SKILL.md) | Place validation at boundaries, preserve domain invariants, and keep business logic independent of framework wiring. |
+| [principle-experience-first](skills/principle-experience-first/SKILL.md) | Prioritize a polished core workflow and justify feature scope from the experience of end users, API consumers, and maintainers. |
+| [principle-foundational-thinking](skills/principle-foundational-thinking/SKILL.md) | Choose core data structures before logic, examine shared state, and sequence foundations before features. |
+| [principle-laziness-protocol](skills/principle-laziness-protocol/SKILL.md) | Prefer deletion, shallow call paths, consolidated decisions, and the smallest change that solves the problem. |
+| [principle-minimize-reader-load](skills/principle-minimize-reader-load/SKILL.md) | Reduce the layers readers must trace and the hidden or mutable state they must hold. |
 
 No bundled router, agent definitions, or automations. Each skill owns its own
 workflow and can use the harness's available delegation tools.
@@ -185,6 +190,35 @@ and no compatibility patch. Invoke `$tdd` in Codex or `/astack:tdd` in Claude
 Code for a bug fix. It favors a cheap, focused regression test and requires an
 explanation and a useful verification alternative when a failing test is
 impractical. Its explicit-only policy is preserved in both harnesses.
+
+`principle-boundary-discipline` is vendored from pstack under MIT. Invoke
+`$principle-boundary-discipline` in Codex or `/astack:principle-boundary-discipline`
+in Claude Code. Its patch limits internal trust to established, preserved
+invariants and keeps domain checks, authorization, recovery, and business policy
+with their owners. The explicit-only policy is preserved in both harnesses.
+
+`principle-experience-first` is vendored from pstack under MIT with its
+instruction text unchanged and no compatibility patch. Invoke
+`$principle-experience-first` in Codex or `/astack:principle-experience-first`
+in Claude Code for product, UX, or feature-scope tradeoffs. Its explicit-only
+policy is preserved in both harnesses.
+
+`principle-foundational-thinking` is vendored from pstack under MIT with its
+instruction text unchanged and no compatibility patch. Invoke
+`$principle-foundational-thinking` in Codex or
+`/astack:principle-foundational-thinking` in Claude Code. Its explicit-only policy
+is preserved in both harnesses.
+
+`principle-laziness-protocol` is vendored from pstack under MIT with its
+instruction text unchanged and no compatibility patch. Invoke
+`$principle-laziness-protocol` in Codex or `/astack:principle-laziness-protocol`
+in Claude Code when refactoring or evaluating added complexity. Its explicit-only
+policy is preserved in both harnesses.
+
+`principle-minimize-reader-load` is vendored from pstack under MIT. Its only
+compatibility patch removes an optional background-reading reference. Invoke `$principle-minimize-reader-load` in Codex or
+`/astack:principle-minimize-reader-load` in Claude Code. Its explicit-only policy
+is preserved in both harnesses.
 
 See [vendoring details](docs/vendoring.md) for licenses, patches, exit codes,
 and the validation and reinstall steps.
