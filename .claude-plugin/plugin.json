@@ -1,7 +1,7 @@
 {
   "name": "astack",
-  "version": "3.5.3",
-  "description": "Anatolii's personal skills for Claude Code and Codex: claim validation, task interviews, external-system setup, work selection, code explanations and rationale, merge comprehension, and weekly reports.",
+  "version": "3.5.4",
+  "description": "Anatolii's personal skills for Claude Code and Codex: claim validation, task interviews, external-system setup, work selection, code explanations and rationale, writing cleanup, merge comprehension, and weekly reports.",
   "author": {
     "name": "Anatolii Platonov",
     "url": "https://github.com/platonoff-dev"

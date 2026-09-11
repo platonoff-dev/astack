@@ -15,6 +15,7 @@ plugin, built one useful component at a time.
 | [weekly-report](skills/weekly-report/SKILL.md) | Draft your weekly status section from source evidence, with approval before publication. |
 | [why](skills/why/SKILL.md) | Investigate code rationale through available history and sources, separating evidence from inference. |
 | [how](skills/how/SKILL.md) | Explain runtime flow, subsystem boundaries, and code placement from implementation evidence. |
+| [unslop](skills/unslop/SKILL.md) | Remove AI writing patterns while preserving meaning and intended tone. |
 
 No bundled router, agent definitions, or automations. Each skill owns its own
 workflow and can use the harness's available delegation tools.
@@ -166,6 +167,13 @@ invoked: `$why` / `$how` in Codex or `/astack:why` / `/astack:how` in Claude Cod
 They pass no model or reasoning-effort overrides, use available host tools, and
 can run in the parent when delegation is unavailable. `why` adapts to the sources
 you can access; no particular forge, connector, or warehouse schema is required.
+`unslop` is also vendored from pstack under MIT. Invoke `$unslop` in Codex or
+`/astack:unslop` in Claude Code with the writing to edit. It preserves upstream
+rule numbers and editing rules, including strict punctuation preferences. Its
+compatibility patch removes the explicit-only frontmatter flag at the user's
+request. The description retains “Must always apply”; both harnesses may select
+the skill implicitly. This is not a hook that guarantees execution on every turn.
+
 See [vendoring details](docs/vendoring.md) for licenses, patches, exit codes,
 and the validation and reinstall steps.
 
