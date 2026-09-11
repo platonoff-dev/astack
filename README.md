@@ -23,6 +23,7 @@ plugin, built one useful component at a time.
 | [principle-foundational-thinking](skills/principle-foundational-thinking/SKILL.md) | Choose core data structures before logic, examine shared state, and sequence foundations before features. |
 | [principle-laziness-protocol](skills/principle-laziness-protocol/SKILL.md) | Prefer deletion, shallow call paths, consolidated decisions, and the smallest change that solves the problem. |
 | [principle-minimize-reader-load](skills/principle-minimize-reader-load/SKILL.md) | Reduce the layers readers must trace and the hidden or mutable state they must hold. |
+| [principle-model-the-domain](skills/principle-model-the-domain/SKILL.md) | Encode domain rules and state in suitable data structures while avoiding unnecessary abstractions. |
 
 No bundled router, agent definitions, or automations. Each skill owns its own
 workflow and can use the harness's available delegation tools.
@@ -219,6 +220,12 @@ policy is preserved in both harnesses.
 compatibility patch removes an optional background-reading reference. Invoke `$principle-minimize-reader-load` in Codex or
 `/astack:principle-minimize-reader-load` in Claude Code. Its explicit-only policy
 is preserved in both harnesses.
+
+`principle-model-the-domain` is vendored from pstack under MIT with its
+instruction text unchanged and no compatibility patch. Invoke
+`$principle-model-the-domain` in Codex or `/astack:principle-model-the-domain`
+in Claude Code when designing stateful logic or consolidating scattered domain
+rules. Its explicit-only policy is preserved in both harnesses.
 
 See [vendoring details](docs/vendoring.md) for licenses, patches, exit codes,
 and the validation and reinstall steps.
