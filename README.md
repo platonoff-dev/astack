@@ -15,6 +15,7 @@ plugin, built one useful component at a time.
 | [weekly-report](skills/weekly-report/SKILL.md) | Draft your weekly status section from source evidence, with approval before publication. |
 | [why](skills/why/SKILL.md) | Investigate code rationale through available history and sources, separating evidence from inference. |
 | [how](skills/how/SKILL.md) | Explain runtime flow, subsystem boundaries, and code placement from implementation evidence. |
+| [bro](skills/bro/SKILL.md) | Restate the last assistant message simply and concisely, without jargon. |
 | [unslop](skills/unslop/SKILL.md) | Remove AI writing patterns while preserving meaning and intended tone. |
 
 No bundled router, agent definitions, or automations. Each skill owns its own
@@ -173,6 +174,10 @@ rule numbers and editing rules, including strict punctuation preferences. Its
 compatibility patch removes the explicit-only frontmatter flag at the user's
 request. The description retains “Must always apply”; both harnesses may select
 the skill implicitly. This is not a hook that guarantees execution on every turn.
+
+`bro` is also vendored from pstack under MIT, with its instruction text unchanged
+and no compatibility patch. Invoke it explicitly with `$bro` in Codex or
+`/astack:bro` in Claude Code to simplify the previous assistant reply.
 
 See [vendoring details](docs/vendoring.md) for licenses, patches, exit codes,
 and the validation and reinstall steps.
