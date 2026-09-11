@@ -8,6 +8,7 @@ plugin, built one useful component at a time.
 | Skill | Purpose |
 |---|---|
 | [task-interview](skills/task-interview/SKILL.md) | Clarify selected work through an adaptive interview, ending in a local brief. |
+| [validate-claims](skills/validate-claims/SKILL.md) | Check factual claims in tickets, documents, proposals, or messages against evidence and assess their implications. |
 | [setup-astack](skills/setup-astack/SKILL.md) | Create and refine private service access guides and tracker mappings, including connector corrections. |
 | [pick-next](skills/pick-next/SKILL.md) | Recommend the next item from your queue or an epic, accounting for capacity and priorities. |
 | [merge-brief](skills/merge-brief/SKILL.md) | Explain a proposed change and check your understanding before you decide whether to merge. |
@@ -37,6 +38,25 @@ codex plugin add astack@astack
 ```
 
 Start a new task after installation.
+
+## Claim validation
+
+Use `$validate-claims PROJ-123` in Codex or `/astack:validate-claims PROJ-123`
+in Claude Code to validate a ticket. The same skill accepts documents, proposals,
+messages, URLs, or pasted assertions, such as `$validate-claims Check the factual
+claims in this proposal.` It can be selected automatically for matching validation
+requests; it is not a mandatory hook on every task.
+
+Validation separates factual assertions from requirements, predictions, and
+recommendations. It checks relevant claims against source evidence and returns
+supported, contradicted, or unresolved verdicts with evidence and limits. When a
+conclusion or action is proposed, it assesses whether the verified premises support
+it. For tickets, this includes the alleged cause and prescribed fix, then a next
+action such as implement, investigate, clarify, split, or no change. Validation
+does not edit the source material or execute recommendations on its own.
+
+Use `task-interview` when the remaining work is deciding what the task should mean.
+`validate-claims` first establishes which of its factual premises hold.
 
 ## External-system setup
 

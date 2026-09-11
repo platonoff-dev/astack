@@ -1,0 +1,4 @@
+interface:
+  display_name: "Validate claims"
+  short_description: "Check factual claims against source evidence"
+  default_prompt: "Use $validate-claims to check the factual assertions in this material, report evidence and limits, and assess any proposed conclusion or action."
