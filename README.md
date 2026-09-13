@@ -23,6 +23,7 @@ plugin, built one useful component at a time.
 | [principle-experience-first](skills/principle-experience-first/SKILL.md) | Prioritize a polished core workflow and justify feature scope from the experience of end users, API consumers, and maintainers. |
 | [principle-fix-root-causes](skills/principle-fix-root-causes/SKILL.md) | Reproduce bugs, trace their causes, and fix confirmed patterns within the authorized scope. |
 | [principle-foundational-thinking](skills/principle-foundational-thinking/SKILL.md) | Choose core data structures before logic, examine shared state, and sequence foundations before features. |
+| [principle-guard-the-context-window](skills/principle-guard-the-context-window/SKILL.md) | Preserve working context through permitted delegation, selective reads, concise evidence, and bounded phases. |
 | [principle-laziness-protocol](skills/principle-laziness-protocol/SKILL.md) | Prefer deletion, shallow call paths, consolidated decisions, and the smallest change that solves the problem. |
 | [principle-minimize-reader-load](skills/principle-minimize-reader-load/SKILL.md) | Reduce the layers readers must trace and the hidden or mutable state they must hold. |
 | [principle-model-the-domain](skills/principle-model-the-domain/SKILL.md) | Encode domain rules and state in suitable data structures while avoiding unnecessary abstractions. |
@@ -222,6 +223,14 @@ instruction text unchanged and no compatibility patch. Invoke
 `$principle-foundational-thinking` in Codex or
 `/astack:principle-foundational-thinking` in Claude Code. Its explicit-only policy
 is preserved in both harnesses.
+
+`principle-guard-the-context-window` is vendored from pstack under MIT. Its
+patch accounts for compaction, makes delegation depend on available tools and
+harness permissions, and keeps supporting detail in linked references. Invoke
+`$principle-guard-the-context-window` in Codex or
+`/astack:principle-guard-the-context-window` in Claude Code. Its explicit-only
+policy is preserved; selective reads without delegation do not provide context
+isolation. No agent definitions or model requirements are bundled.
 
 `principle-laziness-protocol` is vendored from pstack under MIT with its
 instruction text unchanged and no compatibility patch. Invoke
