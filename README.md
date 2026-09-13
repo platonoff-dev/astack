@@ -24,6 +24,7 @@ plugin, built one useful component at a time.
 | [principle-laziness-protocol](skills/principle-laziness-protocol/SKILL.md) | Prefer deletion, shallow call paths, consolidated decisions, and the smallest change that solves the problem. |
 | [principle-minimize-reader-load](skills/principle-minimize-reader-load/SKILL.md) | Reduce the layers readers must trace and the hidden or mutable state they must hold. |
 | [principle-model-the-domain](skills/principle-model-the-domain/SKILL.md) | Encode domain rules and state in suitable data structures while avoiding unnecessary abstractions. |
+| [principle-never-block-on-the-human](skills/principle-never-block-on-the-human/SKILL.md) | Proceed with authorized reversible work while preserving approval gates and task scope. |
 | [principle-redesign-from-first-principles](skills/principle-redesign-from-first-principles/SKILL.md) | Reconsider an existing design as if a new requirement had been present from the start, then deliver the redesign incrementally. |
 | [principle-separate-before-serializing-shared-state](skills/principle-separate-before-serializing-shared-state/SKILL.md) | Separate independent write targets before adding structural serialization for genuinely shared state. |
 | [principle-subtract-before-you-add](skills/principle-subtract-before-you-add/SKILL.md) | Remove unnecessary complexity before additions, refactors, or rewrites, and build on the simpler base. |
@@ -236,6 +237,13 @@ instruction text unchanged and no compatibility patch. Invoke
 `/astack:principle-subtract-before-you-add` in Claude Code when sequencing an
 addition, refactor, or rewrite. Its explicit-only policy is preserved in both
 harnesses.
+
+`principle-never-block-on-the-human` is vendored from pstack under MIT. Its patch
+keeps initiative within authorized task scope, preserves explicit approval gates,
+and avoids repeated confirmation of existing authorization. Invoke
+`$principle-never-block-on-the-human` in Codex or
+`/astack:principle-never-block-on-the-human` in Claude Code. Its explicit-only policy
+is preserved in both harnesses.
 
 See [vendoring details](docs/vendoring.md) for licenses, patches, exit codes,
 and the validation and reinstall steps.
