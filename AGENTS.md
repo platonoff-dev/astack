@@ -14,8 +14,8 @@ The repo is both a plugin and its marketplace. `.claude-plugin/` and
 `.codex-plugin/` contain the plugin manifests; `.claude-plugin/marketplace.json`
 and `.agents/plugins/marketplace.json` point to this repo with source `./`.
 
-Thirty-one skills ship: `task-interview`, `validate-claims`, `setup-astack`, `pick-next`,
-`merge-brief`, `weekly-report`, `why`, `how`, `unslop`, `bro`, `tdd`, `harden-tests`,
+Thirty-four skills ship: `task-interview`, `validate-claims`, `setup-astack`, `pick-next`,
+`merge-brief`, `arena`, `swarm`, `interrogate`, `weekly-report`, `why`, `how`, `unslop`, `bro`, `tdd`, `harden-tests`,
 `principle-attack-the-premise`, `principle-boundary-discipline`, `principle-build-the-lever`, `principle-encode-lessons-in-structure`,
 `principle-experience-first`,
 `principle-fix-root-causes`, `principle-foundational-thinking`,

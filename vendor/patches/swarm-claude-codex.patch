@@ -1,0 +1,94 @@
+diff --git a/SKILL.md b/SKILL.md
+--- a/SKILL.md
++++ b/SKILL.md
+@@ -1,46 +1,66 @@
+ ---
+ name: swarm
+-description: "Fan out N parallel workers, drain them, and return one report. Use for /swarm, 'swarm this', or parallel coverage, races, gauntlets, and exploration."
++description: "Coordinate independent workers for bounded coverage or a declared race, verify their outputs, and return one report. Use when explicitly asked to swarm work."
+ disable-model-invocation: true
+ ---
+
+ # Swarm
+
+-Fan out N parallel cloud workers. They may cover separate slices, race the same brief, or mix both. The parent waits, aggregates, and returns one report.
++Workers cover separate slices, race the same brief, or combine both. The lead
++verifies their outputs and returns one report.
+
+-## Start
+-
+-Open a todolist with one entry per phase before launching anything.
+-
+-1. Frame
+-2. Fan out
+-3. Aggregate
+-4. Report
++Read the [shared execution and result contract](../../references/agent-workflows.md).
++Keep a short plan for Frame, Fan out, Aggregate, and Report using the available
++planning tool or a local note.
+
+ ## Phase A: Frame
+
+-1. State the done predicate and the artifact or report the swarm must return.
+-2. Choose the shape. Partition into slices, race N workers on identical briefs, or mix both. For a race or mixed shape, declare `first pass`, `rank all`, or `best-of` before spawning.
+-3. Set N from the user or derive it from the shape. N is total workers, not the cloud concurrency limit.
+-4. Pick the worker model from `swarm workers` in `~/.cursor/rules/pstack-models.mdc` when present. Otherwise use `grok-4.6-fast-xhigh`. For a model race, name each arm's model up front.
+-5. Give each worker its own writable output when it writes.
++1. State the completion predicate and required artifact or report.
++2. Choose coverage, race, or a mixed shape. For coverage, enumerate every required
++   slice and its completion checks in a ledger before dispatch. Size slices by
++   useful independent work, subject to native capacity.
++3. For each race, declare its comparison set and selection rule before dispatch:
++   `first pass` accepts the first independently verified qualifying output;
++   `rank all` compares every declared contender; `best-of` selects the strongest
++   verified output collected within a stated task-specific limit. For `best-of`,
++   disclose the considered set and any missing contenders. A mixed run also
++   needs a result for every required coverage slice.
++4. Choose the requested runners or inherit the active model. Record any model
++   race arms without claiming repeated models provide model diversity.
++5. Identify exact inputs, allowed effects, workspaces, and outputs. For code
++   implementation, use separate source copies or worktrees verified from the
++   same baseline. Assign non-overlapping intended changes where practical, then
++   integrate serially; distinct report files alone do not isolate code writers.
+
+ ## Phase B: Fan out
+
+-Spawn all N workers in one message with `subagent_type: generalPurpose`, `environment: "cloud"`, `run_in_background: true`, and the configured model. Use `environment: "local"` only when the worker needs access to something on the user's computer.
++Launch fresh native workers as capacity permits. Each brief stands alone and
++contains the goal, exact slice or race arm, input identity, scope, owned
++workspace/output, allowed effects, completion checks, and worker result contract.
++Do not assume cloud access or a default branch matches the required input.
+
+-When a worker must start from a non-default pushed branch, pass `cloud_base_branch`.
+-
+-Every brief stands alone. Include the goal, scope, exact slice or race arm, how to verify, and what to report. Reports use `PASS`, `ISSUES`, or `BLOCKED` with evidence.
+-
+-If a worker drops out, proceed with N-1 and note it.
++Track attempts separately from slices. A worker dropout leaves its required slice
++open until accepted evidence covers it. Reassign within the run's limits or carry
++that gap into the result; surviving workers do not make missing work complete.
+
+ ## Phase C: Aggregate
+
+-Read the terminal results. For coverage, every required slice needs a result. For a race, apply the selection rule declared up front. Use first pass, rank all, or best-of. Do not paste raw worker dumps.
++Inspect the actual outputs, input matches, and verification evidence before
++accepting a slice or race candidate. For implementation, inspect each patch and
++integrate accepted changes one at a time, then check the combined result.
+
+-Keep a compact result table, one-line evidenced issues, and explicit gaps or dropouts.
++Coverage is complete only when every required slice is accepted and the combined
++completion checks pass. An `ISSUES` report can satisfy an audit slice when its
++coverage and evidence are complete. For a race, apply the declared rule only to
++verified qualifying outputs. Cancel unneeded work through the native interface
++and report unresolved cancellation; preserve writer ownership until termination.
++Missing or cancelled contenders cannot support an all-candidate ranking.
+
+ ## Phase D: Report
+
+-Return one consolidated in-chat report with the table, issue one-liners, gaps or dropouts, and the race rule when used.
++Return one compact table of required slices or race arms, attempt/result status,
++accepted evidence, and remaining gaps. Add concise evidenced issues, the race
++rule and considered set when applicable, combined verification, and unresolved
++running work. Say `complete`, `partial`, or `blocked` against the original
++completion predicate. Preserve useful partial results without claiming full
++coverage or replacing them with raw worker dumps.

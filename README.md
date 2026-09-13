@@ -13,6 +13,9 @@ plugin, built one useful component at a time.
 | [pick-next](skills/pick-next/SKILL.md) | Recommend the next item from your queue or an epic, accounting for capacity and priorities. |
 | [merge-brief](skills/merge-brief/SKILL.md) | Explain a proposed change and check your understanding before you decide whether to merge. |
 | [weekly-report](skills/weekly-report/SKILL.md) | Draft your weekly status section from source evidence, with approval before publication. |
+| [arena](skills/arena/SKILL.md) | Compare independent candidates with a fresh judge and synthesize a verified artifact. |
+| [swarm](skills/swarm/SKILL.md) | Cover bounded work or run a declared race, verify outputs, and report remaining gaps. |
+| [interrogate](skills/interrogate/SKILL.md) | Review code with independent reviewers and evidence-based lead judgment, without applying findings. |
 | [why](skills/why/SKILL.md) | Investigate code rationale through available history and sources, separating evidence from inference. |
 | [how](skills/how/SKILL.md) | Explain runtime flow, subsystem boundaries, and code placement from implementation evidence. |
 | [bro](skills/bro/SKILL.md) | Restate the last assistant message simply and concisely, without jargon. |
@@ -41,6 +44,20 @@ plugin, built one useful component at a time.
 
 No bundled router, agent definitions, or automations. Each skill owns its own
 workflow and can use the harness's available delegation tools.
+
+## Native agent workflows
+
+Invoke `$arena`, `$swarm`, or `$interrogate` in Codex, or
+`/astack:arena`, `/astack:swarm`, or `/astack:interrogate` in Claude Code.
+These three explicit-only skills use the active harness's native agents and
+[shared execution and result contract](references/agent-workflows.md). A run stays
+within one harness and uses its available capacity and authorized runners.
+Arena combines alternatives, Swarm verifies coverage or a declared race, and
+Interrogate reviews code without applying changes. Missing workers, unverified
+outputs, and incomplete coverage remain explicit in the result. Fresh contexts
+and separate workspaces depend on the native interface; instruction-only
+restrictions are not enforced isolation. No runner service, model registry,
+CLI bridge, or additional agent definitions are installed.
 
 ## Install
 

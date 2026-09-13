@@ -1,0 +1,482 @@
+diff --git a/SKILL.md b/SKILL.md
+--- a/SKILL.md
++++ b/SKILL.md
+@@ -1,111 +1,87 @@
+ ---
+ name: interrogate
+-description: "Use for \"interrogate\", \"adversarial review\", \"multi-model review\", \"challenge this\", \"stress test this code\", \"find blind spots\", or \"tear this apart\". Multiple LLM reviewers challenge changes from independent angles."
++description: "Review a code diff or selected source with independent reviewers and evidence-based lead judgment. Use when explicitly asked to interrogate code or run an adversarial code review. Returns findings without applying them."
+ disable-model-invocation: true
+ ---
+
+ # Interrogate
+
+-Spawn one reviewer per configured model to adversarially review code changes. Each model gets the same prompt and rubric. The adversarial signal comes from model diversity, not assigned personas.
++Give independent reviewers the same code, intent, and relevant rubric, then
++verify their findings and synthesize a verdict. Return findings without applying
++changes. This first version reviews code; design documents and prose require a
++separately chosen rubric and are outside this workflow's supported scope.
+
+-The deliverable is a synthesized verdict. Do NOT auto-apply changes.
++Read the [shared execution and result contract](../../references/agent-workflows.md).
+
+-## Step 1, Determine Scope
++## Step 1: Determine scope
+
+-Identify what to review from context:
++Use the user's selected diff or files. If selection is implicit, inspect the
++current branch and working tree and identify the intended comparison base; do
++not assume `main` or omit relevant uncommitted changes. For a branch review,
++resolve the base and head before producing their diff.
+
+-- If the user points at specific files or a diff, use that
+-- If on a feature branch, run `git diff main...HEAD` (or the appropriate base branch) for the full changeset
+-- If the user's message references recent work, gather the relevant files
++Freeze the diff or source snapshot plus surrounding context needed to understand
++the change, and record its identity. Include callers, contracts, and verification
++evidence where relevant. If scope is still consequentially ambiguous, clarify
++before dispatch; collect unambiguous context in the meantime.
+
+-Package the diff (or file contents) plus any surrounding context files the reviewers need to understand the code.
++## Step 2: State the intent
+
+-## Step 2, State the Intent
++State the intended behavior and constraints in one clear paragraph, grounded in
++the user's request and available change description, commits, and code. Separate
++inference from an explicit requirement. Reviewers check whether the implementation
++achieves that goal. They may also flag evidence of a false factual premise or
++conflicting requirement, separately from an implementation defect.
+
+-Before spawning reviewers, state the intent explicitly. Derive this from:
++## Step 3: Dispatch independent reviewers
+
+-- The user's message
+-- Commit messages
+-- PR description if one exists
+-- The code itself
++Use the requested panel, or begin with two fresh reviewers. Prefer available,
++authorized model diversity when it adds useful independent judgment. With one
++runner, disclose repeated independent runs of the same model. Use only current
++native fields and exact authorized runner values; do not guess replacements or
++repair model configuration as a review side effect.
+
+-Write one clear paragraph. If you're unsure about the intent, ask the user before proceeding.
++Read and fill [reviewer-prompt.md](references/reviewer-prompt.md) with the intent,
++frozen input and context, [rubric.md](references/rubric.md), and the relevant
++[code-quality lens](references/code-quality-review.md). Send the same substantive
++brief to every reviewer, changing only its identity and assigned output. Apply
++code-quality concerns proportionally; a broad maintainability audit must be
++explicitly selected. Keep peer findings and the lead's tentative verdict out of
++reviewer contexts until submission.
+
+-## Step 3, Spawn Reviewers
++Reviewers read source and return findings with the shared result contract. Use
++enforced tool restrictions when exposed; otherwise state the behavioral limit.
++Batch within capacity. Inspect and freeze submitted reviews. Retry failed or
++incomplete attempts within the run's limits, or retain their coverage gaps.
+
+-Launch all reviewers in a single message using the Task tool. Use the `interrogate reviewers` list from `~/.cursor/rules/pstack-models.mdc` when present, one reviewer per entry, extending or shrinking the Reviewer A/B/C/D labels below to the configured entry count. Otherwise use the table defaults.
++## Step 4: Synthesize
+
+-| Subagent | Default model |
+-|----------|---------------|
+-| Reviewer A | `claude-fable-5-1-thinking-max` |
+-| Reviewer B | `gpt-5.6-sol-max` |
+-| Reviewer C | `grok-4.6-fast-xhigh` |
+-| Reviewer D | `claude-opus-5-thinking-xhigh` |
++1. Parse all usable reviews and reconcile their claimed coverage with the frozen
++   input. Missing context or unexamined scope remains a review limitation.
++2. Deduplicate findings by the underlying defect and retain every source reviewer.
++3. Verify each consequential claim against the code, reachability, constraints,
++   and available checks. A lone evidenced defect survives; a repeated false
++   positive is dismissed. Unresolved consequential claims remain explicit.
++4. Record agreements and contradictions as metadata. Agreement is a reason to
++   inspect evidence, not a correctness vote or a reason to suppress lone findings.
+
+-For each reviewer:
+-- `subagent_type`: `generalPurpose`
+-- `model`: the configured `interrogate reviewers` entry, or the table default with no configured line
+-- `readonly`: `true`
++## Step 5: Lead judgment and verdict
+
+-If a model slug is rejected as unresolvable when you try to spawn the subagent, check the valid slugs in the Task tool's error message, pick the closest equivalent (prefer the highest-reasoning tier of the same family), spawn with the valid slug, and open a separate PR to update the configured value or default table. Do not block the review on the slug issue. If the configured value is `inherit-parent` or `auto`, omit `model` instead. Never treat those aliases as broken slugs or enter this fallback for them.
++Read [lead-judgment.md](references/lead-judgment.md). Categorize every finding:
+
+-Read `references/reviewer-prompt.md` and fill in the template with:
+-1. The stated intent
+-2. The diff or file contents
+-3. The review rubric from `references/rubric.md`
+-4. The code-quality lens from `references/code-quality-review.md`
++- **Act on:** A verified consequential issue for this change and its constraints.
++- **Consider:** A plausible concern needing evidence or a legitimate tradeoff
++  whose benefit is not yet clear. State what would resolve it.
++- **Noted:** Valid context with no current action.
++- **Dismissed:** Refuted, irrelevant, or unsupported as claimed; explain why.
+
+-The same filled template goes to all reviewers, so every model applies the code-quality lens.
++Keep every verified consequential finding, with location, impact, evidence,
++source reviewer IDs, and rationale. Separate premise/requirement concerns from
++implementation defects. Recommend action without changing code or merge state.
+
+-## Step 4, Synthesize
+-
+-As results come back, build a unified picture:
+-
+-1. **Parse all findings** from the reviewers
+-2. **Identify consensus**. Findings raised by 2+ models independently are highest signal.
+-3. **Identify lone-model findings**. Still worth reading, but weight accordingly.
+-4. **Deduplicate**. Different models may describe the same issue differently. Merge these and note which models raised it.
+-5. **Note disagreements**. If one model flags something and another explicitly says the opposite, that's useful context for the verdict.
+-
+-## Step 5, Lead Judgment
+-
+-You are the lead reviewer, a pragmatic senior engineer, not a neutral aggregator.
+-
+-Read `references/lead-judgment.md` for the full framework.
+-
+-Categorize every finding using these buckets:
+-
+-- **Act on**. Real issues affecting correctness, security, or maintainability given the actual goals. These would block a real PR.
+-- **Consider**. Legitimate points, but you're not sure they outweigh the cost of addressing them right now. Worth the user's attention.
+-- **Noted**. Technically valid but not actionable. Context-dependent, premature optimization, or low-impact given the current stage.
+-- **Dismissed**. Wrong, nitpicky, or missing context. Brief explanation why.
+-
+-For each finding, include:
+-- Which model(s) raised it
+-- The category (act on / consider / noted / dismissed)
+-- A one-line rationale for the categorization
+-
+-## Output Format
+-
+-Present the verdict in this structure:
+-
+-### Intent
+-> [The stated intent paragraph from Step 2]
+-
+-### Reviewers
+-- Reviewer [label]: [model name], [N findings] (one bullet per reviewer)
+-
+-### Act On
+-[Findings that should be addressed. For each: description, which models raised it, why it matters.]
+-
+-### Consider
+-[Findings worth thinking about. For each: description, which models raised it, tradeoff involved.]
+-
+-### Noted
+-[Valid but low-priority. Brief list.]
+-
+-### Dismissed
+-[Rejected findings with brief rationale.]
+-
+-### Agreement Map
+-[Where did models agree, where did they diverge, and what does the pattern of agreement/disagreement tell us?]
++Return the intent and exact review scope, reviewer/runner table, the four finding
++categories that contain results, and a short agreement map. Include coverage,
++failed attempts, checks performed, missing evidence, and remaining uncertainty.
++Name the overall result: a completed panel requires at least two usable fresh
++reviews plus lead verification and judgment. One usable review is a single
++review; no findings under incomplete coverage does not certify the change.
+diff --git a/references/code-quality-review.md b/references/code-quality-review.md
+--- a/references/code-quality-review.md
++++ b/references/code-quality-review.md
+@@ -1,47 +1,37 @@
+-# Code Quality Review
++# Code quality review
+
+-Each reviewer applies this code-quality lens in addition to the rubric. It is a strict standard focused on implementation quality, maintainability, abstraction quality, and codebase health.
+-
+-Above all, be ambitious about code structure. Do not merely identify local cleanup. Actively search for "code judo" moves, restructurings that preserve behavior while making the implementation dramatically simpler, smaller, more direct, and more elegant.
+-
+-## Core Prompt
+-
+-Start from this baseline:
+-
+-> Perform a deep code quality audit of the current branch's changes.
+-> Rethink how to structure / implement the changes to meaningfully improve code quality without impacting behavior.
+-> Work to improve abstractions, modularity, reduce Spaghetti code, improve succinctness and legibility.
+-> Be ambitious, if there is a clear path to improving the implementation that involves restructuring some of the codebase, go for it.
+-> Be extremely thorough and rigorous. Measure twice, cut once.
++Use this lens for concrete structural problems caused or exposed by the selected
++code change. Apply it proportionally to the change and its constraints. A broader
++maintainability audit is an explicitly selected mode, not an automatic rewrite
++brief. Reviewers propose findings; they do not implement refactors.
+
+ ## Dimensions
+
+-Each dimension is stated once. Apply the ones that are relevant.
++- **Simplification:** Identify branches, helpers, or layers whose removal would
++  address a concrete source of mistakes or maintenance cost. Show why the current
++  structure is harmful and consider the cost of changing it.
++- **Cohesion and size:** Check whether responsibilities are tangled or navigation
++  obscures a relevant invariant. File length alone is not a defect or a blocker;
++  extraction must improve a specific problem rather than meet a line threshold.
++- **Branching:** Trace scattered feature checks or special cases that make behavior
++  inconsistent, hard to verify, or unsafe to change. A conditional is not itself
++  a design flaw, and a new state machine needs a demonstrated benefit.
++- **Abstractions:** Prefer direct code. Flag wrappers or generic mechanisms when
++  their indirection conceals important assumptions or creates unnecessary coupling.
++- **Types and boundaries:** Show where casts, fallbacks, or loose data models hide
++  an actual invalid state or unclear contract. Respect the language and existing
++  trust boundaries instead of prescribing one type-system pattern everywhere.
++- **Placement and reuse:** Identify a canonical layer or existing helper only when
++  it fits the required semantics. Explain the concrete cost of the current choice.
++- **Orchestration and atomicity:** Trace unsafe partial updates or shared-state
++  races. Suggest concurrency only for genuinely independent work; correctness,
++  resource limits, and operational constraints can justify serial execution.
+
+-0. **Be ambitious about structural simplification.** Do not stop at "this could be a bit cleaner." Look for reframings that make whole branches, helpers, modes, conditionals, or layers disappear. Assume a "code judo" move is often available. It uses the existing architecture more effectively and makes the change dramatically simpler. If you can delete complexity rather than rearrange it, push hard for that.
++## Output and judgment
+
+-1. **Do not let a PR push a file from under 1k lines to over 1k lines without a very strong reason.** Treat this as a strong smell. Prefer extracting helpers, subcomponents, or modules. If the diff crosses that threshold, ask whether the code should be decomposed first. Waive only for a compelling structural reason where the resulting file stays clearly organized.
+-
+-2. **Do not allow spaghetti growth in existing code.** Be suspicious of new ad-hoc conditionals, scattered special cases, or one-off branches inserted into unrelated flows. Treat "weird if statements in random places" as a design problem, not a style nit. Prefer pushing the logic into a dedicated helper, state machine, or module instead of tangling an existing path.
+-
+-3. **Bias toward cleaning the design, not just accepting working code.** If behavior can stay the same while the structure becomes meaningfully cleaner, push for the cleaner version. Prefer simplifications that remove moving pieces over refactors that spread the same complexity around.
+-
+-4. **Prefer direct, boring, maintainable code over hacky or magical code.** Treat brittle, ad-hoc, or "magic" behavior as a problem. Be skeptical of generic mechanisms that hide simple data-shape assumptions. Flag thin abstractions, identity wrappers, or pass-through helpers that add indirection without buying clarity.
+-
+-5. **Push on type and boundary cleanliness when it affects maintainability.** Question unnecessary optionality, `unknown`, `any`, or cast-heavy code when a clearer type boundary could exist. Prefer explicit typed models over loosely-shaped ad-hoc objects. If a branch leans on a silent fallback to paper over an unclear invariant, ask whether the boundary should be made explicit.
+-
+-6. **Keep logic in the canonical layer and reuse existing helpers.** Call out feature logic leaking into shared paths or implementation details leaking through APIs. Prefer existing canonical utilities over bespoke one-offs. Push code toward the right package, service, or module instead of normalizing drift.
+-
+-7. **Treat unnecessary sequential orchestration and non-atomic updates as design smells when the cleaner structure is obvious.** If independent work is serialized for no reason, ask whether it should run in parallel. If related updates can leave state half-applied, push for a more atomic structure. Do not over-index on micro-optimizations, but do flag avoidable orchestration complexity that makes the code more brittle.
+-
+-## Output Expectations
+-
+-Prioritize structural code-quality regressions and missed simplifications first, then spaghetti and branching complexity, then boundary, type, and file-size concerns, then smaller modularity and legibility issues. Do not flood the review with low-value nits when larger structural issues exist. Prefer a few high-conviction comments over a long list of cosmetic notes.
+-
+-## Approval Bar
+-
+-Do not approve merely because behavior seems correct. Treat these as presumptive blockers unless the author can justify them: the PR keeps a lot of incidental complexity when a code-judo move would delete it. Pushes a file from below 1000 lines to above 1000 lines. Adds ad-hoc branching that tangles an existing flow. Scatters feature checks across shared code. Adds an unnecessary abstraction, wrapper, or cast-heavy contract, or duplicates an existing helper or puts logic in the wrong layer when there is a clear canonical home. If those conditions are not met, leave explicit, actionable feedback and push for a cleaner decomposition.
+-
+-## Review Tone
+-
+-Be direct, serious, and demanding about quality. Do not be rude, but do not soften major maintainability issues into mild suggestions. If the code is making the codebase messier, say so. If the implementation missed an obvious dramatic simplification, say that too. Do not be satisfied with "maybe rename this" when the real issue is structural.
++Prioritize impact and evidence. For each structural concern, name the affected
++code, the problem for this change, and the constraint or future edit that makes it
++matter. In a broad audit, separate optional opportunities from actionable defects.
++A more elegant alternative alone is not a blocker. Retain every verified
++consequential issue, summarize related symptoms together, and skip cosmetic
++padding. Be direct and specific without making the review an unsolicited redesign.
+diff --git a/references/lead-judgment.md b/references/lead-judgment.md
+--- a/references/lead-judgment.md
++++ b/references/lead-judgment.md
+@@ -1,58 +1,61 @@
+-# Lead Judgment Framework
++# Lead judgment framework
+
+-You are the lead reviewer. The configured reviewers have produced their findings. Apply pragmatic engineering judgment. Don't aggregate. Filter, contextualize, and decide.
++Verify, contextualize, and decide. Reviewers can miss surrounding constraints or
++suggest a preferred design without identifying a defect. The lead can also miss a
++real problem; neither prior confidence nor reviewer agreement settles the claim.
+
+-## Why This Step Matters
++## Check each consequential finding
+
+-Adversarial reviewers are useful because they're aggressive. But aggression without context produces noise. The reviewers only saw a slice of the codebase and a one-paragraph intent statement. They don't know:
++Trace the code and evidence against the frozen review input. Establish the
++trigger, reachability, consequence, and applicable requirement. For bugs, inspect
++callers, validation, and error paths. Use appropriate permitted checks when they
++resolve uncertainty. If essential context is unavailable, retain the unresolved
++claim and name the missing evidence rather than asserting a clean result.
+
+-- What was already tried and rejected
+-- What constraints exist outside the code (timeline, dependencies, migration plans)
+-- Which parts of the code are temporary scaffolding vs. permanent architecture
+-- What the next PR in the stack will address
++Evaluate findings against explicit review preconditions. Check their enforcement
++when boundary validation is in scope or contrary evidence makes a precondition
++doubtful. An unread, out-of-scope caller is not itself evidence that a stated
++precondition fails. Dismiss speculation that only applies outside the agreed
++contract; report the actual review limit without turning it into a defect.
+
+-You have the full conversation context. Use it.
++Deduplicate a defect's structural cause and symptoms into one finding when the
++same correction resolves both. Retain source reviewer IDs and explicit
++contradictions. Split them only if an independently actionable problem remains
++after the proposed fix. Corroboration helps direct attention but is not a vote.
++Keep a lone verified defect; dismiss repeated claims when the code refutes them.
++Repeated runs of the same model are not distinct model families.
+
+-## Filtering Principles
++## Filter with context
+
+-### Nitpick Gravity
++- Style preferences, extraction suggestions, and larger rewrites need a concrete
++  problem to become actionable. A small inline implementation can be appropriate.
++- A hypothetical input is not a bug unless it is reachable or required by the
++  contract. Check the actual protections rather than assuming they exist.
++- Existing patterns, unchanged lines, or planned follow-up work do not by
++  themselves dismiss a finding. Determine whether this change introduces or
++  exposes the defect and whether a real constraint accepts the risk.
++- Time, compatibility, deployment order, and scope can change a recommendation.
++  Cite the constraint instead of using it as a blanket reason to reject criticism.
++- False factual premises and conflicting requirements can invalidate the approach.
++  Report those concerns separately from code defects and distinguish evidence
++  from inference.
++- No findings, or only style findings, says what this review found. It does not
++  prove the code is correct, especially with missing coverage or checks.
+
+-Reviewers, especially adversarial ones, tend to fill their review. If they don't find critical issues, they'll inflate nits to fill the space. If a reviewer's findings are all nits and style preferences, the code is probably fine. Say so.
++## Decide and explain
+
+-### Hypothetical vs. Actual
++Use **Act on** for verified consequential issues, **Consider** for unresolved
++consequential claims or genuine tradeoffs, **Noted** for valid non-actionable
++context, and **Dismissed** for refuted or irrelevant claims. Explain the evidence
++and constraint behind each disposition so the user can assess the decision.
+
+-"What if someone passes null here?" is only a finding if the caller can actually pass null. Trace the call site. If the input is validated upstream or the type system prevents it, dismiss the finding. Reviewers working from a diff can't always see the full call chain. You can.
++Keep every verified consequential issue. Do not cap the findings count or suppress
++an issue because only one reviewer found it. Group related symptoms to keep the
++report readable. Be especially careful when rejecting security or correctness
++claims; a confident majority can still be wrong.
+
+-### Premature Abstraction Warnings
+-
+-Reviewers often suggest extracting functions, adding interfaces, or creating abstractions. Does this code need to change in a second way? If not, the abstraction is premature. Simple inline code that works beats a clean abstraction that's overkill for the current scope.
+-
+-### "I Would Have Done It Differently"
+-
+-This is the most common false positive in code review. A finding that amounts to "I prefer a different approach" is not a bug, not a design flaw, and not actionable unless the reviewer shows a concrete problem with the current approach. Dismiss these, and say why.
+-
+-### Missing Context Signals
+-
+-Watch for findings that reveal the reviewer didn't understand the context:
+-- Suggesting changes to code the author didn't write or modify
+-- Flagging patterns that are consistent with the rest of the codebase (the reviewer just doesn't know that)
+-- Recommending approaches that conflict with constraints you know about
+-
+-These are honest mistakes from reviewers working with limited information. Dismiss them gracefully.
+-
+-## When Reviewers Are Right
+-
+-Don't dismiss findings just because they're uncomfortable. The whole point of adversarial review is to catch things you'd miss. Signs a finding deserves attention:
+-
+-- Multiple models flag the same issue independently (consensus signal)
+-- The finding identifies a concrete execution path, not a hypothetical
+-- The finding reveals a gap in your mental model of the code
+-- You read the finding and think "...yeah, actually"
+-
+-Be especially careful about dismissing security findings and correctness bugs. These deserve more scrutiny even when they come from a single model.
+-
+-## Verdict Calibration
+-
+-A good verdict is useful, not comprehensive. The user should be able to read the "Act On" section, fix those issues, and ship with confidence. If your "Act On" list has more than 5 items, you're probably not filtering hard enough.
+-
+-The "Dismissed" section is not busywork. It's a trust mechanism. Showing the user what you rejected and why lets them override your judgment where they disagree. This is more valuable than hiding the rejected findings.
++Return the exact scope and input, usable reviewer count, runner identities when
++known, verification evidence, and remaining gaps with the verdict. Incomplete
++coverage or an unresolved consequential claim limits the conclusion. One usable
++review remains a single review. Recommend actions without applying changes or
++claiming approval to merge or publish.
+diff --git a/references/reviewer-prompt.md b/references/reviewer-prompt.md
+--- a/references/reviewer-prompt.md
++++ b/references/reviewer-prompt.md
+@@ -4,7 +4,7 @@
+
+ ---
+
+-You are an adversarial code reviewer. Find real problems in the code below: bugs, design flaws, security issues, and maintainability concerns. You are not here to be helpful or encouraging. You are here to stress-test.
++You are an adversarial code reviewer. Find real problems in the code below: bugs, design flaws, security issues, and maintainability concerns. Challenge the implementation with evidence, without inventing findings to fill the review.
+
+ ## Intent
+
+@@ -12,7 +12,13 @@
+
+ > {INTENT}
+
+-You are reviewing whether the code achieves this intent well. Do NOT question the intent itself. Assume the goal is correct and challenge the execution.
++Review whether the code achieves this intent. If evidence contradicts a factual premise or exposes conflicting requirements, report that separately from implementation defects. Do not replace the requested goal with your preferred design.
++
++## Assignment
++
++{UNIT_ID_INPUT_IDENTITY_SCOPE_ALLOWED_READS_AND_OUTPUT}
++
++Use the assigned frozen input and permitted surrounding context. Read only; do not edit source, publish findings, or access peer results. Return findings to the lead. Follow the supplied shared worker result contract.
+
+ ## Code Under Review
+
+@@ -37,7 +43,7 @@
+    - `warning`: Design concern, maintainability risk, or correctness issue that isn't immediately broken but will cause pain
+    - `nit`: Style, naming, minor improvement. Only include nits if they're genuinely useful, not to pad your review.
+ 2. **Finding**: What the problem is, in concrete terms. Reference specific lines/functions.
+-3. **Evidence**: Why you believe this is a problem. Show your reasoning. Don't just assert.
++3. **Evidence**: Trace a reachable trigger to its impact, citing the relevant code or check. Distinguish observed facts from unresolved hypotheses. State missing context instead of assuming it.
+ 4. **Suggestion** (optional): What you'd do instead, if you have a concrete alternative. Skip this if you don't have a clear fix.
+
+ ## What Makes a Good Finding
+@@ -52,11 +58,11 @@
+ - Restating what the code does without identifying a problem
+ - Suggesting rewrites for working code because you'd prefer a different style
+ - Raising hypothetical issues ("what if someone passes null here") without evidence that the code path is reachable
+-- Praising the code. You're an adversary, not a cheerleader. If you find nothing wrong, say "no findings" and stop.
++- Praising the code. You're an adversary, not a cheerleader. If you find nothing wrong, say "no findings" and still report the scope covered, checks performed, and gaps.
+
+ ## Output
+
+-Return your findings as a structured list. If you have zero findings, say so. An empty review is a valid outcome.
++Return the shared result fields: unit ID, `PASS` / `ISSUES` / `BLOCKED`, covered scope, findings or artifact references, verification evidence, and remaining gaps. `PASS` means no issues found in the completed assigned review, not proof that the change is correct. An empty findings list is valid; incomplete coverage must remain explicit. Then list findings in this form:
+
+ ```
+ ## Findings
+diff --git a/references/rubric.md b/references/rubric.md
+--- a/references/rubric.md
++++ b/references/rubric.md
+@@ -1,6 +1,6 @@
+ # Review Rubric
+
+-Review through whichever lenses are relevant. Not every lens applies to every change. Use judgment.
++Review through whichever lenses are relevant. Not every lens applies to every change. Use judgment. The code-quality lens supplies proportional structural checks; select a broader maintainability audit explicitly.
+
+ ## Correctness
+
+@@ -11,7 +11,7 @@
+ - Off-by-one, type coercion, integer overflow, string encoding
+ - State management: race conditions, stale closures, dangling references
+ - Does the happy path work? Does the sad path work?
+-- Idempotency: what happens if this operation runs twice, or if a previous run crashed halfway? If the answer is "it depends on what state was left behind," there's a missing reconciliation step.
++- Idempotency: what happens if this operation runs twice, or if a previous run crashed halfway? Trace any unsafe partial state and the existing recovery contract before claiming a missing reconciliation step.
+ - Concurrency: if multiple actors can touch the same mutable state (files, branches, shared data), is access serialized structurally (locks, sequential phases, exclusive ownership), or by conventions that won't hold?
+
+ When you find a potential bug, trace the execution path. Don't just flag "this could be nil". Show the call chain that makes it nil.
+@@ -20,7 +20,7 @@
+
+ Is the code fixing the actual problem or papering over a symptom?
+
+-Answering this often requires looking beyond the changed files. Read the surrounding code (callers, callees, type definitions, sibling modules) and understand the architecture the change lives in. Use the tools available to you (Read, Grep, Glob) to explore. Follow the call chain. Read the types. Understand why the code exists before judging whether the change addresses the right layer.
++Answering this often requires looking beyond the changed files. Read the surrounding code (callers, callees, type definitions, sibling modules) and understand the architecture the change lives in. Use the available permitted file-reading and search tools within the assigned source context. Follow the call chain. Read the types. Understand why the code exists before judging whether the change addresses the right layer.
+
+ - Guard clauses that mask a deeper invariant violation
+ - Retry logic that hides a broken contract
+@@ -33,18 +33,18 @@
+
+ Does the code fit well into the system it's part of?
+
+-- Boundary discipline: is validation at system boundaries, or scattered through business logic? Validate data once where it enters the system, then trust it internally.
++- Boundary discipline: is validation at system boundaries, or scattered through business logic? Check which boundaries and invariants are actually enforced; repeated validation may be required when trust or state changes.
+ - Abstraction level: is the code mixing high-level orchestration with low-level detail?
+ - Coupling: does this change introduce dependencies that will make future changes harder?
+ - Data model fit: do the data structures match the actual access patterns? The right structure makes downstream code obvious. The wrong one fights you at every turn.
+ - Bolted-on vs. integrated: was the change patched onto the existing design, or does it read as if the design always accounted for it? If the new requirement had been known from the start, would the code look like this?
+-- Legacy dual-paths: does the change introduce a new API while keeping the old one alive? If there are no external consumers, migrate callers and delete the old path in the same wave. Don't leave compatibility layers that will become permanent.
++- Legacy dual-paths: does the change introduce a new API while keeping the old one alive? Check actual consumers and rollout constraints before recommending caller migration and deletion in the same change. Show the cost or risk of a retained path rather than assuming it is obsolete.
+
+ Don't penalize simple code for lacking abstraction. Premature abstraction is worse than duplication.
+
+ ## Verification
+
+-Can you tell that this code works from reading it?
++What evidence supports the relevant behavior, and what remains unverified?
+
+ - Are there tests? Do they test behavior or implementation details?
+ - Are there assertions/invariants that would catch regressions?
+@@ -62,7 +62,7 @@
+ - Configuration or parameterization for cases that don't exist yet
+ - Dead code, unused imports, vestigial parameters
+ - Over-engineering: "just in case" code paths with no current callers
+-- Obsolete compatibility paths kept alive for transitional stability that's no longer needed. If the migration is done, delete the scaffolding
++- Obsolete compatibility paths kept alive for transitional stability that's no longer needed. Verify that the migration and rollback obligations are complete before recommending deletion
+ - Does the user experience justify the complexity? Every feature, control, and option should earn its place. Half-finished features are worse than missing ones.
+
+ Simpler is better unless simpler is wrong. Three lines of duplication beat a premature abstraction.
