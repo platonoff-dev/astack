@@ -34,6 +34,7 @@ plugin, built one useful component at a time.
 | [principle-prove-it-works](skills/principle-prove-it-works/SKILL.md) | Verify actual artifacts and feature behavior, retain repeatable evidence, and report checks blocked by access or authorization. |
 | [principle-redesign-from-first-principles](skills/principle-redesign-from-first-principles/SKILL.md) | Reconsider an existing design as if a new requirement had been present from the start, then deliver the redesign incrementally. |
 | [principle-separate-before-serializing-shared-state](skills/principle-separate-before-serializing-shared-state/SKILL.md) | Separate independent write targets before adding structural serialization for genuinely shared state. |
+| [principle-sequence-verifiable-units](skills/principle-sequence-verifiable-units/SKILL.md) | Sequence work into checked units and reviewable delivery while preserving the working baseline and required checks. |
 | [principle-subtract-before-you-add](skills/principle-subtract-before-you-add/SKILL.md) | Remove unnecessary complexity before additions, refactors, or rewrites, and build on the simpler base. |
 
 No bundled router, agent definitions, or automations. Each skill owns its own
