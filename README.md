@@ -29,6 +29,7 @@ plugin, built one useful component at a time.
 | [principle-migrate-callers-then-delete-legacy-apis](skills/principle-migrate-callers-then-delete-legacy-apis/SKILL.md) | Migrate internal callers to the new API and remove the legacy path in the same refactor when coordinated breaking changes are acceptable. |
 | [principle-model-the-domain](skills/principle-model-the-domain/SKILL.md) | Encode domain rules and state in suitable data structures while avoiding unnecessary abstractions. |
 | [principle-never-block-on-the-human](skills/principle-never-block-on-the-human/SKILL.md) | Proceed with authorized reversible work while preserving approval gates and task scope. |
+| [principle-outcome-oriented-execution](skills/principle-outcome-oriented-execution/SKILL.md) | Converge on the target architecture during planned migrations, with scoped reversible breakage and explicit verification boundaries. |
 | [principle-redesign-from-first-principles](skills/principle-redesign-from-first-principles/SKILL.md) | Reconsider an existing design as if a new requirement had been present from the start, then deliver the redesign incrementally. |
 | [principle-separate-before-serializing-shared-state](skills/principle-separate-before-serializing-shared-state/SKILL.md) | Separate independent write targets before adding structural serialization for genuinely shared state. |
 | [principle-subtract-before-you-add](skills/principle-subtract-before-you-add/SKILL.md) | Remove unnecessary complexity before additions, refactors, or rewrites, and build on the simpler base. |
