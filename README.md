@@ -25,6 +25,7 @@ plugin, built one useful component at a time.
 | [principle-minimize-reader-load](skills/principle-minimize-reader-load/SKILL.md) | Reduce the layers readers must trace and the hidden or mutable state they must hold. |
 | [principle-model-the-domain](skills/principle-model-the-domain/SKILL.md) | Encode domain rules and state in suitable data structures while avoiding unnecessary abstractions. |
 | [principle-redesign-from-first-principles](skills/principle-redesign-from-first-principles/SKILL.md) | Reconsider an existing design as if a new requirement had been present from the start, then deliver the redesign incrementally. |
+| [principle-separate-before-serializing-shared-state](skills/principle-separate-before-serializing-shared-state/SKILL.md) | Separate independent write targets before adding structural serialization for genuinely shared state. |
 
 No bundled router, agent definitions, or automations. Each skill owns its own
 workflow and can use the harness's available delegation tools.

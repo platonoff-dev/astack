@@ -14,11 +14,12 @@ The repo is both a plugin and its marketplace. `.claude-plugin/` and
 `.codex-plugin/` contain the plugin manifests; `.claude-plugin/marketplace.json`
 and `.agents/plugins/marketplace.json` point to this repo with source `./`.
 
-Eighteen skills ship: `task-interview`, `validate-claims`, `setup-astack`, `pick-next`,
+Nineteen skills ship: `task-interview`, `validate-claims`, `setup-astack`, `pick-next`,
 `merge-brief`, `weekly-report`, `why`, `how`, `unslop`, `bro`, `tdd`, `principle-
 boundary-discipline`, `principle-experience-first`, `principle-foundational-thinking`,
 `principle-laziness-protocol`, `principle-minimize-reader-load`, `principle-model-the-
-domain`, and `principle-redesign-from-first-principles`. There are no
+domain`, `principle-redesign-from-first-principles`, and `principle-separate-before-
+serializing-shared-state`. There are no
 bundled agent definitions or automations; skills may delegate through the harness
 when available.
 
