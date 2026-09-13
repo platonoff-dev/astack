@@ -21,6 +21,7 @@ plugin, built one useful component at a time.
 | [principle-boundary-discipline](skills/principle-boundary-discipline/SKILL.md) | Place validation at boundaries, preserve domain invariants, and keep business logic independent of framework wiring. |
 | [principle-encode-lessons-in-structure](skills/principle-encode-lessons-in-structure/SKILL.md) | Turn recurring corrections into structural checks, using permitted work notes and authorized follow-up changes. |
 | [principle-experience-first](skills/principle-experience-first/SKILL.md) | Prioritize a polished core workflow and justify feature scope from the experience of end users, API consumers, and maintainers. |
+| [principle-fix-root-causes](skills/principle-fix-root-causes/SKILL.md) | Reproduce bugs, trace their causes, and fix confirmed patterns within the authorized scope. |
 | [principle-foundational-thinking](skills/principle-foundational-thinking/SKILL.md) | Choose core data structures before logic, examine shared state, and sequence foundations before features. |
 | [principle-laziness-protocol](skills/principle-laziness-protocol/SKILL.md) | Prefer deletion, shallow call paths, consolidated decisions, and the smallest change that solves the problem. |
 | [principle-minimize-reader-load](skills/principle-minimize-reader-load/SKILL.md) | Reduce the layers readers must trace and the hidden or mutable state they must hold. |
@@ -208,6 +209,13 @@ instruction text unchanged and no compatibility patch. Invoke
 `$principle-experience-first` in Codex or `/astack:principle-experience-first`
 in Claude Code for product, UX, or feature-scope tradeoffs. Its explicit-only
 policy is preserved in both harnesses.
+
+`principle-fix-root-causes` is vendored from pstack under MIT. Its patch
+distinguishes symptom-masking guards from valid boundary and domain checks,
+and keeps fixes to repeated patterns within authorized task scope. Invoke
+`$principle-fix-root-causes` in Codex or `/astack:principle-fix-root-causes`
+in Claude Code when debugging. Its explicit-only policy is preserved in both
+harnesses.
 
 `principle-foundational-thinking` is vendored from pstack under MIT with its
 instruction text unchanged and no compatibility patch. Invoke

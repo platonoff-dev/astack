@@ -1,0 +1,10 @@
+--- a/SKILL.md
++++ b/SKILL.md
+@@ -15,5 +15,5 @@
+ - Ask "why" until you hit the root cause
+-- Do not add guards (adding a nil check to silence a crash is a symptom fix)
++- Do not add guards merely to hide a broken invariant or silence a crash. Keep validation at trust boundaries and guards that implement valid domain behavior; fix the cause of invalid internal state.
+ - If a workaround needs a paragraph-long comment to justify it, the code is wrong (fix the code, not the comment)
+-- Check for the pattern, not just the instance (grep for the same pattern, fix all instances)
++- Check for the pattern, not just the instance (search for the same pattern, fix confirmed instances within the authorized task scope, and report related instances outside that scope).
+ - When stuck, instrument. Don't guess (add logging, read the actual error)
