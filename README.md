@@ -18,6 +18,7 @@ plugin, built one useful component at a time.
 | [bro](skills/bro/SKILL.md) | Restate the last assistant message simply and concisely, without jargon. |
 | [tdd](skills/tdd/SKILL.md) | Fix a bug through a focused failing-then-passing regression test, or explain and use a practical verification alternative. |
 | [unslop](skills/unslop/SKILL.md) | Remove AI writing patterns while preserving meaning and intended tone. |
+| [principle-attack-the-premise](skills/principle-attack-the-premise/SKILL.md) | Reconsider a shared premise after repeated failed fixes, using a rerunnable census and testing suspected role assignments. |
 | [principle-boundary-discipline](skills/principle-boundary-discipline/SKILL.md) | Place validation at boundaries, preserve domain invariants, and keep business logic independent of framework wiring. |
 | [principle-build-the-lever](skills/principle-build-the-lever/SKILL.md) | Use or build a small rerunnable tool for nontrivial work, preserving task scope and approval rules. |
 | [principle-encode-lessons-in-structure](skills/principle-encode-lessons-in-structure/SKILL.md) | Turn recurring corrections into structural checks, using permitted work notes and authorized follow-up changes. |
@@ -203,6 +204,14 @@ and no compatibility patch. Invoke `$tdd` in Codex or `/astack:tdd` in Claude
 Code for a bug fix. It favors a cheap, focused regression test and requires an
 explanation and a useful verification alternative when a failing test is
 impractical. Its explicit-only policy is preserved in both harnesses.
+
+`principle-attack-the-premise` is vendored from pstack under MIT. Its patch
+keeps census results as evidence rather than causal proof and makes changes to
+role assignment depend on confirmed causes and required domain constraints.
+It uses the existing Build the Lever, Fix Root Causes, and Laziness Protocol
+skills, with Redesign from First Principles as a comparison. Invoke
+`$principle-attack-the-premise` in Codex or `/astack:principle-attack-the-premise`
+in Claude Code. Its explicit-only policy is preserved in both harnesses.
 
 `principle-boundary-discipline` is vendored from pstack under MIT. Invoke
 `$principle-boundary-discipline` in Codex or `/astack:principle-boundary-discipline`

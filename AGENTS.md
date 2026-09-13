@@ -14,13 +14,13 @@ The repo is both a plugin and its marketplace. `.claude-plugin/` and
 `.codex-plugin/` contain the plugin manifests; `.claude-plugin/marketplace.json`
 and `.agents/plugins/marketplace.json` point to this repo with source `./`.
 
-Twenty-nine skills ship: `task-interview`, `validate-claims`, `setup-astack`, `pick-
-next`, `merge-brief`, `weekly-report`, `why`, `how`, `unslop`, `bro`, `tdd`, `principle-
-boundary-discipline`, `principle-build-the-lever`, `principle-encode-lessons-in-
-structure`, `principle-experience-first`, `principle-fix-root-causes`, `principle-
-foundational-thinking`, `principle-guard-the-context-window`, `principle-laziness-
-protocol`, `principle-minimize-reader-load`, `principle-migrate-callers-then-delete-
-legacy-apis`, `principle-model-the-domain`, `principle-never-block-on-the-human`,
+Thirty skills ship: `task-interview`, `validate-claims`, `setup-astack`, `pick-next`,
+`merge-brief`, `weekly-report`, `why`, `how`, `unslop`, `bro`, `tdd`, `principle-attack-
+the-premise`, `principle-boundary-discipline`, `principle-build-the-lever`, `principle-
+encode-lessons-in-structure`, `principle-experience-first`, `principle-fix-root-causes`,
+`principle-foundational-thinking`, `principle-guard-the-context-window`, `principle-
+laziness-protocol`, `principle-minimize-reader-load`, `principle-migrate-callers-then-
+delete-legacy-apis`, `principle-model-the-domain`, `principle-never-block-on-the-human`,
 `principle-outcome-oriented-execution`, `principle-prove-it-works`, `principle-redesign-
 from-first-principles`, `principle-separate-before-serializing-shared-state`,
 `principle-sequence-verifiable-units`, and `principle-subtract-before-you-add`. There
