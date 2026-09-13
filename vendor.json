@@ -230,6 +230,18 @@
       "patches": [
         "vendor/patches/principle-prove-it-works.patch"
       ]
+    },
+    {
+      "name": "principle-build-the-lever",
+      "repo": "https://github.com/cursor/plugins.git",
+      "path": "pstack/skills/principle-build-the-lever",
+      "ref": "refs/heads/main",
+      "license": "MIT",
+      "license_path": "pstack/LICENSE",
+      "commit": "889ec4b68fa5aab0e867dad71ec3fdf386ae48f3",
+      "patches": [
+        "vendor/patches/principle-build-the-lever.patch"
+      ]
     }
   ]
 }

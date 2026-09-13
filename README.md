@@ -19,6 +19,7 @@ plugin, built one useful component at a time.
 | [tdd](skills/tdd/SKILL.md) | Fix a bug through a focused failing-then-passing regression test, or explain and use a practical verification alternative. |
 | [unslop](skills/unslop/SKILL.md) | Remove AI writing patterns while preserving meaning and intended tone. |
 | [principle-boundary-discipline](skills/principle-boundary-discipline/SKILL.md) | Place validation at boundaries, preserve domain invariants, and keep business logic independent of framework wiring. |
+| [principle-build-the-lever](skills/principle-build-the-lever/SKILL.md) | Use or build a small rerunnable tool for nontrivial work, preserving task scope and approval rules. |
 | [principle-encode-lessons-in-structure](skills/principle-encode-lessons-in-structure/SKILL.md) | Turn recurring corrections into structural checks, using permitted work notes and authorized follow-up changes. |
 | [principle-experience-first](skills/principle-experience-first/SKILL.md) | Prioritize a polished core workflow and justify feature scope from the experience of end users, API consumers, and maintainers. |
 | [principle-fix-root-causes](skills/principle-fix-root-causes/SKILL.md) | Reproduce bugs, trace their causes, and fix confirmed patterns within the authorized scope. |
@@ -272,6 +273,13 @@ checks, and removes the optional `show-me-your-work` workflow reference. Invoke
 `$principle-prove-it-works` in Codex or `/astack:principle-prove-it-works` in
 Claude Code before declaring a task done. Its explicit-only policy is preserved
 in both harnesses.
+
+`principle-build-the-lever` is vendored from pstack under MIT. Its patch prefers
+existing suitable tools, keeps delegation and execution within authorized scope,
+and makes commits conditional on authorization. Invoke `$principle-build-the-lever`
+in Codex or `/astack:principle-build-the-lever` in Claude Code. Its explicit-only
+policy is preserved in both harnesses. Delegate contracts use assigned write
+boundaries; enforced read-only access depends on the active harness.
 
 See [vendoring details](docs/vendoring.md) for licenses, patches, exit codes,
 and the validation and reinstall steps.
