@@ -30,6 +30,7 @@ plugin, built one useful component at a time.
 | [principle-model-the-domain](skills/principle-model-the-domain/SKILL.md) | Encode domain rules and state in suitable data structures while avoiding unnecessary abstractions. |
 | [principle-never-block-on-the-human](skills/principle-never-block-on-the-human/SKILL.md) | Proceed with authorized reversible work while preserving approval gates and task scope. |
 | [principle-outcome-oriented-execution](skills/principle-outcome-oriented-execution/SKILL.md) | Converge on the target architecture during planned migrations, with scoped reversible breakage and explicit verification boundaries. |
+| [principle-prove-it-works](skills/principle-prove-it-works/SKILL.md) | Verify actual artifacts and feature behavior, retain repeatable evidence, and report checks blocked by access or authorization. |
 | [principle-redesign-from-first-principles](skills/principle-redesign-from-first-principles/SKILL.md) | Reconsider an existing design as if a new requirement had been present from the start, then deliver the redesign incrementally. |
 | [principle-separate-before-serializing-shared-state](skills/principle-separate-before-serializing-shared-state/SKILL.md) | Separate independent write targets before adding structural serialization for genuinely shared state. |
 | [principle-subtract-before-you-add](skills/principle-subtract-before-you-add/SKILL.md) | Remove unnecessary complexity before additions, refactors, or rewrites, and build on the simpler base. |
@@ -264,6 +265,13 @@ and avoids repeated confirmation of existing authorization. Invoke
 `$principle-never-block-on-the-human` in Codex or
 `/astack:principle-never-block-on-the-human` in Claude Code. Its explicit-only policy
 is preserved in both harnesses.
+
+`principle-prove-it-works` is vendored from pstack under MIT. Its patch keeps
+verification and evidence commits within authorized scope, prefers existing
+checks, and removes the optional `show-me-your-work` workflow reference. Invoke
+`$principle-prove-it-works` in Codex or `/astack:principle-prove-it-works` in
+Claude Code before declaring a task done. Its explicit-only policy is preserved
+in both harnesses.
 
 See [vendoring details](docs/vendoring.md) for licenses, patches, exit codes,
 and the validation and reinstall steps.
