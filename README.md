@@ -26,6 +26,7 @@ plugin, built one useful component at a time.
 | [principle-guard-the-context-window](skills/principle-guard-the-context-window/SKILL.md) | Preserve working context through permitted delegation, selective reads, concise evidence, and bounded phases. |
 | [principle-laziness-protocol](skills/principle-laziness-protocol/SKILL.md) | Prefer deletion, shallow call paths, consolidated decisions, and the smallest change that solves the problem. |
 | [principle-minimize-reader-load](skills/principle-minimize-reader-load/SKILL.md) | Reduce the layers readers must trace and the hidden or mutable state they must hold. |
+| [principle-migrate-callers-then-delete-legacy-apis](skills/principle-migrate-callers-then-delete-legacy-apis/SKILL.md) | Migrate internal callers to the new API and remove the legacy path in the same refactor when coordinated breaking changes are acceptable. |
 | [principle-model-the-domain](skills/principle-model-the-domain/SKILL.md) | Encode domain rules and state in suitable data structures while avoiding unnecessary abstractions. |
 | [principle-never-block-on-the-human](skills/principle-never-block-on-the-human/SKILL.md) | Proceed with authorized reversible work while preserving approval gates and task scope. |
 | [principle-redesign-from-first-principles](skills/principle-redesign-from-first-principles/SKILL.md) | Reconsider an existing design as if a new requirement had been present from the start, then deliver the redesign incrementally. |
