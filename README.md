@@ -26,6 +26,7 @@ plugin, built one useful component at a time.
 | [principle-model-the-domain](skills/principle-model-the-domain/SKILL.md) | Encode domain rules and state in suitable data structures while avoiding unnecessary abstractions. |
 | [principle-redesign-from-first-principles](skills/principle-redesign-from-first-principles/SKILL.md) | Reconsider an existing design as if a new requirement had been present from the start, then deliver the redesign incrementally. |
 | [principle-separate-before-serializing-shared-state](skills/principle-separate-before-serializing-shared-state/SKILL.md) | Separate independent write targets before adding structural serialization for genuinely shared state. |
+| [principle-subtract-before-you-add](skills/principle-subtract-before-you-add/SKILL.md) | Remove unnecessary complexity before additions, refactors, or rewrites, and build on the simpler base. |
 
 No bundled router, agent definitions, or automations. Each skill owns its own
 workflow and can use the harness's available delegation tools.
@@ -228,6 +229,13 @@ instruction text unchanged and no compatibility patch. Invoke
 `$principle-model-the-domain` in Codex or `/astack:principle-model-the-domain`
 in Claude Code when designing stateful logic or consolidating scattered domain
 rules. Its explicit-only policy is preserved in both harnesses.
+
+`principle-subtract-before-you-add` is vendored from pstack under MIT with its
+instruction text unchanged and no compatibility patch. Invoke
+`$principle-subtract-before-you-add` in Codex or
+`/astack:principle-subtract-before-you-add` in Claude Code when sequencing an
+addition, refactor, or rewrite. Its explicit-only policy is preserved in both
+harnesses.
 
 See [vendoring details](docs/vendoring.md) for licenses, patches, exit codes,
 and the validation and reinstall steps.
