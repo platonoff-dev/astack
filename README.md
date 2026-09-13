@@ -19,6 +19,7 @@ plugin, built one useful component at a time.
 | [tdd](skills/tdd/SKILL.md) | Fix a bug through a focused failing-then-passing regression test, or explain and use a practical verification alternative. |
 | [unslop](skills/unslop/SKILL.md) | Remove AI writing patterns while preserving meaning and intended tone. |
 | [principle-boundary-discipline](skills/principle-boundary-discipline/SKILL.md) | Place validation at boundaries, preserve domain invariants, and keep business logic independent of framework wiring. |
+| [principle-encode-lessons-in-structure](skills/principle-encode-lessons-in-structure/SKILL.md) | Turn recurring corrections into structural checks, using permitted work notes and authorized follow-up changes. |
 | [principle-experience-first](skills/principle-experience-first/SKILL.md) | Prioritize a polished core workflow and justify feature scope from the experience of end users, API consumers, and maintainers. |
 | [principle-foundational-thinking](skills/principle-foundational-thinking/SKILL.md) | Choose core data structures before logic, examine shared state, and sequence foundations before features. |
 | [principle-laziness-protocol](skills/principle-laziness-protocol/SKILL.md) | Prefer deletion, shallow call paths, consolidated decisions, and the smallest change that solves the problem. |

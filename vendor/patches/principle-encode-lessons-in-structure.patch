@@ -1,0 +1,25 @@
+--- a/SKILL.md
++++ b/SKILL.md
+@@ -9,6 +9,8 @@
+ Encode recurring fixes in mechanisms (tools, code, metadata, automation) instead of textual instructions. Every error, human correction, and unexpected outcome is a learning signal. Capture it, route it, and close the loop.
+ 
+ **Why:** Textual instructions are easy to miss. They require the reader to notice, remember, and comply. Structural mechanisms (lint rules, metadata flags, runtime checks, automation scripts) enforce the rule without cooperation.
++
++Apply this principle within the authorized task and the repository's `CLAUDE.md` / `AGENTS.md`. Respect the active harness's memory-write rules and required approvals. If recording or applying a lesson is not authorized, present the proposed note or change without persisting it.
+ 
+ **Pattern:**
+ When you catch yourself writing the same instruction a second time:
+@@ -22,10 +24,10 @@
+ 
+ **Feedback loop:**
+ - **Capture every correction.** When the human intervenes or tests fail, decide if it's a one-off or a pattern.
+-- **Route to the right layer.** One-off -> brain note. Recurring fix -> skill or lint rule. Systemic issue -> principle.
+-- **Close the loop.** Don't just record. Apply now or create a concrete todo.
++- **Route to the right layer.** One-off -> permitted work note under the active project's `.local/` directory. Recurring fix -> skill or lint rule. Systemic issue -> principle.
++- **Close the loop.** Don't just record. Apply within the authorized task, or describe a concrete follow-up in the current work artifact or response.
+ 
+ **Anti-patterns:**
+ - Acknowledging without recording ("I'll keep that in mind" does not persist)
+-- Recording without routing (a brain note about a lint rule that should exist is wasted unless the lint rule gets implemented)
++- Recording without routing (a work note about a lint rule that should exist is wasted unless the lint rule gets implemented)
+ - Fixing without generalizing (fixing one instance while leaving the recurring pattern intact)
