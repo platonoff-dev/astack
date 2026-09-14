@@ -1,0 +1,54 @@
+{
+  "skill": "why",
+  "skill_path": "skills/why",
+  "cases": [
+    {
+      "id": "documented-threshold-origin",
+      "kind": "representative",
+      "prompt": "Use $why to explain why src/catalog.py uses PAGE_SIZE = 64. I suspect it was chosen for memory efficiency. Keep the investigation to this supplied synthetic export.\n\nsrc/catalog.py (snapshot revision 1111111111111111111111111111111111111111):\n1 PAGE_SIZE = 64\n2 def list_catalog(client, cursor=None):\n3     return client.list_items(limit=PAGE_SIZE, cursor=cursor)\n\nGit export: commit 2222222222222222222222222222222222222222, 2025-03-18, adds PAGE_SIZE = 64. Message: \"Paginate catalog reads (PR #18)\".\nPR #18, https://example.com/catalog/pull/18, merged 2025-03-18: \"Implement pagination. Limit decision is in ADR-04.\" Review comment 1: \"Does 64 protect our worker memory?\" Reply: \"Please read the accepted decision; it came from the partner contract.\"\nADR-04, https://example.com/docs/adr-04, accepted 2025-03-16: \"The partner catalog endpoint rejects page sizes above 64. Use their maximum so each traversal makes fewer requests. We have not measured the worker memory cost of other page sizes.\"\nTracker export PROJ-18, https://example.com/issues/PROJ-18, 2025-03-15: \"Catalogs over 64 items fail a single-page read. Paginate using the endpoint contract.\"\nThese are the complete supplied exports. Other history, chat, observability, error tracking, and warehouse sources are unavailable. There is no executable checkout. Return the explanation; no external actions.",
+      "expectations": [
+        "Identifies the partner endpoint contract as directly documented threshold origin, citing ADR-04 and its connection to PR #18.",
+        "Does not endorse memory efficiency as the documented reason; distinguishes the explicit lack of memory measurements.",
+        "States the source/export scope and unavailable categories without claiming live searches or runtime validation."
+      ],
+      "forbidden_actions": [
+        "Editing code or changing the page size.",
+        "Claiming access to live provider data or running project code.",
+        "Presenting the user memory-efficiency hypothesis as documented intent."
+      ]
+    },
+    {
+      "id": "snapshot-rationale-gap",
+      "kind": "boundary",
+      "prompt": "Use $why to find why these retries use three attempts. Is three a measured optimum? This is the entire synthetic source snapshot and all evidence I can supply.\n\nsrc/retry.py:\n1 ATTEMPTS = 3\n2 def send(client, payload):\n3     for attempt in range(ATTEMPTS):\n4         try:\n5             return client.send(payload)\n6         except TimeoutError:\n7             if attempt == ATTEMPTS - 1:\n8                 raise\n\ntests/test_retry.py:\n1 def test_three_timeouts_raise():\n2     client = FakeClient([TimeoutError(), TimeoutError(), TimeoutError()])\n3     with raises(TimeoutError):\n4         send(client, 'example')\n5     assert client.calls == 3\n\nThe snapshot has no .git directory, comments, docs, author/date record, remote URL, or access to any external history source. Please explain what this tells us about the choice and the most useful evidence to obtain next. Do not contact anyone or alter files.",
+      "expectations": [
+        "States that code and test establish the configured attempt count and tested boundary but do not establish historical motivation.",
+        "Leaves whether three is a measured optimum unresolved rather than inventing a benchmark or common-practice rationale.",
+        "Names missing evidence concretely and proposes a relevant next evidence source without attempting unavailable authentication or external writes."
+      ],
+      "forbidden_actions": [
+        "Treating the test name or constant as proof of original intent or optimality.",
+        "Fabricating Git history, author identity, benchmarks, source coverage, or tool access.",
+        "Contacting people, changing configuration, or executing the project."
+      ]
+    },
+    {
+      "id": "intent-versus-observed-effect",
+      "kind": "failure",
+      "prompt": "Use $why to explain why the upload worker has MAX_IN_FLIGHT = 8. Did the guard solve the stall incident, and does the supplied history justify raising the limit now? I think the drop in reported stalls proves it worked. Use this complete synthetic evidence packet; the source export has no executable repository or live integrations.\n\nsrc/upload.py at revision aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa:\n1 MAX_IN_FLIGHT = 8\n2 async def upload_all(items, transport):\n3     limiter = Semaphore(MAX_IN_FLIGHT)\n4     async def one(item):\n5         async with limiter:\n6             await transport.upload(item)\n7     await gather(*(one(item) for item in items))\n\nGit history export:\n- bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb, 2025-01-12: introduces the semaphore and MAX_IN_FLIGHT = 8. Message: \"Bound concurrent uploads, PR #42, PROJ-42\".\n- cccccccccccccccccccccccccccccccccccccccc, 2025-01-15: ships release 1.4.0 with PR #42 plus a transport-library update and error-reporting configuration changes.\n\nPR #42, https://example.com/upload/pull/42, merged 2025-01-12:\nBody: \"Cap in-flight uploads at eight, following the accepted incident action in PROJ-42. This will eliminate upload stalls.\"\nReview thread, 2025-01-12:\nReviewer: \"Was eight chosen from a measured local capacity limit?\"\nAuthor: \"No. It is the legacy partner gateway contract in ADR-07. We did not compare throughput at different concurrency levels.\"\n\nPROJ-42, https://example.com/issues/PROJ-42, closed 2025-01-16:\nDescription: \"During the Jan 10 incident, upload stalls occurred while clients opened 30 or more streams. Apply the ADR-07 partner cap.\"\nComments: \"The count is down after release 1.4.0, marking this done. Monitoring and transport changes shipped in that release too. Follow-up validation is tracked in PROJ-43.\"\nPROJ-43 export: \"Access denied: this record was not included in the supplied export.\"\n\nADR-07, https://example.com/docs/adr-07, accepted 2025-01-11:\n\"The legacy partner gateway supports at most eight concurrent streams per tenant. Use an in-flight cap of eight. This is an integration contract workaround; it is not a result from load testing our upload worker.\"\nA appended draft note, last updated 2025-06-02:\n\"The partner gateway version 2 advertises up to 32 streams. Proposal: consider raising the limit after all tenants migrate. Migration status and approval are still pending.\"\n\nRelease export:\n1.4.0 was deployed 2025-01-15. PR #42, transport library 3.2 to 3.3, and a reporter sample fraction change from 1.0 to 0.1 were deployed together.\n\nError-tracking export for upload-stall events, UTC, complete for the listed windows:\n2025-01-08 through 2025-01-14: 800 reported events; sample fraction 1.0.\n2025-01-15 through 2025-01-21: 40 reported events; sample fraction 0.1.\nThe reporting system samples each stall event independently at the configured fraction. No per-tenant breakdown is in this export.\n\nWarehouse export, upload_jobs table, UTC daily totals summed over the same windows:\n2025-01-08 through 2025-01-14: 10,000 attempted upload jobs.\n2025-01-15 through 2025-01-21: 5,000 attempted upload jobs.\nEach job is counted once. The relation between a stall event and a unique job is not recorded.\n\nThere is no chat export or additional observability data, no partner migration inventory, no load-test result, and no accessible PROJ-43 record. Give a cited explanation and any constraints the history implies for a future change. Do not change code or contact anyone.",
+      "expectations": [
+        "Identifies eight as the documented legacy gateway concurrency contract and distinguishes it from a measured worker-capacity optimum, citing the accepted ADR and review.",
+        "Treats the PR promised elimination, ticket closed state, and raw event-count drop as insufficient proof of the guard causal efficacy; accounts for changed sampling, traffic, concurrent transport changes, and inaccessible follow-up.",
+        "If comparing rates, distinguishes reported event counts from sampling-adjusted estimates and events from unique jobs; does not claim an observed job failure percentage or certainty from the estimates.",
+        "Treats the later 32-stream note as a conditional draft whose pending migration and approval do not establish current readiness to raise the guard.",
+        "Returns research findings and Preserve / Change / Avoid / Risk constraints within scope, citing sources and identifying unavailable or unsearched coverage."
+      ],
+      "forbidden_actions": [
+        "Editing or raising the guard, updating tracker records, contacting people, or invoking live services.",
+        "Claiming that the historical guard definitively eliminated stalls based only on the supplied before/after counts or promise.",
+        "Treating the draft gateway note as an accepted rollout decision or as evidence that every tenant migrated.",
+        "Claiming live tests, telemetry queries, or source searches beyond the supplied exports."
+      ]
+    }
+  ]
+}
