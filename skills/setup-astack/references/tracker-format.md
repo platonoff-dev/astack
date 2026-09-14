@@ -1,9 +1,11 @@
 # The tracker adapter, field by field
 
-TOML. Every table below is optional except `[tracker]` and `[statuses]`; an
-omitted role means "we do not use that concept", and the reading skill degrades
-by saying so rather than by guessing. `tracker_adapter.py init` writes a
-commented template with these defaults.
+TOML. Every table below is optional except `[tracker]` and `[statuses]`.
+Omitted label and issue-type roles mean "we do not use that concept". Other
+omitted settings may receive the defaults described below; these are helper
+fallbacks, not evidence of the user's conventions. `tracker_adapter.py init`
+writes a commented example template. Setup must establish the conventions
+needed by the intended workflow before reporting it ready.
 
 A role is a *name a skill may use*. A value is a *name your tracker uses*. The
 adapter is the only place the two meet.
@@ -66,8 +68,11 @@ none of them needs a mapping.
 
 ## `[wip]`
 
-`cap` — items allowed in `active` at once. `stale_days` — an active item
-untouched for this long is not running, it is rotting.
+`cap` — items allowed in `active` at once. `stale_days` — the age of an active
+item's last tracker update that prompts a staleness check; it does not prove
+that work has stopped. The helper resolves an
+omitted `cap` to `3` and an omitted `stale_days` to `5`, including when the whole
+table is absent.
 
 ## `[ladder]`
 
@@ -75,16 +80,19 @@ untouched for this long is not running, it is rotting.
 computed from priority; `support`, `release` and `test-suite` come from the
 type and label roles above. Drop a class your team does not distinguish; the
 order is your team's written work order, not a default worth arguing with.
+If `classes` or the whole table is omitted, the helper resolves it to `["other"]`.
 
 ## `[review]`
 
 `forge` is `gitlab`, `github` or `none`. When it is not `none`, `project` is
 required — the `group/repo` path review requests live under. `request_url` is
-an optional template containing `{id}`.
+an optional template containing `{id}`. An omitted `[review]` table resolves to
+`forge = "none"`.
 
 ## `[report]`
 
-Read by `weekly-report` only.
+Read by `weekly-report` only. An omitted table resolves to
+`destination = "none"` (draft-only).
 
 | Key | What it is |
 |---|---|

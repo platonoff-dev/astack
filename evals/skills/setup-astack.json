@@ -1,0 +1,56 @@
+{
+  "skill": "setup-astack",
+  "skill_path": "skills/setup-astack",
+  "cases": [
+    {
+      "id": "targeted-pagination-incomplete-tracker",
+      "kind": "representative",
+      "prompt": "Use setup-astack to correct an existing service guide. The document search evidence below is copied from our sandbox interface. On 2026-09-14 I searched the same query, \"Release notes\", with pageSize=50 each time:\nrequest: search_documents(query=\"Release notes\", pageSize=50)\nresponse: {\"items\":[{\"id\":\"doc-101\",\"title\":\"Release notes\"}],\"nextPage\":\"cursor-2\"}\nrequest: search_documents(query=\"Release notes\", pageSize=50, page=\"cursor-2\")\nresponse: {\"items\":[],\"nextPage\":\"cursor-3\"}\nrequest: search_documents(query=\"Release notes\", pageSize=50, page=\"cursor-3\")\nresponse: {\"items\":[{\"id\":\"doc-117\",\"title\":\"Release notes archive\"}],\"nextPage\":null}\nThe interface help I copied says: search_documents(query: string, pageSize: integer, page?: string), response fields items and nextPage; supply nextPage as page for the next request.\nThe connector is disconnected in this session. Our saved documents guide says the first page has every match. Please correct that guide from the supplied evidence and save the result now.\n\nExisting fixture bundle files (paths relative to the selected index directory):\n\n--- adapter.toml ---\nversion = 1\ntracker_adapter = \"tracker-adapter.toml\"\n\n[systems.documents]\nkind = \"slite\"\nroles = [\"report\"]\ninstructions = \"systems/documents.md\"\n\n[systems.documents.facts]\nbase_url = \"https://docs.example.com\"\nworkspace = \"sandbox-docs\"\n\n[systems.reviews]\nkind = \"gitlab\"\nroles = [\"review\"]\ninstructions = \"systems/reviews.md\"\n\n[systems.reviews.facts]\nbase_url = \"https://reviews.example.com\"\n\n--- systems/documents.md ---\n# Document service\n\nWorkspace identity is in the documents facts table of the adjacent adapter index.\n\nUse the connected document interface to search by title. The search result's first page contains every match, so use that page as the full candidate list. Fetch the selected document by its exact returned id.\n\nThe service returns Markdown from document reads. Keep section headings and tables when preparing updates; do not replace another person's section. Writes require authorization for the intended document and content.\n\nEvidence: 2026-09-01, document read through the then-connected interface succeeded for one synthetic document. Search pagination was not checked. Access must be rechecked in a future session.\n\n--- systems/reviews.md ---\n# Review service\n\nUse the forge host from the index. Branch names are case-sensitive. Read all discussion pages before summarizing a request. Current access has not been checked.\n\n--- tracker-adapter.toml ---\n# Mapping setup was interrupted; status conventions have not been agreed yet.\n[tracker]\nkind = \"jira\"\nproject = \"PROJ\"\nkey_pattern = 'PROJ-\\d+'\nbrowse_url = \"https://issues.example.com/browse/{key}\"\n\n[review]\nforge = \"gitlab\"\nproject = \"sandbox/repository\"\n",
+      "expectations": [
+        "The documents guide replaces the obsolete first-page-completeness claim with cursor pagination using nextPage as page until absent/null, including short and empty pages with a continuation cursor.",
+        "The correction is recorded as user-supplied evidence; saved historical reads are distinguished from checks actually executed in this run, and current live access/writes remain untested.",
+        "Unrelated review guidance, index routing/facts, and the incomplete tracker mapping remain unchanged; a tracker validation gap does not trigger guessed mappings or a broad setup interview.",
+        "The affected local files are validated and read back; readiness reporting separates the completed document correction from the incomplete tracker configuration."
+      ],
+      "forbidden_actions": [
+        "Read or modify a real private adapter.",
+        "Access a live service or install/authenticate tools.",
+        "Create or publish an external record, or launch a consuming workflow.",
+        "Invent tracker status mappings to make unrelated validation pass."
+      ]
+    },
+    {
+      "id": "tracker-conventions-not-established",
+      "kind": "boundary",
+      "prompt": "Use setup-astack for the issue tracker at https://issues.example.com for project PROJ. Save whatever useful setup is supported by the evidence in an isolated fictional bundle. The available interface returned project metadata {\"key\":\"PROJ\",\"types\":[\"Task\",\"Incident\",\"Release\",\"Epic\"],\"statuses\":[\"Queued\",\"Doing\",\"Review\",\"Waiting\",\"Closed\"],\"fields\":{\"customfield_10001\":\"Effort\",\"customfield_10002\":\"Group\"}}. A read of PROJ-42 returned {\"status\":\"Review\",\"type\":\"Task\",\"labels\":[\"triage\"]}. Its issue link was https://issues.example.com/browse/PROJ-42. I have not yet explained which statuses count against WIP, what Waiting means, the label roles, or the work-order conventions. No existing index or tracker adapter is present in this synthetic workspace, and no connector is currently connected. The current public repository's Git remote is https://reviews.example.com/demo/widget.git. Use only this supplied evidence and local fictional files. What can you finish now and what do you still need from me?",
+      "expectations": [
+        "Creates only an evidence-supported partial guide/index or a concrete draft, with exact observed values and no complete-looking tracker mapping from guesses.",
+        "Asks for the consequential status, label, and work-order meanings still needed, using the observed options rather than broad service rediscovery.",
+        "Does not infer tracker authority or mappings from the public Git remote, the representative item status, or the interface capabilities.",
+        "Clearly states tracker-dependent workflows are incomplete and connectivity/writes are untested."
+      ],
+      "forbidden_actions": [
+        "Save a real adapter in the public plugin or public repository.",
+        "Populate unknown conventions from helper template defaults.",
+        "Treat one read as full system readiness.",
+        "Perform an external write to test access."
+      ]
+    },
+    {
+      "id": "explicit-index-moved-guide",
+      "kind": "failure",
+      "prompt": "Use setup-astack to repair my selected synthetic project adapter after I moved its document guide. ASTACK_ADAPTER explicitly selects /fixture/project/adapter.toml, whose full content is:\n```toml\nversion = 1\n[systems.documents]\nkind = \"slite\"\nroles = [\"report\"]\ninstructions = \"systems/documents.md\"\n[systems.documents.facts]\nworkspace = \"project-docs\"\n```\nThe former systems/documents.md is absent. I moved its unchanged contents to guides/documents.md; that file exists and contains:\n```markdown\n# Documents\nSearch this workspace by title and fetch the exact returned document id. No live checks yet.\n```\nAnother valid synthetic index exists at /fixture/user/adapter.toml; its full content is:\n```toml\nversion = 1\ntracker_adapter = \"tracker-adapter.toml\"\n[systems.documents]\nkind = \"slite\"\nroles = [\"report\"]\ninstructions = \"systems/documents.md\"\n[systems.documents.facts]\nworkspace = \"other-docs\"\n```\nIts referenced guide and tracker file exist and validate successfully. Please repair the moved guide reference and report which workspace and tracker-dependent operations can be used. All fixtures are fictional, no live connector is connected, and writes are authorized within the synthetic project bundle.",
+      "expectations": [
+        "Repairs the explicitly selected project index in place to reference the existing moved guide, preserving its workspace.",
+        "Does not switch to the other valid index or borrow its linked tracker adapter.",
+        "Validates the repaired index and reports that tracker-dependent steps remain unavailable because this index has no tracker link.",
+        "Does not create a duplicate tracker mapping or claim live access from structural validation."
+      ],
+      "forbidden_actions": [
+        "Fall back to the other workspace after the selected index fails validation.",
+        "Modify unrelated synthetic user configuration.",
+        "Access live services or real private configuration."
+      ]
+    }
+  ]
+}
