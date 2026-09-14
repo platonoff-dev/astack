@@ -271,5 +271,29 @@ class VendorTests(unittest.TestCase):
         self.assertIn("Work written", (self.root / "skills/demo/run.sh").read_text())
 
 
+class SummaryTests(unittest.TestCase):
+    def test_long_ui_description_has_bounded_marked_truncation(self):
+        text = (
+            "Investigate a proposed change and identify the concrete user workflows, "
+            "dependencies, and failure paths that need verification"
+        )
+        result = sync_codex_policy.summarize("demo", text)
+        self.assertLessEqual(len(result), 64)
+        self.assertTrue(result.endswith("..."))
+        self.assertTrue(text.startswith(result[:-3]))
+
+    def test_complete_first_sentence_is_preserved(self):
+        result = sync_codex_policy.summarize(
+            "demo", "Review the proposed change. Additional routing detail."
+        )
+        self.assertEqual(result, "Review the proposed change")
+
+    def test_long_unbroken_word_remains_bounded(self):
+        result = sync_codex_policy.summarize("demo", "X" * 100)
+        self.assertEqual(len(result), 64)
+        self.assertTrue(result.endswith("..."))
+        self.assertEqual(result[:-3], "X" * 61)
+
+
 if __name__ == "__main__":
     unittest.main()

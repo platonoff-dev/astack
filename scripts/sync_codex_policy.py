@@ -72,13 +72,16 @@ def unquote(value: str) -> str:
     return value.replace('\\"', '"')
 
 
-def summarize(name: str, description: str, limit: int = 96) -> str:
+def summarize(name: str, description: str, limit: int = 64) -> str:
     text = re.sub(r"\s+", " ", unquote(description)).strip()
     if not text:
         return name.replace("-", " ")
     first = re.split(r"(?<=[.!?])\s", text, maxsplit=1)[0].rstrip(".")
     if len(first) > limit:
-        first = first[: limit - 1].rsplit(" ", 1)[0]
+        fragment = first[: limit - 3]
+        if " " in fragment:
+            fragment = fragment.rsplit(" ", 1)[0]
+        first = fragment.rstrip(" ,;:-") + "..."
     return first
 
 
