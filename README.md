@@ -272,7 +272,8 @@ policy is preserved; selective reads without delegation do not provide context
 isolation. No agent definitions or model requirements are bundled.
 
 `principle-laziness-protocol` is vendored from pstack under MIT with its
-instruction text unchanged and no compatibility patch. Invoke
+instruction text unchanged. A maintained compatibility patch supplies concise
+Codex UI metadata. Invoke
 `$principle-laziness-protocol` in Codex or `/astack:principle-laziness-protocol`
 in Claude Code when refactoring or evaluating added complexity. Its explicit-only
 policy is preserved in both harnesses.
