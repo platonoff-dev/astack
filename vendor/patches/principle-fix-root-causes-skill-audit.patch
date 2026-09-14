@@ -1,0 +1,9 @@
+--- /dev/null
++++ b/agents/openai.yaml
+@@ -0,0 +1,6 @@
++interface:
++  display_name: 'Principle fix root causes'
++  short_description: 'Trace symptoms to causes and fix confirmed defects'
++  default_prompt: 'Use $principle-fix-root-causes as the user asked.'
++policy:
++  allow_implicit_invocation: false

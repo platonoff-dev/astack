@@ -189,7 +189,8 @@
       "license_path": "pstack/LICENSE",
       "commit": "889ec4b68fa5aab0e867dad71ec3fdf386ae48f3",
       "patches": [
-        "vendor/patches/principle-fix-root-causes.patch"
+        "vendor/patches/principle-fix-root-causes.patch",
+        "vendor/patches/principle-fix-root-causes-skill-audit.patch"
       ]
     },
     {
