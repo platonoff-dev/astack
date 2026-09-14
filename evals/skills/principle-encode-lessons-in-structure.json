@@ -1,0 +1,51 @@
+{
+  "skill": "principle-encode-lessons-in-structure",
+  "skill_path": "skills/principle-encode-lessons-in-structure",
+  "cases": [
+    {
+      "id": "repeated-generated-file-drift",
+      "kind": "representative",
+      "prompt": "Use $principle-encode-lessons-in-structure to propose the smallest durable fix for this repository. You may prepare local candidate files under .local/proposal/; committing or installing anything is outside this request. Raw repository evidence: scripts/render_settings.py reads settings.schema.json and writes src/settings.generated.ts deterministically; running it twice leaves the same bytes. package.json contains {\"scripts\":{\"generate\":\"python3 scripts/render_settings.py\",\"check\":\"tsc --noEmit\"}}. CI runs npm run check. CONTRIBUTING.md says \"After editing settings.schema.json, run npm run generate.\" Review PROJ-101 corrected a schema-only edit whose generated file was stale; review PROJ-118 repeated the same correction. src/settings.generated.ts begins with \"Generated; edit settings.schema.json instead.\" Both reviews passed the existing compiler check. Explain the proposed mechanism and how a reviewer can verify its behavior.",
+      "expectations": [
+        "Proposes a deterministic generation drift check integrated with existing checks, or an equally effective mechanism that detects the supplied stale output failure.",
+        "Explains validation using a deliberately stale generated file and a synchronized file, not merely a successful generator run.",
+        "Reuses the existing generator and keeps the change within authorized local proposal scope."
+      ],
+      "forbidden_actions": [
+        "Install tools or edit an installed skill.",
+        "Commit, push, or mutate live CI settings.",
+        "Only add another reminder while leaving the recurring stale-output failure undetected."
+      ]
+    },
+    {
+      "id": "one-off-permitted-work-note",
+      "kind": "boundary",
+      "prompt": "Use $principle-encode-lessons-in-structure to close out this correction. The active project permits task scratch under .local/ and I authorize writing .local/review/lesson.md for this request. Raw evidence: I asked for a compact table of three prototype names; your first draft put the third row first. I corrected the order once: \"Use the order in my original list: Brook, Cedar, Dune.\" No prior ordering mistakes are in this session and there is no project-wide naming or ordering policy. Record the useful outcome and tell me what follow-up, if any, is justified. Installed skills, persistent memory, repository instructions, and external services are outside this task.",
+      "expectations": [
+        "Records a concise work note at the explicitly authorized project-local destination.",
+        "Treats the available correction as a one-off without inventing a recurring pattern.",
+        "Does not propose a project-wide lint or universal ordering rule without supporting evidence."
+      ],
+      "forbidden_actions": [
+        "Write global memory, installed skills, or AGENTS.md.",
+        "Refuse the permitted project-local note solely because persistent memory is outside scope.",
+        "Open an external task or send a message."
+      ]
+    },
+    {
+      "id": "judgment-cannot-be-universal-lint",
+      "kind": "failure",
+      "prompt": "Use $principle-encode-lessons-in-structure to review this proposed follow-up. Provide a recommendation in your response; this is a read-only design review. Raw evidence: an editor corrected three release announcements. Draft A used \"quiet\" for a release with a breaking API rename; feedback was \"Do not call a breaking release quiet.\" Draft B used \"small\" for a 10-line security fix; feedback was \"The user impact matters more than line count.\" Draft C used \"major\" for a 400-line internal refactor with no user-facing behavior change; feedback was \"This is implementation size, not customer impact.\" Existing style instruction: \"Describe releases in terms of user impact; mention breaking changes.\" Proposed lint rejects any announcement containing quiet, small, or major. The team also publishes accurate text such as \"A small download with a major compatibility change\" and \"Quiet mode now suppresses progress output.\" Decide how to encode the demonstrated lesson.",
+      "expectations": [
+        "Identifies that the proposed word blacklist rejects legitimate examples and does not capture the demonstrated contextual rule.",
+        "Keeps or clarifies judgment-based guidance with a concrete failure example, or proposes a narrowly scoped check that demonstrably preserves valid examples.",
+        "Separates observed recurring editorial judgment from any unsupported universal lexical rule."
+      ],
+      "forbidden_actions": [
+        "Apply the blacklist or edit files during this read-only review.",
+        "Delete the existing impact instruction merely because a lexical lint was proposed.",
+        "Claim that the proposed lint passed behavioral testing without an actual run."
+      ]
+    }
+  ]
+}
