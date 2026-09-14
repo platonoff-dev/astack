@@ -13,7 +13,7 @@ description: >-
 
 # `/pick-next` — the next thing to start
 
-One query, one recommendation. **Read-only**: never transitions, assigns,
+One recommendation. **Read-only**: never transitions, assigns,
 comments, or edits. The output ends at a named pick the user may start — or at
 an honest "you are full, finish something first".
 
@@ -66,10 +66,17 @@ My-queue mode is *assigned to me and not finished*, oldest first. Epic mode is
 *children of this key*, oldest first, plus `assignee` in the field list — an
 epic's children belong to several people.
 
-A queue of any size overflows the tool result and gets spilled to a file, and a
-narrow field list does not prevent it (connectors return `description`
-regardless). Expect the spill and flatten the saved file instead of re-reading
-it into the conversation:
+The epic filter narrows new-work candidates, not capacity. In either mode,
+check your complete unfinished queue in the mapped workspace for active work,
+in-flight releases and returned parked items, including those outside the epic.
+Fetch this separately when the candidate response does not contain it. Follow
+pagination for the required scope; an incomplete queue cannot establish a free
+slot. Report an access or completeness gap instead of treating missing items as
+zero.
+
+If the tool spills a large result to a file, flatten the saved file instead of
+re-reading it into the conversation. Adapt this Jira-shaped example to the
+actual response schema and verified blocking-link type and direction:
 
 ```bash
 jq -r '.issues.nodes[] | [.key, .fields.status.name, .fields.issuetype.name,
@@ -96,7 +103,7 @@ all of them before ranking anything.
 | `excluded` | status in the adapter's `excluded` role, or a label in `wontfix` |
 | `active` | status in `active` — costs one of your slots |
 | `parked` | status in `parked` — waiting on another person, costs no slot |
-| `blocked` | status in `blocked`, or ← blocked-by a non-`excluded` sibling |
+| `blocked` | status in `blocked`, or ← blocked-by a non-`excluded` linked item |
 | `needs-info` | a label in `needs_info` or `needs_triage` — readiness isn't met, it's a question for the user, not work |
 | `shovel-ready` | status in `shovel_ready` |
 
@@ -104,13 +111,15 @@ all of them before ranking anything.
 separately under "unmapped status", name the status, and say the adapter needs
 a line. Never fold them into `shovel-ready` to make the report look complete.
 
-A blocker that is itself `excluded` doesn't block. Recompute, don't trust the
-blocked status alone — stale blocked items whose blockers all landed are the
-most common miss.
+A blocker that is itself `excluded` doesn't block. Recompute the dependency
+graph from verified blocker states, including links outside the candidate set.
+An unavailable blocker state is unresolved evidence, not proof of readiness.
+Report a `blocked`-status item whose known blockers all landed as possibly
+stale; do not silently remap its status.
 
-In epic mode, only your own items count toward `active` and `parked`; a
-colleague's in-progress child is somebody else's slot, and neither blocks you
-nor is offered as a pick.
+Only your own items count toward your `active` and `parked` totals. A
+colleague's in-progress child uses no slot of yours and is not offered as a
+pick, but an explicit dependency from it can still block your candidate.
 
 ## Step 3 — Do you have a slot at all?
 
@@ -122,14 +131,17 @@ skill will not exceed it without being told to.
 
 **An active status is ambiguous and the tracker can't disambiguate it.** It
 covers both "an agent is grinding on this right now" and "this needs my hands".
-Don't pretend to know which — use last-updated as the only honest signal, show
-it, and let the user overrule.
+Show last-updated as a staleness signal and consider current user-supplied or
+read-only execution evidence. Timestamp age alone does not establish whether an
+agent or job is running.
 
 Run these in order; first match wins.
 
-1. **An `active` item untouched for `wip.stale_days` or more.** Name it. It is
-   not running, it is rotting. Recommend finishing or dropping it back, and
-   don't offer a new pick unless the user overrides.
+1. **An `active` item untouched for `wip.stale_days` or more.** Name it and
+   show the timestamp. If current evidence confirms healthy ongoing work, keep
+   counting it as active and continue the checks. Otherwise recommend checking
+   or finishing it before starting more work; do not claim it stopped solely
+   from its timestamp, and do not offer a new pick unless the user overrides.
 2. **A `release`-type item of yours is in flight** (any non-`excluded` status).
    An in-flight release is the release owner's top priority — say so, name it,
    no new pick.
@@ -228,4 +240,4 @@ separate user decision.
 | Treat every blocking link as "is blocked by" | Half of them point outward. Read `outwardIssue` versus `inwardIssue`. |
 | Offer a pick without saying whether reviews are pending | Reviews outrank new work. Silence reads as "none waiting". |
 | Transition the pick "to help" | Whoever starts the work does that, after the user chooses. This skill only reads. |
-| Re-fetch per candidate to fill in a missing field | One query, one jq pass. A field the search didn't return isn't worth a round-trip. |
+| Fetch every candidate individually | Use narrow batched follow-ups only for evidence that can change capacity, readiness or ranking. Missing decisive evidence is a gap, not a default. |
