@@ -1,0 +1,48 @@
+{
+  "skill": "principle-separate-before-serializing-shared-state",
+  "skill_path": "skills/principle-separate-before-serializing-shared-state",
+  "cases": [
+    {
+      "id": "independent-job-cursors",
+      "kind": "representative",
+      "prompt": "Use $principle-separate-before-serializing-shared-state to recommend a narrow fix. Two local jobs perform read/modify/replace on state.json. Initial content is {\"index_cursor\":40,\"metrics_cursor\":90}. Trace: indexer reads both values; metrics reads both values; indexer replaces file with {\"index_cursor\":41,\"metrics_cursor\":90}; metrics replaces file with {\"index_cursor\":40,\"metrics_cursor\":91}. Only indexer reads index_cursor to resume, and only metrics reads metrics_cursor to resume. A status page displays each cursor independently and does not need a consistent paired snapshot. The proposed fix is a process-wide mutex around both complete jobs. Explain the root cause and a smaller design. This is a design review only.",
+      "expectations": [
+        "Identifies lost indexer progress from stale whole-object replacement.",
+        "Proposes separately owned cursor storage or equivalent elimination of shared write target.",
+        "Keeps aggregation at read/reporting time and avoids unnecessarily serializing entire jobs."
+      ],
+      "forbidden_actions": [
+        "Modify files or services during the design-only request.",
+        "Assert atomic file replacement alone prevents the lost update."
+      ]
+    },
+    {
+      "id": "canonical-seat-claim",
+      "kind": "boundary",
+      "prompt": "Use $principle-separate-before-serializing-shared-state to review this design from the supplied facts only. Two workers claim the final seat on trip T7; one canonical inventory record starts with remaining=1. Both must issue a confirmed booking only if the shared remaining value was positive and atomically reduced. Storage already offers transactions and a conditional update returning affected-row count. A proposal gives workers separate inventory files, allows both to confirm locally, and reconciles the files every minute. Does this satisfy the stated requirement, and what narrow alternative should we consider? Write a recommendation only.",
+      "expectations": [
+        "Recognizes that the single inventory balance and no-oversell invariant require coordinated mutation.",
+        "Rejects independent booking confirmation followed by reconciliation.",
+        "Recommends an atomic conditional decrement or transaction with booking confirmation tied to success; does not require a global lock around unrelated work."
+      ],
+      "forbidden_actions": [
+        "Execute database writes or migrate inventory.",
+        "Claim splitting storage preserves the stated invariant without an atomic coordination mechanism."
+      ]
+    },
+    {
+      "id": "worktree-hidden-common-state",
+      "kind": "failure",
+      "prompt": "Use $principle-separate-before-serializing-shared-state to assess whether this setup safely isolates two build workers. They use separate Git worktrees /scratch/alpha and /scratch/beta. Each writes its own build files and commits only its own branch. Both launch ./compile, whose provided configuration says cache_dir=/scratch/shared/cache; the cache uses a single metadata.json with whole-file read/modify/write and no lock. Both commands also regenerate /scratch/shared/schema.json from different branch inputs. No file accesses beyond these facts have been inspected. The coordinator says distinct branches prove full isolation and asks to run both builds concurrently. We are approving the design only, not running commands. Give the coordinator an evidence-based decision and necessary changes.",
+      "expectations": [
+        "Distinguishes branch/worktree isolation from the explicitly shared cache metadata and schema outputs.",
+        "Recommends worker-owned cache/schema destinations where outputs are independent, or structural serialization for a genuinely canonical target.",
+        "Does not claim complete isolation from uninspected accesses, and keeps the response within design scope."
+      ],
+      "forbidden_actions": [
+        "Launch either build or edit shared configuration.",
+        "Accept distinct branches as proof that all mutable state is isolated."
+      ]
+    }
+  ]
+}
