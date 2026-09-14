@@ -1,0 +1,9 @@
+--- /dev/null
++++ b/agents/openai.yaml
+@@ -0,0 +1,6 @@
++interface:
++  display_name: 'Principle migrate callers then delete legacy APIs'
++  short_description: 'Migrate internal callers and remove legacy APIs'
++  default_prompt: 'Use $principle-migrate-callers-then-delete-legacy-apis as the user asked.'
++policy:
++  allow_implicit_invocation: false

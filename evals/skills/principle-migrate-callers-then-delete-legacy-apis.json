@@ -1,0 +1,48 @@
+{
+  "skill": "principle-migrate-callers-then-delete-legacy-apis",
+  "skill_path": "skills/principle-migrate-callers-then-delete-legacy-apis",
+  "cases": [
+    {
+      "id": "coordinated-internal-migration",
+      "kind": "representative",
+      "prompt": "Use $principle-migrate-callers-then-delete-legacy-apis to propose the exact change for this private monorepo refactor. All services deploy together and the API has no external consumers. Raw files: storage.py defines read_user(id) returning {\"id\": id, \"name\": \"Ada\"} and load_user(id) returning User(id=id, name=\"Ada\"). routes.py calls read_user(id)[\"name\"]. jobs.py imports read_user as lookup and calls lookup(id)[\"name\"]. tests/test_users.py asserts both returned representations and verifies missing IDs raise MissingUser in both paths. The approved target is load_user returning User. Explain code and test changes; no repository or live service access is needed.",
+      "expectations": [
+        "Inventory both direct and aliased callers.",
+        "Migrate routes and jobs to load_user and User.name before removing read_user.",
+        "Preserve missing-user behavior tests against the new API while removing obsolete representation assertions."
+      ],
+      "forbidden_actions": [
+        "Retain a permanent compatibility wrapper solely for the inventoried internal callers.",
+        "Delete missing-user coverage merely because its original test calls read_user."
+      ]
+    },
+    {
+      "id": "independently-deployed-consumer",
+      "kind": "boundary",
+      "prompt": "Use $principle-migrate-callers-then-delete-legacy-apis to advise on PROJ-204. Ticket: \"Replace read_user with load_user; remove read_user this week.\" Raw evidence: package exports include read_user; this repository has zero read_user callers. release-notes.md says \"Published SDK supports customer extensions; deprecated APIs remain available through the next major version.\" telemetry.csv contains caller,version,count with extension-pack,4.2,930 and dashboard,5.0,12. The new release is 5.1. Only this SDK repository is in scope. Produce a scoped recommendation and next evidence needed.",
+      "expectations": [
+        "Recognize external consumers and documented compatibility window prevent applying coordinated immediate deletion.",
+        "Explain zero local callers does not establish that published API is unused.",
+        "Propose a scoped transition or defer deletion until compatibility and consumer migration requirements are met."
+      ],
+      "forbidden_actions": [
+        "Recommend deleting read_user in 5.1 based solely on local search.",
+        "Treat the skill as permission to modify customer extensions."
+      ]
+    },
+    {
+      "id": "dynamic-caller-and-test-contract",
+      "kind": "failure",
+      "prompt": "Use $principle-migrate-callers-then-delete-legacy-apis to review this proposed internal refactor. All applications deploy together. Raw diff deletes parse_record, changes the only direct caller to decode_record, and removes test_rejects_bad_checksum. A source search for parse_record found no remaining Python calls. Raw pipeline.yaml still contains steps: [{handler: parse_record, input: inbound}]. loader.py contains handler = getattr(codec, step[\"handler\"]); handler(step[\"input\"]). Both old and new APIs are required by design.md to reject corrupted checksums. The author says deletion is complete and all remaining tests pass. Explain whether the change is ready and the smallest repair; no live execution needed.",
+      "expectations": [
+        "Identify the YAML-configured dynamic caller as incomplete migration.",
+        "Require migrating the handler configuration or equivalent registry wiring before deletion is complete.",
+        "Restore checksum rejection coverage for decode_record because it is a required behavior."
+      ],
+      "forbidden_actions": [
+        "Accept passing remaining tests as proof of complete migration.",
+        "Reintroduce the old API permanently instead of addressing the coordinated dynamic caller."
+      ]
+    }
+  ]
+}
