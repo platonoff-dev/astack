@@ -1,0 +1,53 @@
+{
+  "skill": "principle-type-system-discipline",
+  "skill_path": "skills/principle-type-system-discipline",
+  "cases": [
+    {
+      "id": "payment-state",
+      "kind": "representative",
+      "prompt": "Use $principle-type-system-discipline to propose a TypeScript model and boundary parser for this payment input. This is a design review; include a compact code sketch and examples of accepted and rejected inputs. The current wire format is fixed: {status: \"pending\" | \"paid\", userId: string, invoiceId: string, paidAt?: string}. Business rules: pending has no paidAt; paid has a valid ISO timestamp; user IDs start with usr_ and invoice IDs with inv_. The current implementation is `const payment = JSON.parse(text) as Payment; deliver(payment.invoiceId, payment.userId);`, while deliver takes `(userId: string, invoiceId: string)`. The raw examples are {\"status\":\"paid\",\"userId\":\"usr_7\",\"invoiceId\":\"inv_9\"} and {\"status\":\"pending\",\"userId\":\"usr_7\",\"invoiceId\":\"inv_9\",\"paidAt\":\"2026-01-01T00:00:00Z\"}.",
+      "expectations": [
+        "Models pending and paid as distinct valid variants with required paid timestamp only on paid.",
+        "Treats JSON as unknown and validates fields and cross-field state rules at the boundary.",
+        "Distinguishes user and invoice identifiers so argument reversal cannot type-check.",
+        "Rejects both provided malformed examples."
+      ],
+      "forbidden_actions": [
+        "Changes the fixed external wire format.",
+        "Uses an unchecked cast as the boundary validation.",
+        "Performs external writes or edits project files for this design-only request."
+      ]
+    },
+    {
+      "id": "total-sum-scope",
+      "kind": "boundary",
+      "prompt": "Use $principle-type-system-discipline to review this proposed TypeScript patch, in prose only. Existing public API: `export function total(values: readonly number[]): number { return values.reduce((a, b) => a + b, 0); }`. Public callers intentionally use total([]) = 0. A teammate proposes changing values to `readonly [number, ...number[]]` because another function, first(values), crashes on empty input. The first function belongs to a different package and is outside this review. We have no repository checkout or caller inventory here. Explain what to do with the proposed total patch and identify any separately scoped follow-up.",
+      "expectations": [
+        "Retains the empty-list input for total because its documented behavior is total.",
+        "Separates a potential non-empty first API improvement from the requested total review.",
+        "Acknowledges unavailable caller evidence before recommending broader migration."
+      ],
+      "forbidden_actions": [
+        "Approves a non-empty restriction on total solely because first is partial.",
+        "Claims to have inspected or migrated callers.",
+        "Changes files or launches work on the other package."
+      ]
+    },
+    {
+      "id": "duration-construction",
+      "kind": "failure",
+      "prompt": "Use $principle-type-system-discipline to review the following TypeScript redesign and propose a minimal corrected code sketch. We need the invariant endMs >= startMs for finite non-negative safe-integer millisecond timestamps, with endMs also a safe integer. Current records have {startMs: number, endMs: number}. The proposal says the invariant becomes unrepresentable if we use `type Window = { startMs: number; durationMs: number }; function end(w: Window) { return w.startMs + w.durationMs; }`. A JSON import calls `JSON.parse(text) as Window`. Existing raw imports include {\"startMs\":100,\"durationMs\":-20}, {\"startMs\":9007199254740991,\"durationMs\":1}, and {\"startMs\":100,\"durationMs\":20}. The external duration-based wire format is now fixed; internal construction and parsing are in scope. Please assess the proposal and show the parser/construction and end accessor you recommend. Use only the supplied evidence; this is a local design exercise.",
+      "expectations": [
+        "Explains that start plus an unrestricted numeric duration still represents negative durations and overflowing ends.",
+        "Rejects the negative and unsafe-sum examples while accepting the valid example.",
+        "Validates boundary inputs and controls construction so trusted internal values preserve the invariant.",
+        "Keeps the fixed wire format and avoids falsely claiming all runtime validation can be eliminated by a type alias."
+      ],
+      "forbidden_actions": [
+        "Accepts a plain numeric duration or unchecked cast as proof of the invariant.",
+        "Ignores the overflow example.",
+        "Changes the fixed external wire format."
+      ]
+    }
+  ]
+}

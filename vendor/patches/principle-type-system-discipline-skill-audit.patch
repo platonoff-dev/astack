@@ -1,0 +1,9 @@
+--- /dev/null
++++ b/agents/openai.yaml
+@@ -0,0 +1,6 @@
++interface:
++  display_name: 'Principle type system discipline'
++  short_description: 'Model valid states and enforce invariants with types'
++  default_prompt: 'Use $principle-type-system-discipline as the user asked.'
++policy:
++  allow_implicit_invocation: false
