@@ -1,0 +1,9 @@
+--- /dev/null
++++ b/agents/openai.yaml
+@@ -0,0 +1,6 @@
++interface:
++  display_name: 'Principle build the lever'
++  short_description: 'Use rerunnable tools to do or verify nontrivial work'
++  default_prompt: 'Use $principle-build-the-lever as the user asked.'
++policy:
++  allow_implicit_invocation: false
