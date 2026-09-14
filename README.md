@@ -14,6 +14,7 @@ plugin, built one useful component at a time.
 | [merge-brief](skills/merge-brief/SKILL.md) | Explain a proposed change and check your understanding before you decide whether to merge. |
 | [blast-radius](skills/blast-radius/SKILL.md) | Trace what a change could break beyond its diff and verify the key safety assumptions with real code. |
 | [weekly-report](skills/weekly-report/SKILL.md) | Draft your weekly status section from source evidence, with approval before publication. |
+| [reflect](skills/reflect/SKILL.md) | Review the active conversation through three independent lenses and propose durable skill edits for approval. |
 | [arena](skills/arena/SKILL.md) | Compare independent candidates with a fresh judge and synthesize a verified artifact. |
 | [swarm](skills/swarm/SKILL.md) | Cover bounded work or run a declared race, verify outputs, and report remaining gaps. |
 | [interrogate](skills/interrogate/SKILL.md) | Review code with independent reviewers and evidence-based lead judgment, without applying findings. |
