@@ -1,0 +1,9 @@
+--- /dev/null
++++ b/agents/openai.yaml
+@@ -0,0 +1,6 @@
++interface:
++  display_name: 'Principle model the domain'
++  short_description: 'Encode domain rules and state in clear data structures'
++  default_prompt: 'Use $principle-model-the-domain as the user asked.'
++policy:
++  allow_implicit_invocation: false

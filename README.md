@@ -284,7 +284,8 @@ compatibility patch removes an optional background-reading reference. Invoke `$p
 is preserved in both harnesses.
 
 `principle-model-the-domain` is vendored from pstack under MIT with its
-instruction text unchanged and no compatibility patch. Invoke
+instruction text unchanged. Its compatibility patch maintains a concise Codex
+UI summary. Invoke
 `$principle-model-the-domain` in Codex or `/astack:principle-model-the-domain`
 in Claude Code when designing stateful logic or consolidating scattered domain
 rules. Its explicit-only policy is preserved in both harnesses.
