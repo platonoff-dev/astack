@@ -1,0 +1,9 @@
+--- /dev/null
++++ b/agents/openai.yaml
+@@ -0,0 +1,6 @@
++interface:
++  display_name: 'Arena'
++  short_description: 'Compare independent candidates and synthesize a verified result'
++  default_prompt: 'Use $arena as the user asked.'
++policy:
++  allow_implicit_invocation: false
