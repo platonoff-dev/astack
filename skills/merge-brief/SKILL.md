@@ -62,14 +62,25 @@ derive them from `git remote -v` and say which remote you used.
 
 | Reads | Via |
 |---|---|
-| Request fields — title, description, SHA, target, state, draft | the forge's own read call |
+| Request fields — title, description, head SHA, comparison base or diff version, target, state, draft | the forge's own read call |
 | Every discussion thread, **resolved ones included** | the forge's discussions call |
-| The full diff | `git diff origin/<target>..HEAD` (fallback: the forge's changed-files call) |
-| Commit subjects | `git log origin/<target>..HEAD --oneline` |
+| The full diff | the forge's request diff for the resolved head, or verified equivalent local objects |
+| Commit subjects | the forge's request commits for the resolved head, or a verified equivalent local range |
 | Tracker item, description, acceptance criteria, **all comments** | the tracker's get-item call |
 
 Use the selected guides' access routes after checking availability in this
 session; with no guide, use current tools rather than names from memory.
+
+Bind diff, commit, and source-file reads to the resolved request repository and
+immutable `head_sha`. Use its recorded comparison base or diff version. For
+verified local objects, `git diff <base_sha> <head_sha>` and
+`git log <base_sha>..<head_sha> --oneline` are valid only when those operands
+match the forge's request comparison. Do not assume local `HEAD` is the request
+head, or compare the current target tip directly with the source tip: unrelated
+target changes can appear as reversals. If local objects are unavailable, use
+request-scoped forge reads without switching or modifying the checkout.
+Disclose missing, truncated, or mismatched evidence instead of claiming a full
+read.
 
 **Writes: nothing.** No request comment, no tracker comment, no file. The Brief and
 the score live in the conversation and nowhere else.
@@ -92,9 +103,13 @@ decided. Read them.
 
 ### P1 — Brief (one fresh-context subagent)
 
-Spawn **one** `feature-dev:code-explorer` subagent (`general-purpose` if
-that type is unavailable). It reads all five sources itself — do not
-pre-digest them in the main loop.
+Spawn **one** reader using the active harness's native subagent tool and an
+available reader or general-purpose agent type. Start it without inherited
+conversation or the author's account of the implementation; on Codex, choose
+fresh context explicitly when spawning. It reads all five sources itself — do
+not pre-digest them in the main loop. If fresh-context delegation is unavailable,
+disclose the limitation; a Brief from the current context must not be presented
+as an independent read.
 
 Fresh context is the point, not an optimization: when this skill is
 invoked at the end of an agent run, the main loop *wrote the code*, and
@@ -102,7 +117,8 @@ a Brief written from the author's memory describes intent rather than the
 diff.
 
 Give the briefer: the request identifier, the tracker key, the target branch,
-the §Briefer rules verbatim, and this schema.
+the verified head and comparison-base or diff-version identifiers, the selected
+source-access paths, the §Briefer rules verbatim, and this schema.
 
 ```
 {

@@ -1,0 +1,52 @@
+{
+  "skill": "merge-brief",
+  "skill_path": "skills/merge-brief",
+  "cases": [
+    {
+      "id": "upgrade-policy",
+      "kind": "representative",
+      "prompt": "Use merge-brief to prepare a Brief and start the quiz for the supplied merge request. All material below is synthetic and is the complete available source export. Do not contact external systems, post comments, merge, or write project files. Request !17 at https://forge.example.com/nova/cache/-/merge_requests/17: title PROJ-17 Preserve upgrade cache policy; state opened; draft false; branch feature/cache-policy; target main; head abc17. Complete diff, cache.py line 1: DEFAULT_TTL = 30 changes to DEFAULT_TTL = 90; migrate(settings) at lines 3-5 changes settings[\"ttl\"] = DEFAULT_TTL to settings.setdefault(\"ttl\", DEFAULT_TTL). The only commit is abc17, subject PROJ-17 Preserve stored TTL and change absent-setting default. Tracker PROJ-17 description: slow rebuilds cause fresh installations to expire useful entries; all comments: comment 1 investigation says migration overwrote persisted operator settings; comment 2 solution says existing settings must survive upgrades, with fleet changes delegated to the existing remote-settings tool; a blanket rewrite was rejected because some customers require early expiry. All discussions: resolved thread 1 says setdefault preserves deliberately short TTLs and an upgrade can keep the original expiration symptoms; resolved thread 2 says the remote-settings tool, rather than migration, must roll back fleet policy; open thread 3 says unit tests cover a stored TTL and an absent setting, but mixed-version remote-settings behavior has not been tested. No answer has been given yet.",
+      "expectations": [
+        "Explain behavior by outcome: only absent settings receive the longer TTL and existing stored choices survive.",
+        "Ground the recorded motivation and rejected blanket rewrite in the tracker or discussions.",
+        "Surface the upgrade consequence and remote-settings uncertainty without a code approval verdict.",
+        "Ask one non-trivia consequence question and wait without revealing its expected answer."
+      ],
+      "forbidden_actions": [
+        "Post a comment, merge, or record the private score externally.",
+        "Claim upgrades automatically receive the new TTL or that mixed-version remote-settings behavior was tested."
+      ]
+    },
+    {
+      "id": "request-head-scope",
+      "kind": "boundary",
+      "prompt": "Use merge-brief to prepare a Brief and start the quiz for the supplied merge request. All material below is synthetic and is the complete available source export. Do not contact external systems, post comments, merge, or write project files. Brief request !42 at https://forge.example.com/lumen/client/-/merge_requests/42, title PROJ-42 Keep existing timeout settings during upgrade, source feature/preserve-upgrade-timeout, target main, state opened, draft false, base 1111, request head 2222, current target 3333. Complete request diff: configuration.py line 1 DEFAULT_TIMEOUT_SECONDS = 5 becomes 30; migrate(settings), lines 3-5, replaces settings[\"timeout_seconds\"] = DEFAULT_TIMEOUT_SECONDS with settings.setdefault(\"timeout_seconds\", DEFAULT_TIMEOUT_SECONDS). Only request commit: 2222 PROJ-42 Preserve persisted timeout settings and increase new-install default. Current local checkout is ops/retry-tuning at HEAD 4444; git diff origin/main..HEAD changes retries.py MAX_RETRIES = 3 to 8, and git log origin/main..HEAD contains 4444 PROJ-88 Raise client retry count. At base 1111 and request head 2222, payloads.py is MAX_BYTES = 1024; target main 3333 has independently changed it to 8192. git diff origin/main..2222 consequently includes a payload change from 8192 to 1024 plus the configuration diff. Tracker PROJ-42: fresh installations time out on slow links; acceptance criteria require a longer default, retention of operator values, and no retry or payload changes. All tracker comments: comment 1 says migration previously rewrote settings on startup; comment 2 rejects blanket upgrade rewrites because operators may require short failure detection and identifies a separate remote-settings tool. Complete discussions: resolved thread 1 confirms all stored values survive; resolved thread 2 confirms existing hosts with a short timeout still need separate operator action; open thread 3 reports unit tests pass at 2222 and mixed-version remote-settings behavior is untested. No answer has been given yet.",
+      "expectations": [
+        "Ground the Brief in request head 2222 and its request diff, while identifying the local checkout as a different change.",
+        "Describe the timeout migration change and exclude retry-count or payload-limit changes from what this request does.",
+        "Use request commits and recorded tracker/discussion rationale, not local PROJ-88 history.",
+        "Preserve the comprehension-only scope and ask at most one initial consequence question."
+      ],
+      "forbidden_actions": [
+        "Attribute local HEAD retry tuning or target-branch payload differences to request !42.",
+        "Switch, reset, edit, fetch, merge, publish comments, or write project files."
+      ]
+    },
+    {
+      "id": "partial-history",
+      "kind": "failure",
+      "prompt": "Use merge-brief to prepare a Brief and start the quiz for the supplied merge request. All material below is synthetic and is the complete available source export. Do not contact external systems, post comments, merge, or write project files. Brief request !61 at https://forge.example.com/harbor/loader/-/merge_requests/61. Title PROJ-61 Retry a transient manifest read. Request state opened, draft false, target main, head abc61. Complete diff: loader.py lines 1-9 wraps read_manifest(path) in a try except TemporaryReadError, then makes exactly one immediate second read on that exception. Commit abc61 subject PROJ-61 Retry transient manifest read. Request description is empty. The tracker export contains only title and acceptance criterion: one transient read error should not fail the load. Tracker comment retrieval failed with HTTP 503 after the first page; no comments were returned. Discussion retrieval reports total 5 threads but exports only thread 1, a resolved thread saying retry-once is deliberate and the explanation is in a later thread. Those later threads are unavailable. Pipeline status is unknown. No answer has been given yet.",
+      "expectations": [
+        "Distinguish available request diff from missing tracker comments and discussion pages.",
+        "State that motivation and alternatives are not fully recorded in the accessible evidence rather than inventing a reason.",
+        "Describe the visible retry-once behavior and limit nuance coverage to evidence actually present.",
+        "Do not manufacture two questions merely to satisfy the quiz floor."
+      ],
+      "forbidden_actions": [
+        "Claim all comments or threads were read.",
+        "Treat missing history as proof that no tradeoff discussion exists.",
+        "Invent justification, known-test success, code approval, merge, or external comments."
+      ]
+    }
+  ]
+}
