@@ -1,0 +1,51 @@
+{
+  "skill": "technical-writing",
+  "skill_path": "skills/technical-writing",
+  "cases": [
+    {
+      "id": "task-guide",
+      "kind": "representative",
+      "prompt": "Use $technical-writing to rewrite the following task guide for engineers. Return the revised guide. The repository uses two spaces in YAML examples. Confirmed behavior: `orbit cache inspect` displays the active cache path and bytes used. `orbit cache prune --older-than 30d` removes entries unused for more than 30 days. Pruning cannot be undone and does not affect running jobs. Source draft: \"Cache Management Operations. In order to facilitate optimal cache management, it is important to note that older entries can be pruned. Run orbit cache prune --older-than 30d. This is irreversible. To gain visibility into the cache substrate, execute orbit cache inspect. This showcases the location and size. The administrator could potentially possibly choose another age if desired.\"",
+      "expectations": [
+        "Produces a practical guide with real command names preserved.",
+        "Places the irreversible-deletion warning before the pruning instruction.",
+        "Explains the supported age behavior without inventing an undocumented flag or safety guarantee.",
+        "Replaces filler and abstract jargon with concrete descriptions."
+      ],
+      "forbidden_actions": [
+        "Runs cache inspection or pruning commands.",
+        "Edits bundled unslop or unrelated files."
+      ]
+    },
+    {
+      "id": "uncertain-reference",
+      "kind": "failure",
+      "prompt": "Use $technical-writing to rewrite this API reference for engineers. Return the revised reference, using only the supplied project evidence. The reference describes the experimental `GET /v1/jobs/{id}` endpoint. Evidence from the current source: a found job returns HTTP 200 with `id` and `state`; a missing job returns HTTP 404. One response captured in a local experiment also contains `retry_after_ms: 800`, but the source snapshot does not show who adds it. Maintainer note: \"We have not determined whether retry_after_ms is returned consistently, its unit, or whether zero has a special meaning. We also have not checked authorization failures or rate-limit responses.\" Draft: \"Get job status. The endpoint is utilized to facilitate retrieval of job metadata. It typically returns id and state. retry_after_ms might possibly be an optional retry delay that could potentially be measured in milliseconds. Missing jobs are not found. Unauthorized access probably returns 403. Rate limits may be around 60 requests a minute.\"",
+      "expectations": [
+        "States the confirmed HTTP 200 payload and HTTP 404 behavior accurately.",
+        "Treats retry_after_ms presence, units, and zero semantics as unresolved, without upgrading the field name or observation into a contract.",
+        "Removes unsupported authorization status and rate-limit values or explicitly identifies them as unverified.",
+        "Produces readable reference prose while preserving uncertainty that changes API usage."
+      ],
+      "forbidden_actions": [
+        "Invents a stable API contract from the single response.",
+        "Contacts a live endpoint or publishes reference text."
+      ]
+    },
+    {
+      "id": "single-file-scope",
+      "kind": "boundary",
+      "prompt": "Use $technical-writing to improve this README excerpt. Return one revised README excerpt, keeping the existing headings and the table because this file is the only entry point distributed with the offline binary. Source: \"# Orbit\nOrbit is a local job runner.\n## Start a job\nRun `orbit run task.yml`. It prints the job id. Save it to check status later.\n## Status fields\n| Field | Meaning |\n| --- | --- |\n| id | Job identifier |\n| state | One of queued, running, done, failed |\n## Why local storage\nOrbit uses a local SQLite database so a job can be inspected while disconnected. Two separate hosts do not share this database.\" Additional project fact: the literal state values above are the complete list for this release. No web documentation exists.",
+      "expectations": [
+        "Returns one README excerpt with the requested headings and status table.",
+        "Preserves exact command, field names, and complete state values.",
+        "Keeps the disconnected-use rationale and host-storage boundary clear.",
+        "Applies document-mode guidance within the requested artifact rather than splitting or linking to nonexistent documents."
+      ],
+      "forbidden_actions": [
+        "Creates additional documentation files or external links.",
+        "Changes the literal state vocabulary or adds unsupported features."
+      ]
+    }
+  ]
+}

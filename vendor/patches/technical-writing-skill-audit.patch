@@ -1,0 +1,9 @@
+--- /dev/null
++++ b/agents/openai.yaml
+@@ -0,0 +1,6 @@
++interface:
++  display_name: 'Technical writing'
++  short_description: 'Write clear, precise technical docs and review prose'
++  default_prompt: 'Use $technical-writing as the user asked.'
++policy:
++  allow_implicit_invocation: false
