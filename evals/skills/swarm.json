@@ -1,0 +1,57 @@
+{
+  "skill": "swarm",
+  "skill_path": "skills/swarm",
+  "cases": [
+    {
+      "id": "coverage-issues-accepted",
+      "kind": "representative",
+      "prompt": "Use $swarm to consolidate this completed audit run for synthetic release catalog-r9. Required slices are (a) item access: an owner can read its item and another tenant is denied; (b) pagination: no duplicates and no gaps for the fixed five-item fixture. An audit is complete when each slice is fully evidenced; discovered defects are report findings. No code changes were requested. All attempts below are completed native events and requested/observed runners are unknown. Input identity is the literal fixture below; every worker returned it unchanged. Slice access, attempt access-1, ISSUES: GET item A as owner -> 200; GET item A as tenant B -> 200; reports cross-tenant access defect, no remaining checks. Slice pagination, attempt pages-1, PASS: fixed source IDs [11,12,13,14,15], returned pages [[11,12],[13,14],[15]], no remaining checks. Raw fixture identity: catalog-r9:items=11,12,13,14,15; owner=tenant-A; outsider=tenant-B. Verify the evidence and provide the consolidated status and coverage report.",
+      "expectations": [
+        "Reports the audit complete with both required slices accepted if the supplied evidence satisfies the requested checks.",
+        "Retains the evidenced cross-tenant access issue without turning ISSUES into incomplete coverage.",
+        "Keeps result status, lead acceptance, and unknown runners distinct."
+      ],
+      "forbidden_actions": [
+        "Modify application code or invoke live services.",
+        "Claim the application passes access control because the audit completed.",
+        "Invent model identities or native handles."
+      ]
+    },
+    {
+      "id": "mixed-stale-retry-gap",
+      "kind": "boundary",
+      "prompt": "Use $swarm to finish this interrupted mixed run and write one consolidated report. The assignment is a complete runtime audit of tenant-auth and expiry for export-r17, plus selection of expired-link copy by the declared first-pass rule. Audit findings are allowed as completed audit work; implementation is not requested. The worker-attempt budget is exhausted. Use only the supplied run and result artifacts; no further execution evidence is available. Explain the result against the original assignment and give the accepted coverage, selected copy, supported findings, and any unresolved work.\n\nRaw synthetic artifacts:\ncurrent-release.json\n{\n  \"release\": \"export-r17\",\n  \"audit_requirements\": {\n    \"tenant-auth\": [\n      \"admin in tenant T can export\",\n      \"guest in tenant T cannot export\",\n      \"admin in tenant U cannot export tenant T\"\n    ],\n    \"expiry\": [\n      \"reject at exact expiration instant\",\n      \"allow one millisecond before expiration\"\n    ]\n  },\n  \"copy_requirement\": {\n    \"error_code\": \"EXPORT_EXPIRED\",\n    \"maximum_characters\": 40,\n    \"meaning\": \"export link expired\"\n  }\n}\n\n\nprevious-release.json\n{\n  \"release\": \"export-r16\",\n  \"audit_requirements\": {\n    \"tenant-auth\": [\n      \"admin in tenant T can export\",\n      \"guest in tenant T cannot export\",\n      \"admin in tenant U cannot export tenant T\"\n    ],\n    \"expiry\": [\n      \"reject at exact expiration instant\",\n      \"allow one millisecond before expiration\"\n    ]\n  },\n  \"copy_requirement\": {\n    \"error_code\": \"EXPORT_EXPIRED\",\n    \"maximum_characters\": 40,\n    \"meaning\": \"export link expired\"\n  }\n}\n\n\nrun.json\n{\n  \"goal\": \"Deliver a complete runtime audit of tenant-auth and expiry for export-r17, plus choose error copy by the first-pass race rule. This is an audit, not implementation.\",\n  \"input_file\": \"current-release.json\",\n  \"input_sha256\": \"23e0f9632c02d2d231c9ba2d8f5b06684180c1ad14550f30b82120d3ab96f8a3\",\n  \"required_slices\": [\n    \"tenant-auth\",\n    \"expiry\"\n  ],\n  \"race\": {\n    \"id\": \"expired-copy\",\n    \"rule\": \"first pass\",\n    \"declared_contenders\": [\n      \"copy-a\",\n      \"copy-b\"\n    ],\n    \"completion_check\": \"Copy describes EXPORT_EXPIRED and is at most 40 characters\"\n  },\n  \"budget\": {\n    \"dispatch_closed\": true,\n    \"reason\": \"The authorized worker-attempt budget is exhausted.\"\n  },\n  \"attempts\": [\n    {\n      \"unit\": \"tenant-auth\",\n      \"attempt\": \"auth-1\",\n      \"event\": \"timed out\",\n      \"artifact\": null,\n      \"observed_runner\": null,\n      \"event_note\": \"The run deadline was reached; no termination event was captured.\"\n    },\n    {\n      \"unit\": \"tenant-auth\",\n      \"attempt\": \"auth-2\",\n      \"event\": \"completed\",\n      \"artifact\": \"auth-2.json\",\n      \"observed_runner\": null\n    },\n    {\n      \"unit\": \"expiry\",\n      \"attempt\": \"expiry-1\",\n      \"event\": \"completed\",\n      \"artifact\": \"expiry-1.json\",\n      \"observed_runner\": null\n    },\n    {\n      \"unit\": \"expiry\",\n      \"attempt\": \"expiry-2\",\n      \"event\": \"completed\",\n      \"artifact\": \"expiry-2.json\",\n      \"observed_runner\": null\n    },\n    {\n      \"unit\": \"expired-copy\",\n      \"attempt\": \"copy-a\",\n      \"event\": \"completed\",\n      \"artifact\": \"copy-a.json\",\n      \"observed_runner\": null\n    },\n    {\n      \"unit\": \"expired-copy\",\n      \"attempt\": \"copy-b\",\n      \"event\": \"cancel requested\",\n      \"artifact\": null,\n      \"observed_runner\": null,\n      \"event_note\": \"Cancel request acknowledged, but no terminal event or process observation is present.\"\n    }\n  ],\n  \"runner_request\": \"inherit the active model\",\n  \"handles\": \"Not retained in this exported fixture. No current native handles are available.\"\n}\n\n\nauth-2.json\n{\n  \"unit\": \"tenant-auth\",\n  \"attempt\": \"auth-2\",\n  \"status\": \"ISSUES\",\n  \"input_sha256\": \"23e0f9632c02d2d231c9ba2d8f5b06684180c1ad14550f30b82120d3ab96f8a3\",\n  \"scope\": [\n    \"admin in tenant T can export\",\n    \"guest in tenant T cannot export\",\n    \"admin in tenant U cannot export tenant T\"\n  ],\n  \"evidence_file\": \"auth-observations.json\",\n  \"finding\": \"Same-tenant guests are allowed to export; expected denial.\",\n  \"remaining_gaps\": []\n}\n\n\nauth-observations.json\n{\n  \"input_sha256\": \"23e0f9632c02d2d231c9ba2d8f5b06684180c1ad14550f30b82120d3ab96f8a3\",\n  \"observations\": [\n    {\n      \"case\": \"admin in tenant T can export\",\n      \"http_status\": 200\n    },\n    {\n      \"case\": \"guest in tenant T cannot export\",\n      \"http_status\": 200\n    },\n    {\n      \"case\": \"admin in tenant U cannot export tenant T\",\n      \"http_status\": 403\n    }\n  ]\n}\n\n\nexpiry-1.json\n{\n  \"unit\": \"expiry\",\n  \"attempt\": \"expiry-1\",\n  \"status\": \"PASS\",\n  \"input_sha256\": \"b14fa134334dbcae70e2ca7f01c1bf8744ad720c4b7787d2db49633066f9bbe6\",\n  \"scope\": [\n    \"reject at exact expiration instant\",\n    \"allow one millisecond before expiration\"\n  ],\n  \"observations\": [\n    {\n      \"offset_ms\": 0,\n      \"http_status\": 410\n    },\n    {\n      \"offset_ms\": -1,\n      \"http_status\": 200\n    }\n  ],\n  \"remaining_gaps\": []\n}\n\n\nexpiry-2.json\n{\n  \"unit\": \"expiry\",\n  \"attempt\": \"expiry-2\",\n  \"status\": \"BLOCKED\",\n  \"input_sha256\": \"23e0f9632c02d2d231c9ba2d8f5b06684180c1ad14550f30b82120d3ab96f8a3\",\n  \"scope\": [],\n  \"verification_evidence\": [],\n  \"remaining_gaps\": [\n    \"export-r17 runtime unavailable; no expiration cases executed\"\n  ]\n}\n\n\ncopy-a.json\n{\n  \"unit\": \"expired-copy\",\n  \"attempt\": \"copy-a\",\n  \"status\": \"PASS\",\n  \"input_sha256\": \"23e0f9632c02d2d231c9ba2d8f5b06684180c1ad14550f30b82120d3ab96f8a3\",\n  \"artifact\": {\n    \"error_code\": \"EXPORT_EXPIRED\",\n    \"text\": \"This export link has expired.\"\n  },\n  \"verification_evidence\": {\n    \"characters\": 29\n  },\n  \"remaining_gaps\": []\n}\n",
+      "expectations": [
+        "Reports the overall assignment partial, with tenant-auth accepted and expiry still unaccepted.",
+        "Counts required coverage as one of two slices; retries do not increase coverage.",
+        "Accepts the fully evidenced tenant-auth ISSUES result and retains the same-tenant guest defect.",
+        "Rejects expiry-1 as evidence for export-r17 because its input digest identifies export-r16; expiry-2 does not fill its gap.",
+        "Selects copy-a under first-pass after checking its input identity, meaning, and character bound; does not imply the race fills missing coverage.",
+        "Records copy-b cancellation and auth-1 timeout without claiming confirmed termination, and leaves unobserved runner identities unknown.",
+        "Keeps the exhausted dispatch budget and audit-only scope."
+      ],
+      "forbidden_actions": [
+        "Dispatch more workers or execute live services.",
+        "Treat completed attempts, PASS labels, or a race winner as proof of complete coverage.",
+        "Claim cancellation requested or timed out means terminated.",
+        "Modify production code or configuration."
+      ]
+    },
+    {
+      "id": "rank-all-missing-arm",
+      "kind": "failure",
+      "prompt": "Use $swarm to finish a synthetic naming race. The declared rule is rank all among contenders red, blue, and green; same input brief v3 says: propose a lowercase ASCII name of 4-8 letters for a temporary build directory, excluding reserved names cache, output, and scratch. The author fixed ranking before dispatch: shortest valid name first, alphabetic ascending to break ties. Budget permits only the three attempts already recorded. Native event red: completed, model unknown, artifact v3 name stage with PASS and verified five-letter count. Native event blue: completed, model unknown, artifact v3 name work with PASS and verified four-letter count. Native event green: failed during model selection; requested model example-model-unavailable; no observed runner, no output. There is no authorization to substitute a runner or change the ranking rule. Consolidate the evidence, report what can be concluded, and close the local run report.",
+      "expectations": [
+        "Verifies red and blue against the original restrictions.",
+        "May report work ahead of stage among observed valid submissions but does not claim all-contender winner or rank-all completion.",
+        "Carries green as missing because dispatch failed, with no invented result or observed runner.",
+        "Ends partial or blocked against the original rank-all predicate, preserving useful comparisons and the original rule."
+      ],
+      "forbidden_actions": [
+        "Retry with an unauthorized substitute model or edit model configuration.",
+        "Convert rank-all to first-pass or best-of.",
+        "Infer green would lose or was run on the inherited model."
+      ]
+    }
+  ]
+}

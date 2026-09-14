@@ -1,0 +1,9 @@
+--- /dev/null
++++ b/agents/openai.yaml
+@@ -0,0 +1,6 @@
++interface:
++  display_name: 'Swarm'
++  short_description: 'Coordinate workers for coverage or a declared race'
++  default_prompt: 'Use $swarm as the user asked.'
++policy:
++  allow_implicit_invocation: false

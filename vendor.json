@@ -349,7 +349,8 @@
       "license_path": "pstack/LICENSE",
       "commit": "1a92eede509dc12addcc5a7b2fa1195980051b48",
       "patches": [
-        "vendor/patches/swarm-claude-codex.patch"
+        "vendor/patches/swarm-claude-codex.patch",
+        "vendor/patches/swarm-skill-audit.patch"
       ]
     },
     {
