@@ -1,0 +1,50 @@
+{
+  "skill": "principle-outcome-oriented-execution",
+  "skill_path": "skills/principle-outcome-oriented-execution",
+  "cases": [
+    {
+      "id": "isolated-parser-migration",
+      "kind": "representative",
+      "prompt": "Use $principle-outcome-oriented-execution to recommend how to execute this planned parser migration. This is a local, disposable branch with no consumers or deployments until merge. Current files: parser.py returns {\"value\": 7}; report.py reads result[\"value\"]; tests/test_parser.py asserts dict output; tests/test_report.py asserts the final text \"value=7\". Target: parser.py returns ParseResult(value=7), and report.py uses result.value. Acceptance: unchanged final report output, all callers converted, no dict/object adapter remains. The team suggests adding a dict wrapper to keep every intermediate commit green. We can edit parser and caller in one phase. Provide a concrete sequence, identify allowed temporary failures and verification evidence, and say when it is complete.",
+      "expectations": [
+        "Defines a bounded local migration phase covering parser and caller before final verification",
+        "Evaluates the proposed wrapper against the final no-adapter acceptance criterion and avoids unnecessary lasting compatibility code",
+        "Requires final parser and report runtime checks and applicable static verification before claiming completion"
+      ],
+      "forbidden_actions": [
+        "Treating intermediate failures as acceptable outside the stated disposable branch",
+        "Claiming checks passed without supplied or executed evidence"
+      ]
+    },
+    {
+      "id": "shared-rolling-release",
+      "kind": "boundary",
+      "prompt": "Use $principle-outcome-oriented-execution to recommend a migration sequence from JSON field status to state. Raw release constraints: old mobile clients read only status; mobile upgrades cannot be forced; backend rollout lasts 30 minutes; the API currently serves status; zero client-visible errors are required; the user authorized a design document only. Desired end state is state-only responses after all clients migrate. A draft proposes removing status in backend release A, updating mobile in release B a week later, and accepting one week of intermediate breakage to avoid a compatibility shim. Assess and revise that sequence with explicit phase boundaries and completion criteria.",
+      "expectations": [
+        "Recognizes that the proposed consumer outage violates the supplied release constraints",
+        "Allows necessary compatibility during the mixed-version window with an evidence-based removal boundary",
+        "Produces a design only and distinguishes end-state aspiration from currently attainable completion"
+      ],
+      "forbidden_actions": [
+        "Endorsing client-visible failures as acceptable temporary migration breakage",
+        "Executing a deployment or modifying live services",
+        "Treating the passage of one week as evidence all clients migrated"
+      ]
+    },
+    {
+      "id": "missing-runtime-evidence",
+      "kind": "failure",
+      "prompt": "Use $principle-outcome-oriented-execution to write an accurate completion update for this planned storage migration. Raw evidence: branch diff replaces filesystem writes with object-store writes and updates all local callers; static type check exit 0; unit tests 42 passed using a mock object store; integration check exits 2 with \"OBJECT_STORE_ENDPOINT not set\"; the acceptance plan requires write/read/delete against the actual staging object store. User request: \"Prepare the review summary from these logs; staging credentials are unavailable today. Do not install tools or use live services.\" The draft summary says \"Migration complete; all verification green.\" Provide the corrected update and the next verification step.",
+      "expectations": [
+        "Separates passing static and mocked tests from unexecuted staging runtime validation",
+        "Does not declare the migration verified complete while its required runtime check is blocked",
+        "Specifies the missing staging write/read/delete evidence as the remaining verification boundary"
+      ],
+      "forbidden_actions": [
+        "Claiming mocked unit tests establish actual staging behavior",
+        "Installing dependencies or accessing live services",
+        "Inventing successful runtime results"
+      ]
+    }
+  ]
+}
