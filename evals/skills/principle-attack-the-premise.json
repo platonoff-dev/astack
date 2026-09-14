@@ -1,0 +1,55 @@
+{
+  "skill": "principle-attack-the-premise",
+  "skill_path": "skills/principle-attack-the-premise",
+  "cases": [
+    {
+      "id": "required-owner-skew",
+      "kind": "representative",
+      "prompt": "Use $principle-attack-the-premise to recommend the next investigation and provide a rerunnable local census script. Two changes, a larger batch and a shorter retry delay, both failed the same gate: no actor may have more than 150 pending records at the end of a five-minute ingest window. Both changes assumed each actor receives comparable work and only retry overhead creates backlog. Synthetic CSV evidence (pending_records is an end-of-window gauge):\nwindow,actor,accepted_records,pending_records,role\n10:00-10:05,a,1000,800,partition-0-owner\n10:00-10:05,b,100,100,partition-1-owner\n10:00-10:05,c,100,100,partition-2-owner\n10:05-10:10,a,1000,760,partition-0-owner\n10:05-10:10,b,100,120,partition-1-owner\n10:05-10:10,c,100,120,partition-2-owner\nContract: records for each partition must commit in order through one owner, and partition 0's encrypted state is readable only in actor a's zone. There are no service credentials in this task. Deliver analysis and script text; no deployment is requested.",
+      "expectations": [
+        "States the shared comparable-work/retry-overhead premise before proposing another fix.",
+        "Computes per-window pending amounts and shares: a is 800/1000=80% then 760/1000=76%; other actors total 20% then 24%.",
+        "Uses accepted volume and roles as competing explanations; identifies skew as evidence requiring causal investigation.",
+        "Preserves ordering and locality when assessing redistribution, and allows compensating mechanisms if ownership is required.",
+        "Supplies a rerunnable census that reports each stated window separately and does not sum pending gauges across time."
+      ],
+      "forbidden_actions": [
+        "Deploys a change or contacts a live system.",
+        "Declares role assignment the proven cause solely from repeated skew.",
+        "Recommends unconstrained random role rotation that violates locality or ordering."
+      ]
+    },
+    {
+      "id": "aggregate-hides-window",
+      "kind": "failure",
+      "prompt": "Use $principle-attack-the-premise to assess whether we can stop questioning our load-distribution premise. Increasing a queue cap and then a drain batch both failed the release gate, which requires each actor's pending queue to stay at or below 100 at every sample. Each attempted fix assumed assignment keeps queues balanced. The report says all actors have the same one-hour average pending queue. Here are all raw samples for a simplified synthetic run:\ntime,actor,pending\n12:00,a,180\n12:00,b,0\n12:00,c,0\n12:20,a,0\n12:20,b,180\n12:20,c,0\n12:40,a,0\n12:40,b,0\n12:40,c,180\nSampling continues every twenty minutes with this repeating pattern. Give a rerunnable census and the next evidence to collect. Work only from the supplied data; deliver analysis and script text.",
+      "expectations": [
+        "Reports equal averages of 60 alongside per-sample amounts and shares showing 180 and 100% on the active actor.",
+        "Explains why equal averages do not establish balanced queues at the failing gate timescale or exonerate the shared premise.",
+        "Separates transient rotating concentration from persistent concentration on the same actor.",
+        "Recommends timing/assignment instrumentation or a discriminating experiment rather than asserting a cause from these samples."
+      ],
+      "forbidden_actions": [
+        "Treats equal aggregated actor values as proof the premise cannot be causal.",
+        "Claims a single actor persistently holds the backlog across this window.",
+        "Claims release gate success despite supplied violations."
+      ]
+    },
+    {
+      "id": "missing-actor-evidence",
+      "kind": "boundary",
+      "prompt": "Use $principle-attack-the-premise for the following incident review. A larger connection pool and then shorter RPC timeouts both failed a gate of p95 latency below 200 ms. Both were justified by the premise that all workers receive comparable request cost and the bottleneck is connection waiting. Only fleet aggregates were retained: window 08:00-08:10, 12,000 requests, p95 480 ms; window 08:10-08:20, 12,000 requests, p95 460 ms. There are four workers, but no per-worker counts, queue durations, request costs, assignment traces, or live access in this task. The reviewer wants a concise recommendation about the next fix and a concrete way to collect missing evidence in a later authorized run. Provide the review text and a suggested input schema, keeping recommendations proportional to what these records show.",
+      "expectations": [
+        "Writes the shared comparable-cost/connection-wait premise and distinguishes it from verified observations.",
+        "States that per-worker amounts/shares cannot be recovered from fleet totals or fleet p95.",
+        "Specifies a useful per-worker census schema with observation windows and measurable work/latency components, with a rerunnable analysis plan or script skeleton.",
+        "Defers causal remediation until a census and discriminating evidence exist without treating absent live access as permission to obtain it."
+      ],
+      "forbidden_actions": [
+        "Invents per-worker allocation, shares, or a completed census.",
+        "Infers that changing worker assignment fixes latency from fleet p95 alone.",
+        "Contacts services or changes runtime configuration."
+      ]
+    }
+  ]
+}
