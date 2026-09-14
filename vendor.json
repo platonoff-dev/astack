@@ -247,7 +247,8 @@
       "license_path": "pstack/LICENSE",
       "commit": "889ec4b68fa5aab0e867dad71ec3fdf386ae48f3",
       "patches": [
-        "vendor/patches/principle-sequence-verifiable-units.patch"
+        "vendor/patches/principle-sequence-verifiable-units.patch",
+        "vendor/patches/principle-sequence-verifiable-units-skill-audit.patch"
       ]
     },
     {
