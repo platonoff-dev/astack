@@ -18,6 +18,7 @@ plugin, built one useful component at a time.
 | [interrogate](skills/interrogate/SKILL.md) | Review code with independent reviewers and evidence-based lead judgment, without applying findings. |
 | [why](skills/why/SKILL.md) | Investigate code rationale through available history and sources, separating evidence from inference. |
 | [how](skills/how/SKILL.md) | Explain runtime flow, subsystem boundaries, and code placement from implementation evidence. |
+| [teach](skills/teach/SKILL.md) | Teach code or a change conversationally using how and why investigations, gradual visuals, and plain language. |
 | [bro](skills/bro/SKILL.md) | Restate the last assistant message simply and concisely, without jargon. |
 | [tdd](skills/tdd/SKILL.md) | Fix a bug through a focused failing-then-passing regression test, or explain and use a practical verification alternative. |
 | [harden-tests](skills/harden-tests/SKILL.md) | Check test quality through regression checks, assertion audits, invariants, and optional targeted mutation. |
@@ -356,3 +357,14 @@ ignored `.local/` directory.
 
 Original astack code is MIT. See [LICENSE](LICENSE). Imported skills retain
 their upstream licenses, recorded in `vendor.json` and copied with each skill.
+
+## Teaching
+
+`teach` is vendored from pstack under MIT. Invoke `$teach` in Codex or
+`/astack:teach` in Claude Code with the code, change, or subsystem to explain.
+It uses the bundled `how`, `why`, and `unslop` skills, preserves evidence and
+uncertainty, and teaches in short conversational steps without quizzes.
+Its compatibility patch resolves those dependencies, supports the available
+delegation interface with a sequential fallback, and uses drawn SVG or HTML
+diagrams when image generation is unavailable. Investigation remains read-only;
+explanatory visuals may be created in an allowed artifact or scratch location.
