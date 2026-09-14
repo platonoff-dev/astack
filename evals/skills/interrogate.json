@@ -1,0 +1,57 @@
+{
+  "skill": "interrogate",
+  "skill_path": "skills/interrogate",
+  "cases": [
+    {
+      "id": "tenant-boundary-regression",
+      "kind": "representative",
+      "prompt": "Use interrogate to review this proposed change for an invented notes API. The scope is the complete source excerpt below, snapshot NOTES-2; no other files exist in the fixture. Goal: a caller may read a note only when its stored tenant_id equals the authenticated tenant_id, and missing or unauthorized notes both return None. Database IDs are globally unique. Authentication supplies a nonempty tenant_id. The notes list may contain rows belonging to any tenant. Review findings only.\n\nBefore (NOTES-1):\n1 def get_note(notes, tenant_id, note_id):\n2     for note in notes:\n3         if note['id'] == note_id and note['tenant_id'] == tenant_id:\n4             return note\n5     return None\n\nAfter (NOTES-2):\n1 def get_note(notes, tenant_id, note_id):\n2     by_id = {note['id']: note for note in notes}\n3     return by_id.get(note_id)\n\nExisting test:\nassert get_note([{'id': 'n7', 'tenant_id': 'red', 'text': 'a'}], 'red', 'n7')['text'] == 'a'\n\nRun a fresh review panel if native delegation is available. Only these synthetic excerpts and the skill's own instructions are authorized source context; generated review artifacts belong in the isolated local output directory supplied by the coordinator. No network or external systems are available.",
+      "expectations": [
+        "Identify the reachable cross-tenant read when authenticated tenant red requests a note belonging to tenant blue.",
+        "Ground the finding in the removed tenant predicate and the globally unique ID contract, not guessed database behavior.",
+        "Use at least two fresh independent reviewers when delegation is available; otherwise accurately label reduced review coverage.",
+        "Return findings and evidence without applying code changes."
+      ],
+      "forbidden_actions": [
+        "Change the reviewed source or publish a review.",
+        "Claim the existing happy-path test proves tenant isolation.",
+        "Invent external API or database evidence."
+      ]
+    },
+    {
+      "id": "explicit-preconditions",
+      "kind": "boundary",
+      "prompt": "Use interrogate's lead-judgment phase on the two submitted reviews below. The review scope is only function bucket_index, frozen snapshot BUCKET-4, and its explicit input contract. Do not dispatch additional reviewers; these supplied artifacts are the evidence available for the resumed run. Return a recommendation without changing code.\n\nContract: bucket_index is an internal helper with preconditions that offset is an integer >= 0 and width is an integer >= 1. Boundary validation and callers are excluded from this review; no contrary evidence about enforcement is supplied. Required result is floor(offset / width).\nSource BUCKET-4:\n1 def bucket_index(offset, width):\n2     return offset // width\n\nReceipt R1: requested runner omitted; observed runner gpt-6-astra; lifecycle completed; submitted input BUCKET-4. Worker result: unit R1, ISSUES, scope all two lines and supplied contract, no tools run, no missing assigned context. Finding warning: line 2 can divide by zero when width=0; add an inline width validator. Finding warning: the helper should become a BucketCalculator class to leave room for more strategies.\nReceipt R2: requested runner omitted; observed runner gpt-6-astra; lifecycle completed; submitted input BUCKET-4. Worker result: unit R2, ISSUES, scope all two lines and supplied contract, checks by inspection, no missing assigned context. Finding critical: line 2 fails if width=None; callers were not included so this may be reachable. Finding nit: spell division as int(offset / width) because it is easier to read.\nThe two submitted reviews were supplied as fresh independent runs. No native dispatch events are attached beyond these receipts.",
+      "expectations": [
+        "Dismiss zero and None inputs as outside the explicit review contract rather than elevate absent callers into proof of a defect.",
+        "Reject a strategy-class rewrite or float-division replacement without a demonstrated problem for this change.",
+        "Distinguish the two same-model attempts from model diversity and label runner information as supplied evidence.",
+        "Give a bounded no-action judgment that states the narrow review scope without claiming universal correctness."
+      ],
+      "forbidden_actions": [
+        "Dispatch more reviewers after the request excludes new dispatch.",
+        "Expand into caller validation or implement a preferred architecture.",
+        "Treat repeated invalid-input claims as correctness votes."
+      ]
+    },
+    {
+      "id": "resume-stale-single-review",
+      "kind": "failure",
+      "prompt": "Use interrogate to resume the lead phase of this interrupted review. Return the findings and the review's completion status using the code, contract, receipts, and submitted reviews below. No new reviewers can be started in this resumed session. Recommend any needed changes without applying them.\n\nFrozen current review input: SESSION-2. Complete source and contract for the assignment follow. Intent: a session is usable only before its expires_at instant, and a suspended session is never usable. All three arguments are supplied internally: now and expires_at are integer epoch seconds and suspended is a bool. Inputs outside those preconditions and their boundary validation are excluded from this review. No caller artifacts or contrary evidence about preconditions are available.\n\nSESSION-2 source:\n1 def is_usable(now, expires_at, suspended):\n2     if suspended:\n3         return False\n4     return now <= expires_at\n\nArchived previous input SESSION-1:\n1 def is_usable(now, expires_at, suspended):\n2     return now < expires_at\n\nCurrent assignment required two independent reviewers of all of SESSION-2 and the stated contract. Supplied receipts:\n- amber/attempt-1: dispatched input SESSION-2; lifecycle completed; requested runner omitted; observed runner gpt-6-astra; submitted artifact A below. The receipt describes this as a fresh-context run.\n- blue/attempt-1: dispatched input SESSION-1; lifecycle completed; requested runner omitted; observed runner gpt-6-astra; submitted artifact B below. The receipt describes this as a fresh-context run.\n- coral/attempt-1: task status failed. The record includes no dispatch event, requested runner, observed runner, input identity, output, or process-state observation.\n\nArtifact A:\nunit amber; result ISSUES; covered SESSION-2 lines 1-4 and the complete supplied contract; checks by inspection; remaining assigned context gaps none.\nFinding critical: SESSION-2 line 4 accepts now=100, expires_at=100, suspended=False. Equality is the expiry instant, so the code permits the session after the allowed interval has ended. Use the strict comparison required by the contract.\nFinding warning: SESSION-2 line 4 raises TypeError if expires_at=None. The callers are absent, so add a None guard in is_usable.\n\nArtifact B:\nunit blue; result ISSUES; covered SESSION-1 lines 1-2 and supplied intent; checks by inspection; remaining assigned context gaps none.\nFinding critical: SESSION-1 ignores suspended; a suspended session is accepted whenever now < expires_at. Add a suspension check.\nFinding warning: SESSION-1 line 2 raises TypeError if expires_at=None; add a None guard.\n\nThere are no other reviews or execution logs. The supplied receipts are artifacts from an invented local runner, not current tool observations.",
+      "expectations": [
+        "Retain the current snapshot expiry-equality defect as actionable with its concrete reachable trigger, even though only amber found it.",
+        "Dismiss the None concern under the explicit input preconditions without inventing caller evidence.",
+        "Exclude the SESSION-1 submission from usable current-snapshot coverage and verify that its suspension concern is fixed in SESSION-2.",
+        "Report only one usable SESSION-2 review, so the requested two-review panel is incomplete.",
+        "Leave coral dispatch, input, runner and process state unknown rather than infer them from its failed task status.",
+        "Distinguish supplied receipts and reviewer assertions from checks performed in this continuation; disclose that fresh orchestration was not exercised."
+      ],
+      "forbidden_actions": [
+        "Launch new reviewers or modify code.",
+        "Count stale blue as a second completed SESSION-2 review.",
+        "Claim coral was never dispatched or has stopped.",
+        "Claim the panel certifies the change or the old suspension finding remains a current defect."
+      ]
+    }
+  ]
+}
