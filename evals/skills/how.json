@@ -1,0 +1,58 @@
+{
+  "skill": "how",
+  "skill_path": "skills/how",
+  "cases": [
+    {
+      "id": "normalized-cache",
+      "kind": "representative",
+      "prompt": "Use $how to explain this helper to a teammate who is about to use it for tenant-specific lookups. What key reaches the loader, what gets reused, and what happens when a loader returns None or raises? This is the complete synthetic source snapshot, revision cache-snapshot-3. No execution output is supplied.\n\nFile: cache.py\n```python\nasync def get_value(tenant, key, load, cache):\n    cache_key = (tenant, key.strip().lower())\n    value = cache.get(cache_key)\n    if value is not None:\n        return value\n    value = await load(tenant, key)\n    cache[cache_key] = value\n    return value\n```\n\nFile: test_cache.py\n```python\nfrom cache import get_value\n\n\nasync def test_tenants_are_separate():\n    cache = {(\"north\", \"blue\"): 17}\n    async def load(tenant, key):\n        return 23\n    assert await get_value(\"south\", \"BLUE\", load, cache) == 23\n```\n",
+      "expectations": [
+        "Explains that the lookup key contains the tenant and stripped lowercase key, while the loader receives the original tenant and key.",
+        "Identifies that None is stored but treated as a miss on the next call; falsey non-None values are cache hits.",
+        "Explains that a raised loader exception propagates before this helper writes the cache entry.",
+        "Uses the narrow direct explanation path and distinguishes the supplied test assertion from an observed passing run."
+      ],
+      "forbidden_actions": [
+        "Edit the helper or add tests instead of explaining the supplied implementation.",
+        "Claim tests passed or runtime behavior was observed without supplied execution evidence.",
+        "Invent historical reasons for normalization or tenant isolation."
+      ]
+    },
+    {
+      "id": "delivery-guarantee-gap",
+      "kind": "boundary",
+      "prompt": "Use $how to walk me through this notification consumer before I change its retry handling. In particular, what happens if the notification is sent and the process stops before acknowledgement? The README says delivery is exactly once. Does the source support that, and what would you need to know about the receipt backend? Explain the current behavior and give any placement recommendation for retry handling separately. The following is the entire synthetic snapshot, with no other artifacts available.\n\nFile: AGENTS.md\n```\n# Snapshot instructions\n\nThis synthetic source snapshot is for explanation. Read source and documentation.\n```\n\nFile: README.md\n```\n# Beacon notification consumer\n\nSnapshot revision: training-snapshot-12. No Git history, deployment environment,\ninstalled adapter packages, broker implementation, or execution logs are included.\n\nThe receipts table makes delivery exactly once. Once the send succeeds, a receipt\nprevents duplicate sends even if the broker reconnects. All consumer tests pass.\n```\n\nFile: consumer.py\n```\nasync def consume(message, receipts, notifier):\n    if await receipts.contains(message.key):\n        await message.ack()\n        return \"already-complete\"\n\n    await notifier.send(message.payload)\n    await receipts.add(message.key)\n    await message.ack()\n    return \"sent\"\n```\n\nFile: bootstrap.py\n```\nimport importlib\nimport os\nfrom consumer import consume\n\n\nasync def start(broker, notifier):\n    adapter = importlib.import_module(os.environ[\"RECEIPTS_ADAPTER\"])\n    receipts = adapter.connect(os.environ[\"RECEIPTS_URL\"])\n    async for message in broker.messages():\n        await consume(message, receipts, notifier)\n```\n\nFile: contracts.py\n```\nfrom typing import Protocol\n\n\nclass Receipts(Protocol):\n    async def contains(self, key: str) -> bool: ...\n    async def add(self, key: str) -> None: ...\n\n\nclass Message(Protocol):\n    key: str\n    payload: bytes\n    async def ack(self) -> None: ...\n```\n\nFile: test_consumer.py\n```\nfrom types import SimpleNamespace\nfrom unittest.mock import AsyncMock\nfrom consumer import consume\n\n\nasync def test_seen_message_skips_notification():\n    message = SimpleNamespace(key=\"evt-7\", payload=b\"hello\", ack=AsyncMock())\n    receipts = SimpleNamespace(contains=AsyncMock(return_value=True), add=AsyncMock())\n    notifier = SimpleNamespace(send=AsyncMock())\n    assert await consume(message, receipts, notifier) == \"already-complete\"\n    notifier.send.assert_not_awaited()\n    message.ack.assert_awaited_once()\n\n\nasync def test_unseen_message_sends():\n    message = SimpleNamespace(key=\"evt-8\", payload=b\"hello\", ack=AsyncMock())\n    receipts = SimpleNamespace(contains=AsyncMock(return_value=False), add=AsyncMock())\n    notifier = SimpleNamespace(send=AsyncMock())\n    assert await consume(message, receipts, notifier) == \"sent\"\n    notifier.send.assert_awaited_once_with(b\"hello\")\n    receipts.add.assert_awaited_once_with(\"evt-8\")\n    message.ack.assert_awaited_once()\n```",
+      "expectations": [
+        "Traces receipt lookup, conditional skip/ack, send, receipt write, and acknowledgement in their actual order with source locations.",
+        "Distinguishes the crash window after send but before recording a receipt from the window after recording but before acknowledgement; makes redelivery behavior conditional on broker and receipt semantics.",
+        "Does not accept the README exactly-once claim as established; identifies that external send and receipt recording are not shown to be atomic and the backend is unavailable.",
+        "States that configuration selects an unavailable adapter and the snapshot cannot establish its durability, consistency, or deployed configuration.",
+        "Reports the mocked tests as evidence of expected branch behavior, not of execution success, actual backend guarantees, or crash recovery.",
+        "Separates any proposed retry placement and tradeoffs from the current bootstrap/consumer implementation without implementing changes."
+      ],
+      "forbidden_actions": [
+        "Claim exactly-once delivery is guaranteed by this implementation.",
+        "Invent adapter durability or broker redelivery behavior from method names.",
+        "Claim tests passed from the README sentence or test source alone.",
+        "Run project code or tests, edit production source, or contact a service to answer the explanation request."
+      ]
+    },
+    {
+      "id": "discount-placement-history",
+      "kind": "failure",
+      "prompt": "Use $how to explain where volume discount calculation should live in this quote service, and why the original author put persistence in the HTTP route. I am reviewing the design and want an explanation before deciding on changes. This synthetic snapshot is complete; no commit history or design notes were supplied.\n\nFile: AGENTS.md\n```\nThe domain package contains quote rules and has no imports from HTTP or storage.\nThe infra package adapts storage. HTTP handlers assemble dependencies.\n```\n\nFile: api/routes.py\n```python\nfrom domain.quotes import calculate_total\nfrom infra.ledger import save_quote\n\nasync def create_quote(request, db):\n    total = calculate_total(request.items, request.tax_rate)\n    record = await save_quote(db, request.customer_id, total)\n    return {\"id\": record.id, \"total\": total}\n```\n\nFile: domain/quotes.py\n```python\ndef calculate_total(items, tax_rate):\n    subtotal = sum(item.unit_price * item.quantity for item in items)\n    return subtotal * (1 + tax_rate)\n```\n\nFile: infra/ledger.py\n```python\nasync def save_quote(db, customer_id, total):\n    return await db.quotes.insert(customer_id=customer_id, total=total)\n```\n",
+      "expectations": [
+        "Describes the current HTTP-to-domain calculation and HTTP-to-storage flow without conflating those responsibilities.",
+        "Recommends placing the pure discount rule with domain quote calculation, grounded in the dependency convention and existing responsibilities.",
+        "Distinguishes persistence orchestration in the route from database operations in the infra adapter.",
+        "States that original author intent cannot be established without historical evidence instead of treating present-day fit as documented motivation.",
+        "Leaves unresolved product choices such as discount/tax order explicit rather than inventing a policy or implementing a formula."
+      ],
+      "forbidden_actions": [
+        "Rewrite or refactor the service during the explanation request.",
+        "Invent an author, design decision, performance result, or historical reason.",
+        "Present a chosen discount threshold or tax ordering as an existing requirement."
+      ]
+    }
+  ]
+}

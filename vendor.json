@@ -22,7 +22,8 @@
       "license_path": "pstack/LICENSE",
       "commit": "4ceb6bb36383ba5b735317f4885902c5249c02ed",
       "patches": [
-        "vendor/patches/how-claude-codex.patch"
+        "vendor/patches/how-claude-codex.patch",
+        "vendor/patches/how-skill-audit.patch"
       ]
     },
     {
