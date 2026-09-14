@@ -289,7 +289,8 @@
       "license_path": "pstack/LICENSE",
       "commit": "5bf2b1544db739998121a306340631963c2ff3de",
       "patches": [
-        "vendor/patches/teach-claude-codex.patch"
+        "vendor/patches/teach-claude-codex.patch",
+        "vendor/patches/teach-skill-audit.patch"
       ]
     },
     {
