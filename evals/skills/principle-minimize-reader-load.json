@@ -1,0 +1,50 @@
+{
+  "skill": "principle-minimize-reader-load",
+  "skill_path": "skills/principle-minimize-reader-load",
+  "cases": [
+    {
+      "id": "invoice-call-chain",
+      "kind": "representative",
+      "prompt": "Use $principle-minimize-reader-load to review this synthetic Python module. Suggest the smallest useful refactor and explain where a reader traces the final amount and what can change it. Do not edit files.\n\ndef price_for(quantity, unit_price):\n    return forward_price(quantity, unit_price)\n\ndef forward_price(quantity, unit_price):\n    return calculate_price(quantity, unit_price)\n\ndef calculate_price(quantity, unit_price):\n    return quantity * unit_price\n\ndef invoice_line(quantity, unit_price):\n    return {\"amount\": price_for(quantity, unit_price)}\n\nRepository search results: price_for has only invoice_line as a caller; forward_price has only price_for; calculate_price has only forward_price. None of these functions are exported, decorated, or referenced dynamically. There are no other mutable values in this module.",
+      "expectations": [
+        "Identifies the redundant call chain using the supplied callers.",
+        "Proposes a simpler path that preserves quantity times unit_price behavior.",
+        "Distinguishes unnecessary indirection from mutable-state concerns, without inventing missing state."
+      ],
+      "forbidden_actions": [
+        "Edits files or performs external actions.",
+        "Introduces new abstraction layers or a shared framework without a demonstrated need."
+      ]
+    },
+    {
+      "id": "authorization-wrapper",
+      "kind": "boundary",
+      "prompt": "Use $principle-minimize-reader-load to review this Python code and recommend a focused readability change. This is a proposal only; do not edit files.\n\nclass InvoiceStore:\n    def __init__(self, db):\n        self.db = db\n    def read(self, invoice_id):\n        return self.db.fetch_invoice(invoice_id)\n\ndef invoice_for_user(store, user, invoice_id):\n    invoice = store.read(invoice_id)\n    if invoice.tenant_id != user.tenant_id:\n        raise PermissionError(\"invoice belongs to another tenant\")\n    return invoice\n\ndef invoice_route(store, user, invoice_id):\n    return serialize(invoice_for_user(store, user, invoice_id))\n\nSearch evidence: InvoiceStore has only this implementation. invoice_for_user has one caller, invoice_route. store.read is also used by an authorized administrative export job. The service has tests showing cross-tenant requests must be rejected. The route is the only user-facing path in this fixture.",
+      "expectations": [
+        "Recognizes tenant authorization as a meaningful invariant despite the helper having one caller.",
+        "Any proposed refactor preserves authorization before serialization for the route.",
+        "Does not apply user authorization indiscriminately to the separately described administrative export path."
+      ],
+      "forbidden_actions": [
+        "Edits files or changes access-control behavior.",
+        "Recommends removing the tenant check as unnecessary wrapper work.",
+        "Claims the absence of additional implementations proves a boundary has no value."
+      ]
+    },
+    {
+      "id": "unknown-discount-writers",
+      "kind": "failure",
+      "prompt": "Use $principle-minimize-reader-load to assess this excerpt. I only have these files; give a review with a concrete next investigation and a bounded improvement if the evidence supports one. Do not modify anything.\n\n# pricing.py\nactive_discount = 0\n\ndef total(subtotal):\n    return subtotal * (1 - active_discount)\n\n# admin.py\nimport pricing\n\ndef set_discount(value):\n    pricing.active_discount = value\n\nKnown context: A background worker and plugin loader also import pricing, but their source is unavailable. Search was run only on pricing.py and admin.py. Existing API consumers call total(subtotal) with one argument. There are no timing traces, concurrency guarantees, or complete call-site results in the supplied evidence.",
+      "expectations": [
+        "Identifies hidden mutable module state as the reader-load problem.",
+        "Distinguishes the observed admin writer from the unknown set of all writers.",
+        "Makes an investigation or refactor proposal bounded by missing callers, concurrency information, and public API compatibility."
+      ],
+      "forbidden_actions": [
+        "Claims set_discount is the only writer or asserts a race condition has been proven.",
+        "Recommends an immediate breaking signature replacement as safe without consumer evidence.",
+        "Edits files or contacts unavailable services."
+      ]
+    }
+  ]
+}
