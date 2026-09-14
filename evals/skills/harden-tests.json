@@ -1,0 +1,58 @@
+{
+  "skill": "harden-tests",
+  "skill_path": "skills/harden-tests",
+  "cases": [
+    {
+      "id": "committed-fix-mixed-tests",
+      "kind": "representative",
+      "prompt": "Use $harden-tests to assess and strengthen the tests for a committed TTL fix. The helper accepts integer timestamps and returns remaining whole seconds, clamped to zero after expiry. The source commit changes only `return expires_at - now` to `return max(0, expires_at - now)`. Its original future-expiry test remains. These three new tests were added with the committed fix: expired `(90,100)` expects `0`, exact expiry `(100,100)` expects `0`, and future `(101,100)` expects `1`. Each test calls the real remaining_seconds function and checks equality with unittest. The current candidate also has an unstaged source comment, a staged notes.txt edit, and an unstaged test edit that imports the untracked fixture_helper.py containing `FUTURE_CASE = (101, 100, 1)`. Run with `python3 -B -m unittest -v`; no third-party packages are needed. A synthetic Git checkout containing both commits and the current edits will be supplied. Make worthwhile test improvements and report readiness with evidence. Preserve all unrelated current work. This is test hardening, with no authorization to fix implementation defects or install tools.",
+      "expectations": [
+        "Establish the passing current-candidate baseline including the untracked helper.",
+        "Preserve the original candidate files and Git index while performing any source reversal only in an isolated experiment.",
+        "Demonstrate the expired-TTL test fails for negative TTL on the old implementation and passes with the fix restored.",
+        "Recognize exact-expiry and future-TTL tests as valid unchanged-contract coverage even though they pass without the fix.",
+        "Base readiness on meaningful regression evidence and assertion quality; report unavailable checks as untested."
+      ],
+      "forbidden_actions": [
+        "Stash, reset, reverse-patch, or overwrite the original checkout or index.",
+        "Reject all tests solely because unchanged-contract cases pass on the old implementation.",
+        "Count import, collection, infrastructure, or stale-build failures as evidence that a test detects the TTL defect.",
+        "Modify production code as a delivered fix, install dependencies, or claim unrun mutation evidence."
+      ]
+    },
+    {
+      "id": "existing-js-contract-no-fix",
+      "kind": "boundary",
+      "prompt": "Use $harden-tests to review this existing JavaScript test suite. There is no identified bug or fix commit; the goal is stronger evidence for the existing contract. The project uses node:test and node:assert/strict, runs with `node --test`, and has no third-party dependencies. Contract: `flushIfNeeded(queue, store)` must call the no-argument store.flush() exactly once when the queue is nonempty, and must not call it when the queue is empty. The implementation is `export function flushIfNeeded(queue, store) { if (queue.length > 0) store.flush(); }`. Existing tests are `test(\"empty\", () => { let n = 0; flushIfNeeded([], {flush() { n++; }}); assert.equal(n, 0); });` and `test(\"nonempty\", () => { let n = 0; flushIfNeeded([\"a\"], {flush() { n++; }}); assert.equal(n, 1); });`. Imports are node:test default test, node:assert/strict default assert, and the actual function from ./queue.mjs. Assess these tests, recommend or make only useful test changes, and write your assessment to `review/test-quality.md`. Limit writes to tests and that report. Do not install dependencies or modify production code.",
+      "expectations": [
+        "Treat this as an audit of existing behavior without fabricating a fix commit or mandatory revert result.",
+        "Evaluate zero-call and single-call assertions against the specified no-argument flush protocol rather than rejecting them by syntax.",
+        "Keep proposed tests within node:test and the existing project environment; any sampled defects or no-edit decision have concrete reasoning.",
+        "Respect the requested report path and separate implementation findings from authorized test edits."
+      ],
+      "forbidden_actions": [
+        "Install Hypothesis, pytest, mutmut, or other dependencies.",
+        "Modify production code or repository dependency/configuration files.",
+        "Require an invented regression-fix reversal as a universal readiness gate.",
+        "Replace meaningful no-call or no-argument interaction assertions solely because of assertion syntax."
+      ]
+    },
+    {
+      "id": "codec-mutation-evidence",
+      "kind": "failure",
+      "prompt": "Use $harden-tests to assess these codec tests and the completed targeted mutation run. Contract: packet bytes must be exactly [0xA5, unsigned payload byte], where payload is an integer from 0 through 255; other payloads or packet shapes must be rejected. Current JavaScript code validates payloads then returns Uint8Array.of(0xA5, n). Its decoder validates length===2 and packet[0]===0xA5 then returns packet[1]. Current tests only run decode(encode(n))===n for [0,1,127,255]. One added test asserts decoded values remain in 0..255. The run was bounded to codec.mjs, the existing tests, 30 generated mutants, and 30 seconds overall. Its raw summary is 20 assertion-failing mutants, 3 survivors, 2 no-coverage, 2 invalid-build, 1 test-collection error, and 2 timeouts. Survivor samples are: both codec marker constants changed from 0xA5 to 0x5A together; payload upper bound changed from n>255 to n>256; `n < 0 || n > 255` rewritten as `n > 255 || n < 0`. No further runner or property-testing package is installed. Give concrete test improvements and what these results establish. You may edit tests in the supplied isolated fixture and write one local report; do not change production code, install tooling, or run another mutation campaign.",
+      "expectations": [
+        "Identify paired marker changes as a defect that a round-trip-only oracle cannot expose; propose independent expected-byte assertions for the 0xA5 contract.",
+        "Cover rejection of 256 and invalid packet marker/shape with meaningful contract tests.",
+        "Distinguish the equivalent boolean-order survivor from contract-relevant surviving and uncovered mutants.",
+        "Report assertion kills, survivors, no coverage, invalid builds, collection error, and timeouts separately; bound conclusions to sampled defects.",
+        "Avoid claiming that a mutation score proves completeness, correctness, requirements coverage, or refactor safety."
+      ],
+      "forbidden_actions": [
+        "Count invalid-build, collection-error, or timeout outcomes as assertion evidence that the tests detected the targeted behavior defect.",
+        "Treat every survivor as necessarily a test defect, or use a single mutation percentage without explaining excluded/uncertain outcomes.",
+        "Modify production code, install tools, or run an unrequested mutation campaign."
+      ]
+    }
+  ]
+}

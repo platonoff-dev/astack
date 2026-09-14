@@ -1,123 +1,146 @@
 ---
 name: harden-tests
-description: Check whether tests detect incorrect behavior through regression checks, assertion audits, invariant searches, and optional targeted mutation testing. Use when asked to assess or strengthen test quality.
+description: Audit and strengthen existing tests for regression sensitivity and contract coverage. Use when asked whether tests would catch a bug, to harden a change's tests, or to repair weak or brittle assertions. Not a default step for routine test writing or bug fixing.
 ---
 
 # Harden tests
 
-One job: **attack the tests.** The code is somebody else's problem. The
-question you answer is "do these tests actually fail when the behaviour is
-wrong?" — because 100% diff coverage with unasserted tests is precisely the AI
-failure mode, and nothing else in the pipeline checks for it.
+Establish which incorrect behaviors the tests detect, strengthen useful gaps,
+and report the evidence. A passing suite or high coverage alone does not answer
+that question. Tests should also tolerate changes that preserve their contract.
 
-## Hard rules
+This is a focused review of existing tests. TDD handles writing a failing test
+before implementing a fix; property-based testing handles generator and property
+design in depth. Neither skill is required here.
 
-- **You never touch source.** Not one line. If a finding can only be fixed in
-  the implementation, that is a stop: report it, do not fix it.
-- **You may edit tests** — that is your remit — but every test edit means you
-  re-run attack 1 afterwards. No exceptions.
-- **Attack 1 is mandatory and is the verdict.** Any new test that still passes
-  with the fix reverted is a `NOT READY`, regardless of how green everything
-  else is.
-- **Write exactly one file: `.work/harden.md`.**
+## Establish the scope and contract
 
-## Supporting capabilities
+Read the repository's `AGENTS.md` / `CLAUDE.md`, the requested diff or test area,
+nearby tests, and the project's test commands. Use its existing language, test
+runner, fixtures, and dependency policy. Keep the scope at the named change or
+behavior unless evidence requires a wider check.
 
-Use these capabilities when available in the current harness. Their absence
-does not prevent the assertion audit or regression check below.
+For each behavior under review, identify the contract and its basis: requirements,
+documented API or protocol, a reproduced bug, or an established compatibility
+promise. Current implementation behavior alone is not proof of intent. Surface
+an ambiguous expectation instead of encoding a guess as a test.
 
-- **Property-based testing** — supports attack 3, and its
-  section on tests that "assert nothing" through tautology or vacuity is the
-  sharpest tool you have for attack 2. It ranks nine property patterns
-  (roundtrip, inverse, oracle, idempotence, invariant, easy-to-verify,
-  commutativity, associativity, identity) by strength: **assert the strongest
-  property the code supports.**
-- **Mutation testing** — supports attack 4, specifically the
-  scoping: which targets, which timeouts, how to keep a run finite. Use it to
-  decide whether attack 4 is even affordable for this ticket before running
-  anything.
+Distinguish tests that **claim to detect the regression** from tests of unchanged
+behavior. Name the defect each regression test claims to catch. Other useful
+contract tests may legitimately pass when this particular fix is removed.
 
-Attack 1 is yours alone. No skill does it and no skill excuses it.
+For a hardening request, edit tests, fixtures, and test helpers within scope. For
+an assessment-only request, report proposed changes. Keep production fixes
+outside a test-hardening-only request; report source defects and continue
+independent review. A broader user request may already authorize those fixes.
+Temporary production edits in isolated experiments are permitted for the checks
+below; they are not changes to deliver.
 
-## Attack 1 — revert-check (mandatory, ~free)
+## Audit assertions and execution
 
-`git stash` the implementation commit's source changes, leaving the tests in
-place. Run only the new tests. **Every one must fail.** Restore.
+Trace setup through the real subject to the observable result. Ask both: **what
+contract violation would fail this test, and what harmless refactor would fail
+it?** Use the answers to judge an assertion, rather than banning its syntax.
 
-```
-git stash push -- <impl source files>
-<project test command selecting the new tests>
-git stash pop
-```
+| Check | Decision |
+|---|---|
+| Test actually executes | Confirm discovery, selection, and completion. Check skipped or expected-failure cases, unawaited work, swallowed errors, and assertions hidden in callbacks that never run. Framework expectations, type checks, and explicit no-crash contracts can be valid without a conventional assertion statement. |
+| Expected result has an independent basis | Prefer hand-checked examples, specification fixtures, an independent oracle, or a justified relation. Reusing the subject or its faulty helper to compute both sides creates a shared blind spot. Similar-looking arithmetic is not automatically tautological; judge independence and the faults it can expose. |
+| Assertion distinguishes the defect | Presence, type, or truthiness checks may be too weak for a value or state contract. Assert the relevant result, error, state transition, or effect. Keep exact messages, snapshots, and constants only at the precision the contract requires; protocol bytes and promised defaults can justify exact values. |
+| Doubles preserve the behavior being tested | Keep the subject real. Stub at a boundary whose behavior is understood. A mock returning what the test configured proves little by itself; inspecting a request emitted by real code can verify a contract. Check arguments, counts, or ordering when those are part of that contract, not for private call choreography. |
+| Absence is meaningful | Empty results, no write, no notification, and rejection are legitimate outcomes. Ensure the triggering path ran and the observation covers the relevant completion point. Add a contrasting case when needed to distinguish correct absence from an unconditional no-op; it need not live in the same test. |
+| Inputs exercise the claim | Check boundaries, error paths, and state transitions relevant to the change. Empty loops, impossible preconditions, heavily discarded generated inputs, or one shared fixture hiding all other branches can leave a green test with no useful evidence. |
 
-Report it as `N/N new tests fail with the fix reverted`. Name any test that
-survived — that test does not test the fix.
+Fix concrete weaknesses without rewriting good tests for style. Do not weaken an
+expectation to accommodate a source bug. Control time, randomness, scheduling,
+and shared state at existing seams where they obscure the result; avoid sleeps
+and repeated retries that merely hide a flaky failure.
 
-## Attack 2 — assertion audit
+## Demonstrate regression sensitivity
 
-Read every new test. Flag:
+For tests claiming to catch a known bug, seek a reproducible **pass with the fix,
+meaningful failure with the defect, pass again with the fix**. Existing evidence
+can suffice if it matches the current test and relevant implementation; otherwise
+run a focused experiment when practical.
 
-- no assertion at all;
-- asserting on a mock the test itself configured (tautology);
-- `assert_called()` / `assert_called_once()` with no argument check;
-- over-mocking such that the real code path never executes;
-- an assertion that would hold for the pre-fix behaviour too (attack 1 catches
-  these mechanically — this catches the ones that hide behind a second test).
+Read [Isolated regression checks](references/regression-check.md) before preparing
+the experiment. Keep the current tests fixed while reversing only the relevant
+production change in a disposable checkout or copy. `git stash` does not undo
+committed implementation changes. Preserve the user's working tree and index.
 
-`ruff` `PT` and `T20` cover a slice of this. The rest is reading — with
-`property-based-testing`'s tautology/vacuity criteria applied to the example
-tests, not only to property tests.
+Check the actual selected test names and failures, not just the process exit
+code. A wrong result or a crash in the exercised behavior can be evidence;
+collection errors, incompatible APIs, stale binaries, missing dependencies, and
+unrelated failures cannot establish the claim. Run separately when one failure
+prevents other regression tests from reaching their assertions.
 
-Also audit the exception handling the new tests exercise: a handler that
-`pass`es or returns an indistinguishable default is the most common reason a
-test passes over broken code. You may not fix it in source — report it as a
-stop.
+A claimed regression test that still passes needs investigation: wrong setup,
+weak observation, wrong defect, or a misstated claim. Strengthen it or correct
+the claim based on the contract; do not manufacture failure in a useful test of
+unchanged behavior. If reversing the fix is impractical, try a small plausible
+defect at the same behavioral seam, label it as an injected defect, and state
+that historical regression detection remains unverified.
 
-## Attack 3 — invariant hunt
+After changing a regression test, repeat its relevant sensitivity check. After
+other test edits, rerun those tests and affected neighbors; there is no reason
+to repeat unrelated experiments.
 
-For each criterion ask: is there a *property* here, not just examples? For this
-codebase's actual work the answer is usually yes — byte-size bounds,
-split-then-join round-trips, loss-free queue refill, drain rates, ack == send.
-When it is, add a `hypothesis` property test. Install `hypothesis` into the
-local test venv only; never edit `Pipfile` / `requirements-test.txt`.
+## Fill valuable contract gaps
 
-## Attack 4 — targeted mutation (optional, per ticket)
+Choose examples, a table of cases, or properties according to the gap. Useful
+properties include conservation of data, ordering plus preservation of elements,
+round trips, idempotence, agreement with an independent model, and relationships
+between related inputs or state transitions. State preconditions and the domain
+over which the rule should hold.
 
-`mutmut` on the single changed module with a hard timeout. Only for logic-dense
-security code. Choose the scope using available mutation-testing guidance — targets
-and timeouts are the whole problem here; use it to decide whether attack 4 is
-affordable for this ticket before running anything. This is a third gear, not
-your identity: Do not attempt a whole-suite mutation run without assessing its cost. Check
-whether `mutmut` is available; use the project test environment and report
-missing tooling honestly.
+Properties complement each other; there is no universal strength ranking. A
+constant result can be idempotent, an empty result can be sorted, and paired
+encoder/decoder bugs can pass a round trip. Add an independent example or another
+constraint when it closes that blind spot. Check that generators reach relevant
+boundaries and produce enough valid cases. Preserve useful counterexamples and
+the seed or replay information supplied by the runner.
 
-## Output — `.work/harden.md`
+Use a property library already in the project when it helps. Without one, use
+focused examples or bounded enumeration, or propose a dependency with a concrete
+benefit. Do not install tools automatically or refactor production code merely
+to introduce property testing.
 
-```markdown
-# PROJ-123 — hardening
+## Optional bounded mutation
 
-## Attack 1 — revert-check
-**6/6 new tests fail with the fix reverted.**
-| Test | Fails on revert | Failure |
-|---|---|---|
-| `test_refill_survives_restart` | yes | AssertionError: lost 3 messages |
+Use mutation when uncertainty about important logic remains after the cheaper
+checks. Select a few plausible defects, such as an off-by-one condition, a
+missing state update, or a wrong boundary argument. A manual injected defect may
+be enough. Use an existing mutation tool only when its cost is justified; no
+language, tool, full-suite run, or universal score is required.
 
-## Attack 2 — assertion audit
-| Test | Finding | Action |
-|---|---|---|
-| `test_split_preserves_payload` | asserts only on the mock it configured | rewrote to assert on the joined bytes |
+Before running, set the production targets, selected tests, and a total time or
+mutant budget with per-run timeouts. Establish a passing unmodified baseline and
+use isolation as above. Change one defect at a time, or let a configured runner
+isolate each mutant. Triage the result:
 
-## Attack 3 — invariants
-| Property | Test | Cases |
-|---|---|---|
-| split then join is the identity | `test_split_join_roundtrip` | 10k |
+| Outcome | Interpretation and action |
+|---|---|
+| Meaningful failure | Evidence that the selected tests detect this defect; identify the failing observation. |
+| Survived or not covered | Check reachability, inputs, and assertions. Add a test only for a relevant contract gap. Survival alone does not establish equivalence. |
+| Equivalent or outside the contract | Explain why behavior cannot differ on the valid domain, or why the difference is outside scope. Leave uncertain equivalence unresolved. Do not pin internals just to kill it. |
+| Invalid build, collection, or tool error | The experiment is inconclusive for behavioral sensitivity. Distinguish these from an expected runtime failure caused by the defect itself. |
+| Timeout or flaky result | Diagnose within the budget. A reproducible mutant-induced hang differs from a slow environment or pre-existing flake. Report timeouts separately even if the tool counts them as detected. |
 
-## Attack 4 — mutation
-skipped / mutmut on `<module>`: N mutants, M survived — <which>
+Mutation measures sensitivity to the tried defects. It does not validate the
+requirements, establish complete correctness, or show tolerance of harmless
+refactors. Stop at the agreed budget and report untested targets and survivors.
 
-## Stops for the human
-- <anything that needs a source change, or "none">
-```
+## Report the result
 
-Report back: the revert-check line first, then counts for attacks 2–4, then the
-stop list.
+Lead with the important gaps and whether the claimed regression detection was
+demonstrated. Include the tests changed, the contracts they protect, and any
+production defects or unresolved expectations. For experiments, give the test
+selection, source revision or patch, command, and observed failure or survival.
+Count only executed checks; identify skips, errors, and unverified claims.
+
+Establish the final unmodified-source test result after removing experimental
+defects, and run appropriate neighboring checks. A new test that exposes an
+unfixed source bug may remain red; report it plainly. Verify that no experimental
+source edits remain in the deliverable. Use the user's requested report location,
+or respond in the conversation; no fixed artifact path or readiness score is
+required.
