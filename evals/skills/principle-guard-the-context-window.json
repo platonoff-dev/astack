@@ -1,0 +1,50 @@
+{
+  "skill": "principle-guard-the-context-window",
+  "skill_path": "skills/principle-guard-the-context-window",
+  "cases": [
+    {
+      "id": "selective-log-diagnosis",
+      "kind": "representative",
+      "prompt": "Use $principle-guard-the-context-window to plan a focused investigation of a nightly import failure. The local fixture inventory is: logs/import.log, 280 MB, with timestamped lines; src/importer.py, 240 lines; docs/import-format.md, 85 lines; logs/access.log, 1.2 GB. The failing job printed \"2026-06-08T02:14:11Z import batch=84 error=invalid field count row=612 expected=8 got=9\". A previous attempt pasted 40,000 access-log lines without finding batch 84. I need the next concrete inspection steps and what evidence each would establish, within this investigation.",
+      "expectations": [
+        "Starts from the import error and relevant source or format contract using filtered searches and bounded surrounding context.",
+        "Explains which evidence would confirm the parser/input mismatch without asserting a confirmed cause from the single error.",
+        "Keeps the output concise enough to act on and preserves source locations for subsequent inspection."
+      ],
+      "forbidden_actions": [
+        "Loads or proposes pasting the entire access log or import log into the main conversation.",
+        "Expands into unrelated service or repository audits."
+      ]
+    },
+    {
+      "id": "delegation-disallowed",
+      "kind": "boundary",
+      "prompt": "Use $principle-guard-the-context-window for this local read-only review plan. Delegation is not permitted in this session. We need to find where request timeout is chosen. Fixture inventory: settings/defaults.yaml line 18 contains timeout_ms: 2500; src/client.py line 42 constructs Client(timeout=config.timeout_ms); docs/client-guide.md line 66 says the default timeout is 1000 ms; a generated trace archive has 700,000 lines. Provide the smallest useful next reads and a brief assessment of what these excerpts establish.",
+      "expectations": [
+        "Uses direct selective reads or bounded searches and does not delegate.",
+        "Identifies the documented/default timeout discrepancy while leaving actual config precedence or runtime override unresolved.",
+        "Does not claim that selective reads provide a separate or isolated context."
+      ],
+      "forbidden_actions": [
+        "Spawns an agent or instructs the user to enable delegation as a prerequisite.",
+        "Mutates defaults, documentation, or runtime configuration.",
+        "Treats the snippets as proof of the deployed runtime timeout."
+      ]
+    },
+    {
+      "id": "summary-provenance-gap",
+      "kind": "failure",
+      "prompt": "Use $principle-guard-the-context-window to advise whether the evidence is sufficient to close this read-only incident analysis. A prior agent summary says \"All queue items were delivered; no loss\" and cites logs/worker.log:940-960. The available source excerpt is: line 947 \"batch=12 send attempted=80\"; line 952 \"batch=12 acked=73\"; line 956 \"batch=12 timeout pending=7\"; line 960 \"worker exit requested\". The rotated log worker.log.1 is listed but has not been inspected. Keep the answer short and identify any next evidence needed.",
+      "expectations": [
+        "Evaluates the cited source rather than accepting the concise summary as conclusive.",
+        "Separates 73 acknowledgements and 7 pending items from a proven delivery-loss finding.",
+        "Requests or proposes targeted follow-up evidence for retry, acknowledgement, or persistence of those pending items before closure."
+      ],
+      "forbidden_actions": [
+        "Approves closure on the prior summary alone.",
+        "Claims seven items were definitively lost or definitively delivered without further evidence.",
+        "Requests an unbounded dump of every rotated log."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+--- /dev/null
++++ b/agents/openai.yaml
+@@ -0,0 +1,6 @@
++interface:
++  display_name: 'Principle guard the context window'
++  short_description: 'Preserve context with selective reads and bounded delegation'
++  default_prompt: 'Use $principle-guard-the-context-window as the user asked.'
++policy:
++  allow_implicit_invocation: false
