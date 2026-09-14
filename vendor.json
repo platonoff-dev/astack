@@ -69,7 +69,8 @@
       "license_path": "pstack/LICENSE",
       "commit": "f5bdd6826fd0a0d9cbc4347134c3a74a200b9d9d",
       "patches": [
-        "vendor/patches/principle-boundary-discipline.patch"
+        "vendor/patches/principle-boundary-discipline.patch",
+        "vendor/patches/principle-boundary-discipline-skill-audit.patch"
       ]
     },
     {

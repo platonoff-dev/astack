@@ -1,0 +1,49 @@
+{
+  "skill": "principle-boundary-discipline",
+  "skill_path": "skills/principle-boundary-discipline",
+  "cases": [
+    {
+      "id": "established-valid-domain",
+      "kind": "representative",
+      "prompt": "Use $principle-boundary-discipline to review this local refactor and propose only justified code changes. This is the complete call graph of a package: public quote(raw: unknown) calls parseUnits(raw), then price(units). Units is an immutable integer value object; its constructor is private, parseUnits is its only factory, and the package exports only quote. There is no reflection, unsafe cast, deserialization hook, mutation, or alternate constructor. parseUnits rejects non-integers and values outside 1..100 before constructing Units. price is private and currently does: if (units.value < 1 || units.value > 100) throw InvalidUnits; return units.value * 250. quote maps InvalidUnits from parsing to a user error. A teammate proposes removing price's range check. Review the proposal using the supplied contract and show the resulting flow.",
+      "expectations": [
+        "Approve removal of the redundant private price range check based on the complete preservation evidence.",
+        "Keep raw-input validation in parseUnits and preserve the public error behavior.",
+        "Keep price as a pure calculation over Units; explain why the supplied valid-domain guarantee is enough."
+      ],
+      "forbidden_actions": [
+        "Add new defensive checks for hypothetical mutation, casts, or constructor paths expressly excluded by the contract.",
+        "Expand the task into a new framework, data model, or general security review."
+      ]
+    },
+    {
+      "id": "alternate-constructor",
+      "kind": "failure",
+      "prompt": "Use $principle-boundary-discipline to review this proposed cleanup. Give a scoped recommendation and any replacement code needed. The complete relevant Python code is:\nfrom dataclasses import dataclass\n@dataclass(frozen=True)\nclass Limit:\n    value: int\n\ndef parse_cli(text):\n    n = int(text)\n    if n < 1: raise ValueError(\"positive limit required\")\n    return Limit(n)\n\ndef run(limit):\n    if limit.value < 1: raise ValueError(\"positive limit required\")\n    return 100 // limit.value\n\ndef cli(text): return run(parse_cli(text))\ndef restore(row): return run(Limit(row[\"limit\"]))\nThe restore row is read from an older persisted JSON format; no schema validation happens before this function. A fixture contains {\"limit\": 0}. The proposed diff deletes only the guard in run because its parameter is already a Limit and CLI input is validated.",
+      "expectations": [
+        "Reject the proposed deletion as currently unsafe because restore bypasses parse_cli and Limit construction establishes no positive-value guarantee.",
+        "Use the zero-limit fixture to explain the reachable division-by-zero behavior.",
+        "Either retain the run check or establish positive-limit validation at every relevant construction/entry path before removing it; keep the change scoped."
+      ],
+      "forbidden_actions": [
+        "Treat the Limit annotation or frozen dataclass alone as proof of a positive-value invariant.",
+        "Claim the CLI validator covers the persisted restore path."
+      ]
+    },
+    {
+      "id": "authorization-current-state",
+      "kind": "boundary",
+      "prompt": "Use $principle-boundary-discipline to assess a refactor proposal; do not implement it. A service has two entrypoints: HTTP and a scheduled worker. HTTP verifies token signatures and parses a WithdrawalRequest containing account_id, actor_id, and an integer cents > 0; the worker constructs the same validated request type from a parsed queue record. Both call withdraw(request), which opens a transaction, locks the account row, checks current membership and current available balance, debits if authorized and funded, and returns a domain result. Membership can be revoked and balances can change after either request was parsed. The HTTP adapter maps NotMember to status 403 and InsufficientFunds to 409; the worker records these domain outcomes. A teammate proposes moving membership and balance checks to the HTTP parser and replacing core result types with framework HTTP exceptions, arguing that all validation and error handling belong at system boundaries. Review the proposed design against these facts and identify the smallest justified change.",
+      "expectations": [
+        "Keep current membership and balance checks with the transactional state owner, protecting both entrypoints against changing state.",
+        "Distinguish signature/input validation from authorization and state-dependent domain invariants.",
+        "Preserve domain outcomes in the core and transport-specific error mapping in the adapter; a justified recommendation may be no change."
+      ],
+      "forbidden_actions": [
+        "Move state-dependent authorization or balance checks solely into the HTTP parser.",
+        "Introduce HTTP framework exceptions into the shared domain API.",
+        "Perform writes or unrelated redesign when the request asks only for assessment."
+      ]
+    }
+  ]
+}
