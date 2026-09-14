@@ -1,9 +1,14 @@
-# Vendoring skills
+# Vendoring skills and references
 
 Run the helper from an astack source checkout. It uses Git and Python 3.10+
 with the standard library. Every registered skill may come from a different
 repository. Files are copied into `skills/<name>` so plugin installation needs
 no submodule initialization or upstream access.
+
+`vendor.json` keeps skill registrations in `skills` and ordinary reference
+components in an optional `references` list. Both use the same source, exact
+pin, license, and ordered-patch fields. Version-1 registries containing only
+`skills` remain valid. Component names are unique across both lists.
 
 ## Import
 
@@ -45,6 +50,40 @@ monorepo. It is required to exist and is copied into the skill. If a different
 Review applicable terms and preserve any additional notices. The helper records
 your selection; it does not determine licensing suitability.
 
+### Import an ordinary reference
+
+To retain a reviewed upstream skill as reference material without registering
+another skill, add `--target skills/<owner>/references/<name>`:
+
+```sh
+python3 -B scripts/vendor.py add \
+  --name example-principle \
+  --repo https://github.com/example/skill-library.git \
+  --path toolkit/skills/example-principle --ref main --license MIT \
+  --target skills/principles/references/example-principle \
+  --patch vendor/patches/example-principle-reference.patch
+```
+
+The source still starts as a Git skill directory with `SKILL.md`. A registered
+packaging patch must turn it into nonempty ordinary `reference.md` without
+frontmatter, remove skill registration and agent metadata, and preserve
+`LICENSE` and any `LICENSE.upstream`. Those are the only permitted output files;
+unreviewed scripts or assets fail preparation. No automatic policy metadata is
+generated for references. The owning skill supplies discovery and links to the
+reference; each reference owns its complete target directory.
+
+Targets must be exactly `skills/<skill>/references/<name>`. Absolute paths,
+traversal, symlinks, nested targets, and overlaps with other reference targets or
+vendored skill directories are rejected. An owned parent skill may contain
+multiple separately vendored references; synchronizing one preserves its
+siblings and the parent's `SKILL.md`.
+
+When migrating an existing registered skill, move its entry to `references`,
+add its target, retain its source and pin, and append the packaging patch after
+all existing compatibility patches. Reproduce it with `sync <name>`, compare its
+body and license with the old copy, then retire the old skill directory. Review
+and update callers, catalogs, and evaluations with that migration.
+
 ## Check and update
 
 ```sh
@@ -54,6 +93,9 @@ python3 -B scripts/vendor.py update example-skill
 python3 -B scripts/vendor.py update                # all registered skills
 python3 -B scripts/vendor.py sync example-skill    # reproduce the recorded pin
 ```
+
+The same commands select reference components by their registry names. Omitting
+names includes both collections; the output target is determined by the entry.
 
 `check` fetches the pinned commit and current tracked ref. It compares the local
 copy with the pin plus patches, and compares upstream skill files and license
@@ -105,7 +147,7 @@ it. Patch failures leave the skill and pin untouched. Resolve a conflict by
 reviewing upstream changes and updating the patch; do not drop adaptations
 merely to make an update pass.
 
-The only automatic harness adaptation is generating `agents/openai.yaml` when
+For skill entries, the only automatic harness adaptation is generating `agents/openai.yaml` when
 an explicit-only skill has no such file. Existing upstream metadata is
 preserved. An explicit-only skill's existing YAML must contain the block-style
 `policy.allow_implicit_invocation: false`; otherwise add a compatibility patch.

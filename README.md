@@ -26,29 +26,26 @@ plugin, built one useful component at a time.
 | [harden-tests](skills/harden-tests/SKILL.md) | Check test quality through regression checks, assertion audits, invariants, and optional targeted mutation. |
 | [technical-writing](skills/technical-writing/SKILL.md) | Write and review technical prose with document modes, plain sentences, and unambiguous instructions. |
 | [unslop](skills/unslop/SKILL.md) | Remove AI writing patterns while preserving meaning and intended tone. |
-| [principle-attack-the-premise](skills/principle-attack-the-premise/SKILL.md) | Reconsider a shared premise after repeated failed fixes, using a rerunnable census and testing suspected role assignments. |
-| [principle-boundary-discipline](skills/principle-boundary-discipline/SKILL.md) | Place validation at boundaries, preserve domain invariants, and keep business logic independent of framework wiring. |
-| [principle-build-the-lever](skills/principle-build-the-lever/SKILL.md) | Use or build a small rerunnable tool for nontrivial work, preserving task scope and approval rules. |
-| [principle-encode-lessons-in-structure](skills/principle-encode-lessons-in-structure/SKILL.md) | Turn recurring corrections into structural checks, using permitted work notes and authorized follow-up changes. |
-| [principle-experience-first](skills/principle-experience-first/SKILL.md) | Prioritize a polished core workflow and justify feature scope from the experience of end users, API consumers, and maintainers. |
-| [principle-fix-root-causes](skills/principle-fix-root-causes/SKILL.md) | Reproduce bugs, trace their causes, and fix confirmed patterns within the authorized scope. |
-| [principle-foundational-thinking](skills/principle-foundational-thinking/SKILL.md) | Choose core data structures before logic, examine shared state, and sequence foundations before features. |
-| [principle-guard-the-context-window](skills/principle-guard-the-context-window/SKILL.md) | Preserve working context through permitted delegation, selective reads, concise evidence, and bounded phases. |
-| [principle-laziness-protocol](skills/principle-laziness-protocol/SKILL.md) | Prefer deletion, shallow call paths, consolidated decisions, and the smallest change that solves the problem. |
-| [principle-minimize-reader-load](skills/principle-minimize-reader-load/SKILL.md) | Reduce the layers readers must trace and the hidden or mutable state they must hold. |
-| [principle-migrate-callers-then-delete-legacy-apis](skills/principle-migrate-callers-then-delete-legacy-apis/SKILL.md) | Migrate internal callers to the new API and remove the legacy path in the same refactor when coordinated breaking changes are acceptable. |
-| [principle-model-the-domain](skills/principle-model-the-domain/SKILL.md) | Encode domain rules and state in suitable data structures while avoiding unnecessary abstractions. |
-| [principle-never-block-on-the-human](skills/principle-never-block-on-the-human/SKILL.md) | Proceed with authorized reversible work while preserving approval gates and task scope. |
-| [principle-outcome-oriented-execution](skills/principle-outcome-oriented-execution/SKILL.md) | Converge on the target architecture during planned migrations, with scoped reversible breakage and explicit verification boundaries. |
-| [principle-prove-it-works](skills/principle-prove-it-works/SKILL.md) | Verify actual artifacts and feature behavior, retain repeatable evidence, and report checks blocked by access or authorization. |
-| [principle-redesign-from-first-principles](skills/principle-redesign-from-first-principles/SKILL.md) | Reconsider an existing design as if a new requirement had been present from the start, then deliver the redesign incrementally. |
-| [principle-separate-before-serializing-shared-state](skills/principle-separate-before-serializing-shared-state/SKILL.md) | Separate independent write targets before adding structural serialization for genuinely shared state. |
-| [principle-sequence-verifiable-units](skills/principle-sequence-verifiable-units/SKILL.md) | Sequence work into checked units and reviewable delivery while preserving the working baseline and required checks. |
-| [principle-subtract-before-you-add](skills/principle-subtract-before-you-add/SKILL.md) | Remove unnecessary complexity before additions, refactors, or rewrites, and build on the simpler base. |
-| [principle-type-system-discipline](skills/principle-type-system-discipline/SKILL.md) | Model valid states, distinguish semantic primitives, parse external data, exhaust variants, and derive types from authoritative schemas. |
+| [principles](skills/principles/SKILL.md) | Select and read relevant engineering guidance for concrete design, implementation, debugging, refactoring, and verification decisions. |
 
-No bundled router, agent definitions, or automations. Each skill owns its own
+No bundled task router, agent definitions, or automations. Each skill owns its own
 workflow and can use the harness's available delegation tools.
+
+## Principles
+
+The automatically discoverable [principles](skills/principles/SKILL.md) skill
+provides a registry of twenty engineering principles with concrete read-when
+criteria. It reads the smallest relevant set of full references; choosing none
+is valid. Related links do not eagerly load the rest of the collection. It
+reconsiders the selection when the decision changes, and preserves principles
+that another workflow explicitly requires.
+
+Invoke `$principles` in Codex or `/astack:principles` in Claude Code when you
+want to request it directly, naming a principle when useful. This replaces the
+former individual principle commands. The full texts remain ordinary Markdown
+references with their licenses. Automatic selection is enabled in source; it is
+not a hook or a guarantee of selection on every task. Source validation and
+source-path trials do not establish discovery in installed harness caches.
 
 ## Native agent workflows
 
@@ -186,7 +183,8 @@ separate steps.
 
 Standalone agent instructions and non-Git sources receive the same review.
 If they need new packaging support, `adopt` includes that concrete change in
-the proposal; the current vendor helper directly supports Git skill directories.
+the proposal; the vendor helper supports Git skill directories and their reviewed conversion
+to ordinary reference directories.
 
 Import individual skills from different Git repositories, keep exact commit
 pins, check for upstream changes, and update selected skills or all of them:
@@ -222,108 +220,22 @@ the skill implicitly. This is not a hook that guarantees execution on every turn
 and no compatibility patch. Invoke it explicitly with `$bro` in Codex or
 `/astack:bro` in Claude Code to simplify the previous assistant reply.
 
-`tdd` is vendored from pstack under MIT with its instruction text unchanged.
-Its compatibility patch supplies concise Codex menu metadata. Invoke `$tdd` in
+`tdd` is vendored from pstack under MIT. Its compatibility patches supply
+concise Codex menu metadata and conditional principle selection for fix decisions. Invoke `$tdd` in
 Codex or `/astack:tdd` in Claude Code for a bug fix. It favors a cheap, focused
 regression test and requires an explanation and a useful verification alternative
 when a failing test is impractical. Its explicit-only policy is preserved in both
 harnesses.
 
-`principle-attack-the-premise` is vendored from pstack under MIT. Its patch
-keeps census results as evidence rather than causal proof and makes changes to
-role assignment depend on confirmed causes and required domain constraints.
-It uses the existing Build the Lever, Fix Root Causes, and Laziness Protocol
-skills, with Redesign from First Principles as a comparison. Invoke
-`$principle-attack-the-premise` in Codex or `/astack:principle-attack-the-premise`
-in Claude Code. Its explicit-only policy is preserved in both harnesses.
-
-`principle-boundary-discipline` is vendored from pstack under MIT. Invoke
-`$principle-boundary-discipline` in Codex or `/astack:principle-boundary-discipline`
-in Claude Code. Its patch limits internal trust to established, preserved
-invariants and keeps domain checks, authorization, recovery, and business policy
-with their owners. The explicit-only policy is preserved in both harnesses.
-
-`principle-experience-first` is vendored from pstack under MIT with its
-instruction text unchanged and no compatibility patch. Invoke
-`$principle-experience-first` in Codex or `/astack:principle-experience-first`
-in Claude Code for product, UX, or feature-scope tradeoffs. Its explicit-only
-policy is preserved in both harnesses.
-
-`principle-fix-root-causes` is vendored from pstack under MIT. Its patch
-distinguishes symptom-masking guards from valid boundary and domain checks,
-and keeps fixes to repeated patterns within authorized task scope. Invoke
-`$principle-fix-root-causes` in Codex or `/astack:principle-fix-root-causes`
-in Claude Code when debugging. Its explicit-only policy is preserved in both
-harnesses.
-
-`principle-foundational-thinking` is vendored from pstack under MIT with its
-instruction text unchanged. Its compatibility patch maintains concise Codex UI
-metadata. Invoke
-`$principle-foundational-thinking` in Codex or
-`/astack:principle-foundational-thinking` in Claude Code. Its explicit-only policy
-is preserved in both harnesses.
-
-`principle-guard-the-context-window` is vendored from pstack under MIT. Its
-patch accounts for compaction, makes delegation depend on available tools and
-harness permissions, and keeps supporting detail in linked references. Invoke
-`$principle-guard-the-context-window` in Codex or
-`/astack:principle-guard-the-context-window` in Claude Code. Its explicit-only
-policy is preserved; selective reads without delegation do not provide context
-isolation. No agent definitions or model requirements are bundled.
-
-`principle-laziness-protocol` is vendored from pstack under MIT with its
-instruction text unchanged. A maintained compatibility patch supplies concise
-Codex UI metadata. Invoke
-`$principle-laziness-protocol` in Codex or `/astack:principle-laziness-protocol`
-in Claude Code when refactoring or evaluating added complexity. Its explicit-only
-policy is preserved in both harnesses.
-
-`principle-minimize-reader-load` is vendored from pstack under MIT. Its only
-compatibility patch removes an optional background-reading reference. Invoke `$principle-minimize-reader-load` in Codex or
-`/astack:principle-minimize-reader-load` in Claude Code. Its explicit-only policy
-is preserved in both harnesses.
-
-`principle-model-the-domain` is vendored from pstack under MIT with its
-instruction text unchanged. Its compatibility patch maintains a concise Codex
-UI summary. Invoke
-`$principle-model-the-domain` in Codex or `/astack:principle-model-the-domain`
-in Claude Code when designing stateful logic or consolidating scattered domain
-rules. Its explicit-only policy is preserved in both harnesses.
-
-`principle-type-system-discipline` is vendored from pstack under MIT. Its patch
-removes an optional reference to an unbundled TypeScript skill and links the two
-related principles to their astack files. Invoke `$principle-type-system-discipline`
-in Codex or `/astack:principle-type-system-discipline` in Claude Code. Its
-explicit-only policy is preserved in both harnesses; it does not activate
-automatically for typed-language work.
-
-`principle-subtract-before-you-add` is vendored from pstack under MIT with its
-instruction text unchanged and no compatibility patch. Invoke
-`$principle-subtract-before-you-add` in Codex or
-`/astack:principle-subtract-before-you-add` in Claude Code when sequencing an
-addition, refactor, or rewrite. Its explicit-only policy is preserved in both
-harnesses.
-
-`principle-never-block-on-the-human` is vendored from pstack under MIT. Its patch
-keeps initiative within authorized task scope, preserves explicit approval gates,
-and avoids repeated confirmation of existing authorization. Invoke
-`$principle-never-block-on-the-human` in Codex or
-`/astack:principle-never-block-on-the-human` in Claude Code. Its explicit-only policy
-is preserved in both harnesses.
-
-`principle-prove-it-works` is vendored from pstack under MIT. Its patch keeps
-verification and evidence commits within authorized scope, prefers existing
-checks, and removes the optional `show-me-your-work` workflow reference. Invoke
-`$principle-prove-it-works` in Codex or `/astack:principle-prove-it-works` in
-Claude Code before declaring a task done. Its explicit-only policy is preserved
-in both harnesses.
-
-`principle-build-the-lever` is vendored from pstack under MIT. Its patch prefers
-existing suitable tools, keeps delegation and execution within authorized scope,
-and makes commits conditional on authorization. Invoke `$principle-build-the-lever`
-in Codex or `/astack:principle-build-the-lever` in Claude Code. Its explicit-only
-policy is preserved in both harnesses. Delegate contracts use assigned write
-boundaries; enforced read-only access depends on the active harness.
+The twenty principle references are vendored from pstack under MIT. Their
+original source paths, exact pins, licenses, and ordered compatibility patches
+remain in the `references` collection in `vendor.json`. Packaging patches remove
+standalone skill metadata and update principle links; the full instruction bodies
+and earlier adaptations are preserved. Each reference has its own directory and
+LICENSE, so vendor synchronization cannot replace the owned registry or sibling
+references. These references have no independent invocation policy; the parent
+`principles` skill allows automatic selection. Workflow invocation policies,
+including Arena and Reflect's explicit-only policies, remain unchanged.
 
 See [vendoring details](docs/vendoring.md) for licenses, patches, exit codes,
 and the validation and reinstall steps.
@@ -362,8 +274,9 @@ ignored `.local/` directory.
 
 ## License
 
-Original astack code is MIT. See [LICENSE](LICENSE). Imported skills retain
-their upstream licenses, recorded in `vendor.json` and copied with each skill.
+Original astack code is MIT. See [LICENSE](LICENSE). Imported skills and
+references retain their upstream licenses, recorded in `vendor.json` and copied
+with each component.
 
 ## Teaching
 

@@ -1,0 +1,29 @@
+--- a/SKILL.md
++++ b/SKILL.md
+@@ -44,6 +44,8 @@
+ Read and fill [reviewer-prompt.md](references/reviewer-prompt.md) with the intent,
+ frozen input and context, [rubric.md](references/rubric.md), and the relevant
+-[code-quality lens](references/code-quality-review.md). Send the same substantive
++[code-quality lens](references/code-quality-review.md). Fill the principles
++section with resolved absolute registry and reference paths or full guidance needed
++for this review, following the shared contract. Send the same substantive
+ brief to every reviewer, changing only its identity and assigned output. Apply
+ code-quality concerns proportionally; a broad maintainability audit must be
+ explicitly selected. Keep peer findings and the lead's tentative verdict out of
+--- a/references/reviewer-prompt.md
++++ b/references/reviewer-prompt.md
+@@ -31,5 +31,14 @@
+ ## Code Quality Lens
+
+ {CODE_QUALITY_CONTENTS}
++
++## Relevant Principles
++
++{PRINCIPLES_REGISTRY_PATH_AND_SELECTED_REFERENCE_PATHS_OR_GUIDANCE}
++
++Read the supplied registry and any selected references needed for your review
++decisions; do not assume the lead's reads are present in this context. Select
++additional guidance only when the registry criterion fits. Principles do not
++establish defects without evidence from the reviewed code and its contracts.
+
+ ## Instructions

@@ -1,6 +1,0 @@
-interface:
-  display_name: 'Principle boundary discipline'
-  short_description: 'Place validation at boundaries; preserve domain invariants'
-  default_prompt: 'Use $principle-boundary-discipline as the user asked.'
-policy:
-  allow_implicit_invocation: false

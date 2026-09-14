@@ -5,6 +5,12 @@ for one shipped or repository-only astack skill. These cases test decisions,
 artifacts, evidence handling, and scope; they do not require exact wording.
 They are development assets outside the shipped skill directories.
 
+The `principles` suite retains the sixty behavioral cases for the former twenty
+standalone principle skills, using named references through the registry. Six
+additional cases exercise selective reading, no-match selection, required named
+guidance, and changing decision boundaries. Their presence does not establish
+automatic discovery or a behavioral pass.
+
 ## Run a case
 
 Validate the suites already authored:

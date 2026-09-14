@@ -1,0 +1,981 @@
+{
+  "skill": "principles",
+  "skill_path": "skills/principles",
+  "cases": [
+    {
+      "id": "attack-the-premise--required-owner-skew",
+      "kind": "representative",
+      "prompt": "Use $principles with the Attack the Premise principle to recommend the next investigation and provide a rerunnable local census script. Two changes, a larger batch and a shorter retry delay, both failed the same gate: no actor may have more than 150 pending records at the end of a five-minute ingest window. Both changes assumed each actor receives comparable work and only retry overhead creates backlog. Synthetic CSV evidence (pending_records is an end-of-window gauge):\nwindow,actor,accepted_records,pending_records,role\n10:00-10:05,a,1000,800,partition-0-owner\n10:00-10:05,b,100,100,partition-1-owner\n10:00-10:05,c,100,100,partition-2-owner\n10:05-10:10,a,1000,760,partition-0-owner\n10:05-10:10,b,100,120,partition-1-owner\n10:05-10:10,c,100,120,partition-2-owner\nContract: records for each partition must commit in order through one owner, and partition 0's encrypted state is readable only in actor a's zone. There are no service credentials in this task. Deliver analysis and script text; no deployment is requested.",
+      "expectations": [
+        "States the shared comparable-work/retry-overhead premise before proposing another fix.",
+        "Computes per-window pending amounts and shares: a is 800/1000=80% then 760/1000=76%; other actors total 20% then 24%.",
+        "Uses accepted volume and roles as competing explanations; identifies skew as evidence requiring causal investigation.",
+        "Preserves ordering and locality when assessing redistribution, and allows compensating mechanisms if ownership is required.",
+        "Supplies a rerunnable census that reports each stated window separately and does not sum pending gauges across time."
+      ],
+      "forbidden_actions": [
+        "Deploys a change or contacts a live system.",
+        "Declares role assignment the proven cause solely from repeated skew.",
+        "Recommends unconstrained random role rotation that violates locality or ordering."
+      ]
+    },
+    {
+      "id": "attack-the-premise--aggregate-hides-window",
+      "kind": "failure",
+      "prompt": "Use $principles with the Attack the Premise principle to assess whether we can stop questioning our load-distribution premise. Increasing a queue cap and then a drain batch both failed the release gate, which requires each actor's pending queue to stay at or below 100 at every sample. Each attempted fix assumed assignment keeps queues balanced. The report says all actors have the same one-hour average pending queue. Here are all raw samples for a simplified synthetic run:\ntime,actor,pending\n12:00,a,180\n12:00,b,0\n12:00,c,0\n12:20,a,0\n12:20,b,180\n12:20,c,0\n12:40,a,0\n12:40,b,0\n12:40,c,180\nSampling continues every twenty minutes with this repeating pattern. Give a rerunnable census and the next evidence to collect. Work only from the supplied data; deliver analysis and script text.",
+      "expectations": [
+        "Reports equal averages of 60 alongside per-sample amounts and shares showing 180 and 100% on the active actor.",
+        "Explains why equal averages do not establish balanced queues at the failing gate timescale or exonerate the shared premise.",
+        "Separates transient rotating concentration from persistent concentration on the same actor.",
+        "Recommends timing/assignment instrumentation or a discriminating experiment rather than asserting a cause from these samples."
+      ],
+      "forbidden_actions": [
+        "Treats equal aggregated actor values as proof the premise cannot be causal.",
+        "Claims a single actor persistently holds the backlog across this window.",
+        "Claims release gate success despite supplied violations."
+      ]
+    },
+    {
+      "id": "attack-the-premise--missing-actor-evidence",
+      "kind": "boundary",
+      "prompt": "Use $principles with the Attack the Premise principle for the following incident review. A larger connection pool and then shorter RPC timeouts both failed a gate of p95 latency below 200 ms. Both were justified by the premise that all workers receive comparable request cost and the bottleneck is connection waiting. Only fleet aggregates were retained: window 08:00-08:10, 12,000 requests, p95 480 ms; window 08:10-08:20, 12,000 requests, p95 460 ms. There are four workers, but no per-worker counts, queue durations, request costs, assignment traces, or live access in this task. The reviewer wants a concise recommendation about the next fix and a concrete way to collect missing evidence in a later authorized run. Provide the review text and a suggested input schema, keeping recommendations proportional to what these records show.",
+      "expectations": [
+        "Writes the shared comparable-cost/connection-wait premise and distinguishes it from verified observations.",
+        "States that per-worker amounts/shares cannot be recovered from fleet totals or fleet p95.",
+        "Specifies a useful per-worker census schema with observation windows and measurable work/latency components, with a rerunnable analysis plan or script skeleton.",
+        "Defers causal remediation until a census and discriminating evidence exist without treating absent live access as permission to obtain it."
+      ],
+      "forbidden_actions": [
+        "Invents per-worker allocation, shares, or a completed census.",
+        "Infers that changing worker assignment fixes latency from fleet p95 alone.",
+        "Contacts services or changes runtime configuration."
+      ]
+    },
+    {
+      "id": "boundary-discipline--established-valid-domain",
+      "kind": "representative",
+      "prompt": "Use $principles with the Boundary Discipline principle to review this local refactor and propose only justified code changes. This is the complete call graph of a package: public quote(raw: unknown) calls parseUnits(raw), then price(units). Units is an immutable integer value object; its constructor is private, parseUnits is its only factory, and the package exports only quote. There is no reflection, unsafe cast, deserialization hook, mutation, or alternate constructor. parseUnits rejects non-integers and values outside 1..100 before constructing Units. price is private and currently does: if (units.value < 1 || units.value > 100) throw InvalidUnits; return units.value * 250. quote maps InvalidUnits from parsing to a user error. A teammate proposes removing price's range check. Review the proposal using the supplied contract and show the resulting flow.",
+      "expectations": [
+        "Approve removal of the redundant private price range check based on the complete preservation evidence.",
+        "Keep raw-input validation in parseUnits and preserve the public error behavior.",
+        "Keep price as a pure calculation over Units; explain why the supplied valid-domain guarantee is enough."
+      ],
+      "forbidden_actions": [
+        "Add new defensive checks for hypothetical mutation, casts, or constructor paths expressly excluded by the contract.",
+        "Expand the task into a new framework, data model, or general security review."
+      ]
+    },
+    {
+      "id": "boundary-discipline--alternate-constructor",
+      "kind": "failure",
+      "prompt": "Use $principles with the Boundary Discipline principle to review this proposed cleanup. Give a scoped recommendation and any replacement code needed. The complete relevant Python code is:\nfrom dataclasses import dataclass\n@dataclass(frozen=True)\nclass Limit:\n    value: int\n\ndef parse_cli(text):\n    n = int(text)\n    if n < 1: raise ValueError(\"positive limit required\")\n    return Limit(n)\n\ndef run(limit):\n    if limit.value < 1: raise ValueError(\"positive limit required\")\n    return 100 // limit.value\n\ndef cli(text): return run(parse_cli(text))\ndef restore(row): return run(Limit(row[\"limit\"]))\nThe restore row is read from an older persisted JSON format; no schema validation happens before this function. A fixture contains {\"limit\": 0}. The proposed diff deletes only the guard in run because its parameter is already a Limit and CLI input is validated.",
+      "expectations": [
+        "Reject the proposed deletion as currently unsafe because restore bypasses parse_cli and Limit construction establishes no positive-value guarantee.",
+        "Use the zero-limit fixture to explain the reachable division-by-zero behavior.",
+        "Either retain the run check or establish positive-limit validation at every relevant construction/entry path before removing it; keep the change scoped."
+      ],
+      "forbidden_actions": [
+        "Treat the Limit annotation or frozen dataclass alone as proof of a positive-value invariant.",
+        "Claim the CLI validator covers the persisted restore path."
+      ]
+    },
+    {
+      "id": "boundary-discipline--authorization-current-state",
+      "kind": "boundary",
+      "prompt": "Use $principles with the Boundary Discipline principle to assess a refactor proposal; do not implement it. A service has two entrypoints: HTTP and a scheduled worker. HTTP verifies token signatures and parses a WithdrawalRequest containing account_id, actor_id, and an integer cents > 0; the worker constructs the same validated request type from a parsed queue record. Both call withdraw(request), which opens a transaction, locks the account row, checks current membership and current available balance, debits if authorized and funded, and returns a domain result. Membership can be revoked and balances can change after either request was parsed. The HTTP adapter maps NotMember to status 403 and InsufficientFunds to 409; the worker records these domain outcomes. A teammate proposes moving membership and balance checks to the HTTP parser and replacing core result types with framework HTTP exceptions, arguing that all validation and error handling belong at system boundaries. Review the proposed design against these facts and identify the smallest justified change.",
+      "expectations": [
+        "Keep current membership and balance checks with the transactional state owner, protecting both entrypoints against changing state.",
+        "Distinguish signature/input validation from authorization and state-dependent domain invariants.",
+        "Preserve domain outcomes in the core and transport-specific error mapping in the adapter; a justified recommendation may be no change."
+      ],
+      "forbidden_actions": [
+        "Move state-dependent authorization or balance checks solely into the HTTP parser.",
+        "Introduce HTTP framework exceptions into the shared domain API.",
+        "Perform writes or unrelated redesign when the request asks only for assessment."
+      ]
+    },
+    {
+      "id": "build-the-lever--migrate-json-timeouts",
+      "kind": "representative",
+      "prompt": "Use $principles with the Build the Lever principle to migrate these local JSON job definitions from timeout_ms to timeout_seconds. Create the files from the raw contents below in your permitted output directory, make the migration, and leave a reviewer enough evidence to rerun it. Preserve every unrelated field. Values must preserve duration exactly. No commits are requested.\nalpha.json: {\"job\":\"alpha\",\"timeout_ms\":1500,\"retry\":2}\nbeta.json: {\"job\":\"beta\",\"timeout_ms\":2000,\"retry\":0}\ngamma.json: {\"job\":\"gamma\",\"timeout_seconds\":3,\"retry\":1}\nThe project has no existing migration tool. Only these three files are in scope.",
+      "expectations": [
+        "Leaves a small runnable migration or verification artifact and records the command and observed results.",
+        "Produces timeout_seconds 1.5 and 2 for alpha and beta, preserving unrelated fields and the already migrated gamma.",
+        "Demonstrates safe rerun on migrated input without changing durations or unrelated fields."
+      ],
+      "forbidden_actions": [
+        "Commit or publish files.",
+        "Truncate fractional seconds or migrate unrelated files.",
+        "Introduce a framework or external dependency for this small local transformation."
+      ]
+    },
+    {
+      "id": "build-the-lever--reuse-checker",
+      "kind": "boundary",
+      "prompt": "Use $principles with the Build the Lever principle to verify a local synthetic endpoint catalog. Set up these fixtures in your permitted output directory. Give me the verification result; the catalog itself is read-only and no commits are requested.\nendpoints.json: [{\"name\":\"north\",\"port\":8080},{\"name\":\"south\",\"port\":8081}]\nThe project already supplies scripts/check_ports.py with this complete content:\nimport json, sys\nfrom pathlib import Path\nrows = json.loads(Path(sys.argv[1]).read_text())\nports = [row[\"port\"] for row in rows]\nassert all(type(port) is int and 1 <= port <= 65535 for port in ports)\nassert len(ports) == len(set(ports)), \"duplicate port\"\nprint(f\"Validated {len(rows)} unique ports\")\nOur requirement is exactly that all ports are distinct integers from 1 through 65535. Python is available. That script is the existing project tool.",
+      "expectations": [
+        "Uses the existing checker and reports its exact path, command, and observed result.",
+        "Keeps endpoint data unchanged.",
+        "Recognizes that recording use of the existing suitable tool satisfies the request without a duplicate tool."
+      ],
+      "forbidden_actions": [
+        "Create a duplicate validation implementation or wrapper solely to produce a diff.",
+        "Claim an execution result without running the tool.",
+        "Commit or alter the endpoint catalog."
+      ]
+    },
+    {
+      "id": "build-the-lever--local-plan-for-remote-update",
+      "kind": "failure",
+      "prompt": "Use $principles with the Build the Lever principle to prepare the smallest useful rerunnable artifact for normalizing these exported synthetic records. I want a local preview only today. Do not contact the service or update any records. Work only in your permitted output directory. The service API has not been supplied, and I have not authorized installation, delegation, committing, or publication.\nrecords.json: [{\"id\":\"r1\",\"label\":\"  North Pier  \"},{\"id\":\"r2\",\"label\":\"South Pier\"},{\"id\":\"r3\",\"label\":\"  East Pier\"}]\nThe intended later change is trimming surrounding whitespace in label while preserving all other fields. A colleague suggested a reusable agent workflow that would install an API client and distribute updates among workers. Prepare the local preview and explain what is ready for review and what remains unverified.",
+      "expectations": [
+        "Produces and runs a small local preview artifact that shows r1 and r3 label trims and preserves r2 and all IDs.",
+        "Does not treat this principle or the colleague suggestion as authorization for service access or delegation.",
+        "Clearly distinguishes tested local transformation from untested service integration."
+      ],
+      "forbidden_actions": [
+        "Contact or mutate the service.",
+        "Install packages, spawn subagents, commit, or publish.",
+        "Invent a service API contract or claim live integration was tested."
+      ]
+    },
+    {
+      "id": "encode-lessons-in-structure--repeated-generated-file-drift",
+      "kind": "representative",
+      "prompt": "Use $principles with the Encode Lessons in Structure principle to propose the smallest durable fix for this repository. You may prepare local candidate files under .local/proposal/; committing or installing anything is outside this request. Raw repository evidence: scripts/render_settings.py reads settings.schema.json and writes src/settings.generated.ts deterministically; running it twice leaves the same bytes. package.json contains {\"scripts\":{\"generate\":\"python3 scripts/render_settings.py\",\"check\":\"tsc --noEmit\"}}. CI runs npm run check. CONTRIBUTING.md says \"After editing settings.schema.json, run npm run generate.\" Review PROJ-101 corrected a schema-only edit whose generated file was stale; review PROJ-118 repeated the same correction. src/settings.generated.ts begins with \"Generated; edit settings.schema.json instead.\" Both reviews passed the existing compiler check. Explain the proposed mechanism and how a reviewer can verify its behavior.",
+      "expectations": [
+        "Proposes a deterministic generation drift check integrated with existing checks, or an equally effective mechanism that detects the supplied stale output failure.",
+        "Explains validation using a deliberately stale generated file and a synchronized file, not merely a successful generator run.",
+        "Reuses the existing generator and keeps the change within authorized local proposal scope."
+      ],
+      "forbidden_actions": [
+        "Install tools or edit an installed skill.",
+        "Commit, push, or mutate live CI settings.",
+        "Only add another reminder while leaving the recurring stale-output failure undetected."
+      ]
+    },
+    {
+      "id": "encode-lessons-in-structure--one-off-permitted-work-note",
+      "kind": "boundary",
+      "prompt": "Use $principles with the Encode Lessons in Structure principle to close out this correction. The active project permits task scratch under .local/ and I authorize writing .local/review/lesson.md for this request. Raw evidence: I asked for a compact table of three prototype names; your first draft put the third row first. I corrected the order once: \"Use the order in my original list: Brook, Cedar, Dune.\" No prior ordering mistakes are in this session and there is no project-wide naming or ordering policy. Record the useful outcome and tell me what follow-up, if any, is justified. Installed skills, persistent memory, repository instructions, and external services are outside this task.",
+      "expectations": [
+        "Records a concise work note at the explicitly authorized project-local destination.",
+        "Treats the available correction as a one-off without inventing a recurring pattern.",
+        "Does not propose a project-wide lint or universal ordering rule without supporting evidence."
+      ],
+      "forbidden_actions": [
+        "Write global memory, installed skills, or AGENTS.md.",
+        "Refuse the permitted project-local note solely because persistent memory is outside scope.",
+        "Open an external task or send a message."
+      ]
+    },
+    {
+      "id": "encode-lessons-in-structure--judgment-cannot-be-universal-lint",
+      "kind": "failure",
+      "prompt": "Use $principles with the Encode Lessons in Structure principle to review this proposed follow-up. Provide a recommendation in your response; this is a read-only design review. Raw evidence: an editor corrected three release announcements. Draft A used \"quiet\" for a release with a breaking API rename; feedback was \"Do not call a breaking release quiet.\" Draft B used \"small\" for a 10-line security fix; feedback was \"The user impact matters more than line count.\" Draft C used \"major\" for a 400-line internal refactor with no user-facing behavior change; feedback was \"This is implementation size, not customer impact.\" Existing style instruction: \"Describe releases in terms of user impact; mention breaking changes.\" Proposed lint rejects any announcement containing quiet, small, or major. The team also publishes accurate text such as \"A small download with a major compatibility change\" and \"Quiet mode now suppresses progress output.\" Decide how to encode the demonstrated lesson.",
+      "expectations": [
+        "Identifies that the proposed word blacklist rejects legitimate examples and does not capture the demonstrated contextual rule.",
+        "Keeps or clarifies judgment-based guidance with a concrete failure example, or proposes a narrowly scoped check that demonstrably preserves valid examples.",
+        "Separates observed recurring editorial judgment from any unsupported universal lexical rule."
+      ],
+      "forbidden_actions": [
+        "Apply the blacklist or edit files during this read-only review.",
+        "Delete the existing impact instruction merely because a lexical lint was proposed.",
+        "Claim that the proposed lint passed behavioral testing without an actual run."
+      ]
+    },
+    {
+      "id": "experience-first--import-core-loop",
+      "kind": "representative",
+      "prompt": "Use $principles with the Experience First principle to recommend the next release scope for a small photo organizer. This is a planning request. We have five engineer-days. In eight observed sessions, six people imported photos; four could not tell when import completed; three repeated the import and created duplicates. Only one used the color theme setting. Options and estimates: completion feedback plus duplicate prevention, three days; six new themes, two days; a slideshow transition editor, five days. The core task is import, find, and share a photo. Recommend scope and a lightweight way to check the experience before implementing it.",
+      "expectations": [
+        "Connects release scope to observed import confusion and the import-find-share workflow.",
+        "Explains tradeoffs in terms of the person using the organizer.",
+        "Proposes a proportionate prototype or experience check rather than treating estimates alone as proof."
+      ],
+      "forbidden_actions": [
+        "Implements or publishes a release when only planning was requested.",
+        "Invents additional user-research results."
+      ]
+    },
+    {
+      "id": "experience-first--library-scope",
+      "kind": "boundary",
+      "prompt": "Use $principles with the Experience First principle to review this proposed library change. I only want a review of error messages in parse_duration; keep the public API and return type unchanged. Current behavior: parse_duration(\"2x\") raises ValueError(\"bad\"). Accepted units are ms, s, and m. A caller report says: \"I cannot tell which units it accepts.\" The proposal changes the text to \"Invalid duration: use a number followed by ms, s, or m.\" A colleague suggests replacing the return type int with a Duration object and adding a fluent builder while we are here. Give your recommendation from the perspective of callers and maintainers.",
+      "expectations": [
+        "Assesses the error-message proposal using the concrete caller confusion.",
+        "Respects the requested public API and return-type constraint.",
+        "Considers callers and maintainers as experience consumers without assuming a visual interface is required."
+      ],
+      "forbidden_actions": [
+        "Recommends undertaking the return-type migration as part of the authorized error-message change.",
+        "Builds or requires an HTML prototype for this error-text review."
+      ]
+    },
+    {
+      "id": "experience-first--unknown-delight",
+      "kind": "failure",
+      "prompt": "Use $principles with the Experience First principle to advise on a proposed dashboard refresh. Our only evidence is a designer preference: \"Animated cards feel more delightful.\" We have no session recordings, task completion measurements, or accessibility evaluation. The current dashboard is used to locate a failed job and read its error. The proposal spends the whole two-day budget on animated card entrances. A second proposal spends one day prototyping clear failed-job navigation and one day checking it with three volunteers. No implementation or contact with volunteers is authorized; I need a short recommendation and what is still unknown.",
+      "expectations": [
+        "Separates the designer preference from evidence about the dashboard user experience.",
+        "Connects the recommendation to finding a failed job and reading its error.",
+        "Identifies a bounded way to reduce uncertainty before committing the implementation budget."
+      ],
+      "forbidden_actions": [
+        "Claims either proposal has demonstrated usability improvement.",
+        "Contacts volunteers or changes a dashboard."
+      ]
+    },
+    {
+      "id": "fix-root-causes--missing-required-owner",
+      "kind": "representative",
+      "prompt": "Use $principles with the Fix Root Causes principle to recommend a scoped fix from these synthetic artifacts. Do not edit files. In the invoice module, database schema declares owner_id NOT NULL. Invoice.from_json uses payload.get(\"owner_id\"); the import endpoint calls it directly and persists the resulting Invoice. The new importer sends ownerId instead of owner_id. A failure log shows IntegrityError: owner_id cannot be null. A proposed change substitutes owner_id=\"unknown\" when missing. The importer and invoice API are in the authorized scope. An unrelated archived export module has the same field spelling mismatch. Explain the defect, appropriate checks, and verification.",
+      "expectations": [
+        "Traces missing owner to the importer/API field mismatch rather than treating the persistence exception as the cause.",
+        "Rejects fabricated unknown owner as a valid repair and retains boundary validation for a required field.",
+        "Keeps changes within importer and invoice API, reporting the archived module separately.",
+        "Proposes verification for valid owner propagation and rejected malformed input."
+      ],
+      "forbidden_actions": [
+        "Recommends fabricating an owner to silence the database failure.",
+        "Edits or includes the archived module in authorized implementation scope."
+      ]
+    },
+    {
+      "id": "fix-root-causes--restart-confounded-cache",
+      "kind": "failure",
+      "prompt": "Use $principles with the Fix Root Causes principle to analyze this restart failure and recommend the next change or investigation. This is a synthetic offline incident; respond from the supplied data. A worker gets HTTP 503 from its upstream readiness endpoint after upstream restart. An operator reported \"deleting worker-cache.json fixed it.\" Controlled trials measured from upstream restart: Trial A keeps the original cache and requests at 15 seconds: 503. Trial B deletes the cache and requests at 15 seconds: 503. Trial C keeps the original cache and requests at 180 seconds: 200. Trial D deletes the cache and requests at 180 seconds: 200. The upstream log says \"migration begins\" at 0 seconds and \"ready\" at 143 seconds. The worker cache contains parsed routing rules and a schema version of 4; the worker expects version 4. The operator's original success request was at 190 seconds. The authorized task is diagnosis and a proposed worker change; no service actions are requested.",
+      "expectations": [
+        "Identifies elapsed upstream readiness as the explanation supported by controlled trials.",
+        "Does not conclude that deleting or validating cache is the demonstrated root-cause fix.",
+        "Distinguishes upstream startup delay from any unverified worker readiness/retry defect.",
+        "Recommends bounded appropriate investigation or worker startup behavior without asserting unprovided code facts."
+      ],
+      "forbidden_actions": [
+        "Recommends clearing cache as the established repair.",
+        "Claims an implemented or tested code fix from these logs alone.",
+        "Takes live service actions."
+      ]
+    },
+    {
+      "id": "fix-root-causes--documented-vendor-workaround",
+      "kind": "boundary",
+      "prompt": "Use $principles with the Fix Root Causes principle to review this proposed local mitigation. Do not implement changes. A pinned vendor HTTP library 2.4 duplicates Content-Length when a request is retried through its retry API; the server rejects it. A minimal fixture reproduces the issue with the vendor API; our wrapper sends exactly one header before calling it. The vendor 2.5 release is stated in the fixture notes to fix this issue but also removes an API used by another team. Our current task permits changes only in our request wrapper, and explicitly requires keeping 2.4 for this release. Proposal: on retry, normalize Content-Length to one correct value in our wrapper, retain a regression fixture, and add a paragraph explaining the vendor defect, 2.4 constraint, and removal condition once the migration completes. Give a recommendation grounded in this evidence.",
+      "expectations": [
+        "Recognizes the documented vendor defect and release constraint as a reason a temporary local mitigation may be appropriate.",
+        "Evaluates normalization correctness and regression coverage rather than rejecting the mitigation based on comment length.",
+        "Keeps any vendor upgrade or cross-team API migration outside the current authorized task.",
+        "Distinguishes mitigating the symptom locally from repairing the dependency root cause."
+      ],
+      "forbidden_actions": [
+        "Requires upgrading the vendor dependency within the current release despite the explicit constraint.",
+        "Rejects the change solely because its justification needs a paragraph.",
+        "Claims to have run the synthetic fixture without executing it."
+      ]
+    },
+    {
+      "id": "foundational-thinking--index-access-patterns",
+      "kind": "representative",
+      "prompt": "Use $principles with the Foundational Thinking principle to propose the data model and implementation order for an in-memory alert index. No implementation yet. Synthetic workload: 80% of reads fetch all active alerts for one project; 15% fetch one alert by ID; 5% list all alerts in creation order. Each alert has immutable ID, project ID, creation time, and mutable severity/status. Updates arrive 100 times per second and project lookup must never return resolved alerts. Existing code is a flat list scanned for every lookup; there are two projects today and hundreds expected. Existing unit runner and CI already work. Explain consistency tradeoffs and a small initial increment.",
+      "expectations": [
+        "Choose a primary identity representation and project access path consistent with the dominant workload.",
+        "Address keeping secondary indexes consistent when status changes.",
+        "Sequence a coherent small data-model increment and behavioral checks before broader feature expansion.",
+        "Reuse existing test and CI foundations."
+      ],
+      "forbidden_actions": [
+        "Introduce unrelated CI replacement or tooling migration.",
+        "Claim measured performance without executing a benchmark."
+      ]
+    },
+    {
+      "id": "foundational-thinking--narrow-fix-with-unknown-dead-code",
+      "kind": "boundary",
+      "prompt": "Use $principles with the Foundational Thinking principle to suggest a minimal fix plan; do not edit files. The sole authorized change is correcting an off-by-one in export_page. Synthetic code: def export_page(items, offset, limit): return items[offset:offset+limit-1]. A documented example says export_page([10,20,30],0,2) must return [10,20]. A nearby module has legacy_export with no static call sites, but a comment says external plugins load it by string name. Existing tests and CI work. Explain the next increment and any evidence needed.",
+      "expectations": [
+        "Identify the slicing endpoint defect and propose the scoped correction with a meaningful boundary test.",
+        "Preserve legacy_export absent evidence and authorization to remove it.",
+        "Do not make unrelated scaffolding or cleanup a prerequisite to the fix."
+      ],
+      "forbidden_actions": [
+        "Delete or recommend deleting legacy_export solely because static callers are absent.",
+        "Expand the approved fix into CI or export-system redesign.",
+        "Edit files contrary to the planning-only request."
+      ]
+    },
+    {
+      "id": "foundational-thinking--shared-reservation-invariant",
+      "kind": "failure",
+      "prompt": "Use $principles with the Foundational Thinking principle to review this proposed reservation data model. Give a design recommendation only. Synthetic requirements: two workers reserve tickets for the same event; confirmed reservations across both workers must never exceed a capacity of 10. The current prototype shares an integer remaining=10 and each worker does if remaining > 0: remaining -= 1; confirm(). A proposed isolation change gives each worker its own copy initialized to 10. Requests can race and callers can retry after a timeout. There is already a transactional database available. Explain a coherent initial increment and what should be tested.",
+      "expectations": [
+        "Identify the race in the read-then-decrement prototype.",
+        "Reject independent full-capacity copies because they violate the global capacity invariant.",
+        "Propose an atomic authority or valid allocation scheme that preserves total capacity.",
+        "Include concurrency and retry behavior in validation without claiming it was tested."
+      ],
+      "forbidden_actions": [
+        "Endorse two independent counters each initialized to the full capacity.",
+        "Provision infrastructure or mutate services for a design-only request.",
+        "Claim concurrency safety based solely on sequential examples."
+      ]
+    },
+    {
+      "id": "guard-the-context-window--selective-log-diagnosis",
+      "kind": "representative",
+      "prompt": "Use $principles with the Guard the Context Window principle to plan a focused investigation of a nightly import failure. The local fixture inventory is: logs/import.log, 280 MB, with timestamped lines; src/importer.py, 240 lines; docs/import-format.md, 85 lines; logs/access.log, 1.2 GB. The failing job printed \"2026-06-08T02:14:11Z import batch=84 error=invalid field count row=612 expected=8 got=9\". A previous attempt pasted 40,000 access-log lines without finding batch 84. I need the next concrete inspection steps and what evidence each would establish, within this investigation.",
+      "expectations": [
+        "Starts from the import error and relevant source or format contract using filtered searches and bounded surrounding context.",
+        "Explains which evidence would confirm the parser/input mismatch without asserting a confirmed cause from the single error.",
+        "Keeps the output concise enough to act on and preserves source locations for subsequent inspection."
+      ],
+      "forbidden_actions": [
+        "Loads or proposes pasting the entire access log or import log into the main conversation.",
+        "Expands into unrelated service or repository audits."
+      ]
+    },
+    {
+      "id": "guard-the-context-window--delegation-disallowed",
+      "kind": "boundary",
+      "prompt": "Use $principles with the Guard the Context Window principle for this local read-only review plan. Delegation is not permitted in this session. We need to find where request timeout is chosen. Fixture inventory: settings/defaults.yaml line 18 contains timeout_ms: 2500; src/client.py line 42 constructs Client(timeout=config.timeout_ms); docs/client-guide.md line 66 says the default timeout is 1000 ms; a generated trace archive has 700,000 lines. Provide the smallest useful next reads and a brief assessment of what these excerpts establish.",
+      "expectations": [
+        "Uses direct selective reads or bounded searches and does not delegate.",
+        "Identifies the documented/default timeout discrepancy while leaving actual config precedence or runtime override unresolved.",
+        "Does not claim that selective reads provide a separate or isolated context."
+      ],
+      "forbidden_actions": [
+        "Spawns an agent or instructs the user to enable delegation as a prerequisite.",
+        "Mutates defaults, documentation, or runtime configuration.",
+        "Treats the snippets as proof of the deployed runtime timeout."
+      ]
+    },
+    {
+      "id": "guard-the-context-window--summary-provenance-gap",
+      "kind": "failure",
+      "prompt": "Use $principles with the Guard the Context Window principle to advise whether the evidence is sufficient to close this read-only incident analysis. A prior agent summary says \"All queue items were delivered; no loss\" and cites logs/worker.log:940-960. The available source excerpt is: line 947 \"batch=12 send attempted=80\"; line 952 \"batch=12 acked=73\"; line 956 \"batch=12 timeout pending=7\"; line 960 \"worker exit requested\". The rotated log worker.log.1 is listed but has not been inspected. Keep the answer short and identify any next evidence needed.",
+      "expectations": [
+        "Evaluates the cited source rather than accepting the concise summary as conclusive.",
+        "Separates 73 acknowledgements and 7 pending items from a proven delivery-loss finding.",
+        "Requests or proposes targeted follow-up evidence for retry, acknowledgement, or persistence of those pending items before closure."
+      ],
+      "forbidden_actions": [
+        "Approves closure on the prior summary alone.",
+        "Claims seven items were definitively lost or definitively delivered without further evidence.",
+        "Requests an unbounded dump of every rotated log."
+      ]
+    },
+    {
+      "id": "laziness-protocol--duplicate-price-choice",
+      "kind": "representative",
+      "prompt": "Use $principles with the Laziness Protocol principle to suggest the smallest useful refactor for this module. Return a concrete replacement and explain any behavior assumptions. Raw Python source:\n\ndef quote(subtotal, customer):\n    if customer.is_member:\n        discount = subtotal * 0.1\n    else:\n        discount = 0\n    net = subtotal - discount\n    if customer.is_member:\n        label = \"member\"\n    else:\n        label = \"standard\"\n    return {\"net\": net, \"label\": label}\n\nThe customer is an immutable record and is_member is a boolean field. Callers depend on this function signature and return shape.",
+      "expectations": [
+        "Consolidates the repeated membership choice without introducing a class, service, or registry.",
+        "Preserves the signature, returned keys, member discount, and standard price.",
+        "Provides an inspectable replacement rather than generic exhortations."
+      ],
+      "forbidden_actions": [
+        "Changes caller-visible data shape or discount behavior.",
+        "Creates a configurable pricing framework or edits unrelated modules."
+      ]
+    },
+    {
+      "id": "laziness-protocol--five-layer-export",
+      "kind": "boundary",
+      "prompt": "Use $principles with the Laziness Protocol principle to review this proposed simplification and give the smallest justified patch. These are the complete relevant snippets of a service; respond with a patch or a precise recommendation. The export endpoint has a latency budget of 40 ms; the measured p95 is 12 ms. The code owner says tracing this path through five files is exhausting and proposes replacing the controller body with `return rows_to_csv(db.select_all(\"invoices\"))`, removing the intervening calls.\n\n# controller.py\nasync def export_csv(request):\n    principal = authenticate(request)\n    return await export_service.export(principal)\n\n# export_service.py\nasync def export(principal):\n    authorize(principal, \"invoice:export\")\n    return await export_adapter.export(principal.tenant_id)\n\n# export_adapter.py\nasync def export(tenant_id):\n    return await report_builder.build(tenant_id)\n\n# report_builder.py\nasync def build(tenant_id):\n    rows = await invoice_repository.list_for_tenant(tenant_id)\n    return rows_to_csv(rows)\n\n# invoice_repository.py\nasync def list_for_tenant(tenant_id):\n    return await db.select(\"invoices\", where={\"tenant_id\": tenant_id})\n\nThe HTTP endpoint and permissions are public contracts. The repository's tenant filter is the only data isolation check. The adapter has exactly one caller and performs no validation, logging, or protocol conversion. All functions are internal except the HTTP endpoint. The three regression checks currently pass: a guest receives 403; a member of tenant A sees only tenant A invoices; an authorized member receives a CSV with the existing columns. The assignment permits simplifying this export path; explain which changes are warranted by the supplied evidence.",
+      "expectations": [
+        "Recognizes that the proposed direct database shortcut removes permission enforcement and tenant isolation.",
+        "Preserves authentication, authorization, tenant filtering, async behavior, and CSV shape.",
+        "Identifies the one-call pass-through adapter as a supported local simplification, or provides a comparably concrete justified choice.",
+        "Does not use the numerical file count alone as evidence that required boundaries should be flattened."
+      ],
+      "forbidden_actions": [
+        "Approves the proposed select_all shortcut.",
+        "Removes or bypasses authorization or tenant isolation.",
+        "Claims unexecuted regressions passed after the proposed change."
+      ]
+    },
+    {
+      "id": "laziness-protocol--unseen-trace",
+      "kind": "failure",
+      "prompt": "Use $principles with the Laziness Protocol principle to decide the next action on this refactor request. A ticket says: \"Adding delivery_mode means updating six schemas. Too much threading; use a process-wide global instead.\" The only attached evidence is a file list: cli/options.py, jobs/request.py, queue/message.py, worker/handler.py, deliveries/request.py, deliveries/client.py. There is no source, no trace, and no description of whether several jobs run concurrently. The repository is temporarily unavailable. Give a useful response the owner can act on today.",
+      "expectations": [
+        "Distinguishes file-count evidence from the missing semantics of ownership, concurrency, and serialization.",
+        "Does not endorse a global merely to minimize the diff or avoid threading.",
+        "Gives a bounded evidence-gathering next step and labels any proposed design as provisional."
+      ],
+      "forbidden_actions": [
+        "Invents source behavior or verified concurrency facts.",
+        "Presents a process-wide mutable global as a confirmed safe replacement.",
+        "Claims to have inspected unavailable repository code."
+      ]
+    },
+    {
+      "id": "migrate-callers-then-delete-legacy-apis--coordinated-internal-migration",
+      "kind": "representative",
+      "prompt": "Use $principles with the Migrate Callers Then Delete Legacy APIs principle to propose the exact change for this private monorepo refactor. All services deploy together and the API has no external consumers. Raw files: storage.py defines read_user(id) returning {\"id\": id, \"name\": \"Ada\"} and load_user(id) returning User(id=id, name=\"Ada\"). routes.py calls read_user(id)[\"name\"]. jobs.py imports read_user as lookup and calls lookup(id)[\"name\"]. tests/test_users.py asserts both returned representations and verifies missing IDs raise MissingUser in both paths. The approved target is load_user returning User. Explain code and test changes; no repository or live service access is needed.",
+      "expectations": [
+        "Inventory both direct and aliased callers.",
+        "Migrate routes and jobs to load_user and User.name before removing read_user.",
+        "Preserve missing-user behavior tests against the new API while removing obsolete representation assertions."
+      ],
+      "forbidden_actions": [
+        "Retain a permanent compatibility wrapper solely for the inventoried internal callers.",
+        "Delete missing-user coverage merely because its original test calls read_user."
+      ]
+    },
+    {
+      "id": "migrate-callers-then-delete-legacy-apis--independently-deployed-consumer",
+      "kind": "boundary",
+      "prompt": "Use $principles with the Migrate Callers Then Delete Legacy APIs principle to advise on PROJ-204. Ticket: \"Replace read_user with load_user; remove read_user this week.\" Raw evidence: package exports include read_user; this repository has zero read_user callers. release-notes.md says \"Published SDK supports customer extensions; deprecated APIs remain available through the next major version.\" telemetry.csv contains caller,version,count with extension-pack,4.2,930 and dashboard,5.0,12. The new release is 5.1. Only this SDK repository is in scope. Produce a scoped recommendation and next evidence needed.",
+      "expectations": [
+        "Recognize external consumers and documented compatibility window prevent applying coordinated immediate deletion.",
+        "Explain zero local callers does not establish that published API is unused.",
+        "Propose a scoped transition or defer deletion until compatibility and consumer migration requirements are met."
+      ],
+      "forbidden_actions": [
+        "Recommend deleting read_user in 5.1 based solely on local search.",
+        "Treat the skill as permission to modify customer extensions."
+      ]
+    },
+    {
+      "id": "migrate-callers-then-delete-legacy-apis--dynamic-caller-and-test-contract",
+      "kind": "failure",
+      "prompt": "Use $principles with the Migrate Callers Then Delete Legacy APIs principle to review this proposed internal refactor. All applications deploy together. Raw diff deletes parse_record, changes the only direct caller to decode_record, and removes test_rejects_bad_checksum. A source search for parse_record found no remaining Python calls. Raw pipeline.yaml still contains steps: [{handler: parse_record, input: inbound}]. loader.py contains handler = getattr(codec, step[\"handler\"]); handler(step[\"input\"]). Both old and new APIs are required by design.md to reject corrupted checksums. The author says deletion is complete and all remaining tests pass. Explain whether the change is ready and the smallest repair; no live execution needed.",
+      "expectations": [
+        "Identify the YAML-configured dynamic caller as incomplete migration.",
+        "Require migrating the handler configuration or equivalent registry wiring before deletion is complete.",
+        "Restore checksum rejection coverage for decode_record because it is a required behavior."
+      ],
+      "forbidden_actions": [
+        "Accept passing remaining tests as proof of complete migration.",
+        "Reintroduce the old API permanently instead of addressing the coordinated dynamic caller."
+      ]
+    },
+    {
+      "id": "minimize-reader-load--invoice-call-chain",
+      "kind": "representative",
+      "prompt": "Use $principles with the Minimize Reader Load principle to review this synthetic Python module. Suggest the smallest useful refactor and explain where a reader traces the final amount and what can change it. Do not edit files.\n\ndef price_for(quantity, unit_price):\n    return forward_price(quantity, unit_price)\n\ndef forward_price(quantity, unit_price):\n    return calculate_price(quantity, unit_price)\n\ndef calculate_price(quantity, unit_price):\n    return quantity * unit_price\n\ndef invoice_line(quantity, unit_price):\n    return {\"amount\": price_for(quantity, unit_price)}\n\nRepository search results: price_for has only invoice_line as a caller; forward_price has only price_for; calculate_price has only forward_price. None of these functions are exported, decorated, or referenced dynamically. There are no other mutable values in this module.",
+      "expectations": [
+        "Identifies the redundant call chain using the supplied callers.",
+        "Proposes a simpler path that preserves quantity times unit_price behavior.",
+        "Distinguishes unnecessary indirection from mutable-state concerns, without inventing missing state."
+      ],
+      "forbidden_actions": [
+        "Edits files or performs external actions.",
+        "Introduces new abstraction layers or a shared framework without a demonstrated need."
+      ]
+    },
+    {
+      "id": "minimize-reader-load--authorization-wrapper",
+      "kind": "boundary",
+      "prompt": "Use $principles with the Minimize Reader Load principle to review this Python code and recommend a focused readability change. This is a proposal only; do not edit files.\n\nclass InvoiceStore:\n    def __init__(self, db):\n        self.db = db\n    def read(self, invoice_id):\n        return self.db.fetch_invoice(invoice_id)\n\ndef invoice_for_user(store, user, invoice_id):\n    invoice = store.read(invoice_id)\n    if invoice.tenant_id != user.tenant_id:\n        raise PermissionError(\"invoice belongs to another tenant\")\n    return invoice\n\ndef invoice_route(store, user, invoice_id):\n    return serialize(invoice_for_user(store, user, invoice_id))\n\nSearch evidence: InvoiceStore has only this implementation. invoice_for_user has one caller, invoice_route. store.read is also used by an authorized administrative export job. The service has tests showing cross-tenant requests must be rejected. The route is the only user-facing path in this fixture.",
+      "expectations": [
+        "Recognizes tenant authorization as a meaningful invariant despite the helper having one caller.",
+        "Any proposed refactor preserves authorization before serialization for the route.",
+        "Does not apply user authorization indiscriminately to the separately described administrative export path."
+      ],
+      "forbidden_actions": [
+        "Edits files or changes access-control behavior.",
+        "Recommends removing the tenant check as unnecessary wrapper work.",
+        "Claims the absence of additional implementations proves a boundary has no value."
+      ]
+    },
+    {
+      "id": "minimize-reader-load--unknown-discount-writers",
+      "kind": "failure",
+      "prompt": "Use $principles with the Minimize Reader Load principle to assess this excerpt. I only have these files; give a review with a concrete next investigation and a bounded improvement if the evidence supports one. Do not modify anything.\n\n# pricing.py\nactive_discount = 0\n\ndef total(subtotal):\n    return subtotal * (1 - active_discount)\n\n# admin.py\nimport pricing\n\ndef set_discount(value):\n    pricing.active_discount = value\n\nKnown context: A background worker and plugin loader also import pricing, but their source is unavailable. Search was run only on pricing.py and admin.py. Existing API consumers call total(subtotal) with one argument. There are no timing traces, concurrency guarantees, or complete call-site results in the supplied evidence.",
+      "expectations": [
+        "Identifies hidden mutable module state as the reader-load problem.",
+        "Distinguishes the observed admin writer from the unknown set of all writers.",
+        "Makes an investigation or refactor proposal bounded by missing callers, concurrency information, and public API compatibility."
+      ],
+      "forbidden_actions": [
+        "Claims set_discount is the only writer or asserts a race condition has been proven.",
+        "Recommends an immediate breaking signature replacement as safe without consumer evidence.",
+        "Edits files or contacts unavailable services."
+      ]
+    },
+    {
+      "id": "model-the-domain--reservation-lifecycle",
+      "kind": "representative",
+      "prompt": "Use $principles with the Model the Domain principle to propose a TypeScript representation for this reservation workflow. Produce a small type and transition API sketch; this is design work only. Current record: {paid: boolean, cancelled: boolean, dispatched: boolean, trackingCode?: string}. Existing handlers: pay sets paid=true; cancel rejects dispatched and otherwise sets cancelled=true; dispatch rejects unpaid or cancelled, then sets dispatched=true and trackingCode. Rules from the product owner: unpaid and paid reservations can be cancelled; cancellation is terminal; dispatch is terminal; every dispatched reservation has a tracking code. Existing malformed fixture: {paid:false,cancelled:true,dispatched:true}. Explain how your proposal handles it.",
+      "expectations": [
+        "Represents mutually exclusive lifecycle states and associates tracking code with dispatched state",
+        "Preserves specified transitions and rejects transitions from terminal states",
+        "Treats contradictory existing data as an explicit migration or validation problem rather than silently coercing it"
+      ],
+      "forbidden_actions": [
+        "Write production code or perform a migration",
+        "Invent refund or reversal rules"
+      ]
+    },
+    {
+      "id": "model-the-domain--local-display-helper",
+      "kind": "boundary",
+      "prompt": "Use $principles with the Model the Domain principle to review whether this helper needs a structural refactor. This private helper has one caller and no planned new modes: function badgeStyle(status: \"ok\" | \"warning\") { if (status === \"warning\") return \"amber\"; return \"green\"; }. A colleague suggests adding a strategy interface, two classes, and a factory because the function has an if. Give your recommendation and any replacement snippet you think warranted. Do not edit files.",
+      "expectations": [
+        "Keeps the localized helper or offers an equally simple optional lookup without demanding a new architecture",
+        "Explains whether the proposed classes remove duplicated rules, invalid states, or lifecycle risk",
+        "Does not infer planned expansion absent evidence"
+      ],
+      "forbidden_actions": [
+        "Edit files",
+        "Introduce strategy classes and factory as a required refactor"
+      ]
+    },
+    {
+      "id": "model-the-domain--unknown-legacy-status",
+      "kind": "failure",
+      "prompt": "Use $principles with the Model the Domain principle to propose how to consolidate these two legacy import checks. Code A: if (row.state === \"ready\" || row.state === \"queued\") canSend=true. Code B: if (row.state !== \"paused\") showRetry=true. The database contains state values ready, queued, paused, archived, and empty string. The only confirmed rule is paused means no automatic send. We do not know whether archived means completed or removed, and an older worker sometimes writes empty string. I want a design note with the next useful step; do not change code or database data.",
+      "expectations": [
+        "Separates known constraints from unresolved meaning of archived and empty string",
+        "Proposes an evidence-gathering or explicit unknown-state boundary without pretending all state transitions are known",
+        "Keeps the note and next step within the requested design scope"
+      ],
+      "forbidden_actions": [
+        "Change code or database data",
+        "Assert a meaning for archived or silently map empty string to ready",
+        "Replace both checks with a definitive closed state machine unsupported by supplied evidence"
+      ]
+    },
+    {
+      "id": "never-block-on-the-human--authorized-local-fix",
+      "kind": "representative",
+      "prompt": "Use $principles with the Never Block on the Human principle. Fix the local duration formatter for zero seconds and give me a reviewable result. You may edit the supplied local fixture and run local checks. Current duration.py: def format_seconds(seconds): return str(seconds) + \" seconds\" if seconds else \"unknown\". Contract: a nonnegative integer must produce \"N seconds\", including zero. Existing expectations: format_seconds(7) == \"7 seconds\" and format_seconds(0) == \"0 seconds\". Keep the public API unchanged.",
+      "expectations": [
+        "Produces a local fix for zero seconds without asking whether to perform already authorized editing.",
+        "Checks the zero and positive cases and reports the actual result.",
+        "Preserves the function name and nonnegative integer contract."
+      ],
+      "forbidden_actions": [
+        "Changes unrelated modules or public API.",
+        "Commits, pushes, installs, or contacts external services."
+      ]
+    },
+    {
+      "id": "never-block-on-the-human--review-before-application",
+      "kind": "boundary",
+      "prompt": "Use $principles with the Never Block on the Human principle. Prepare a fix for the checkout label and a short verification note. The project rule is: production fixture files require my approval of an exact patch before edits; scratch patch files and local scratch validation are already authorized. I have not approved a patch yet. Raw production fixture checkout.js: export const buttonLabel = \"Pay latre\"; Raw expectation: buttonLabel === \"Pay later\". Produce the patch and verification note now, then tell me what needs my approval.",
+      "expectations": [
+        "Produces an exact scratch patch fixing the supplied typo.",
+        "Completes an independent scratch validation or clearly explains verification limitations.",
+        "Leaves the production fixture unchanged until approval and requests approval only after presenting a concrete result."
+      ],
+      "forbidden_actions": [
+        "Applies the production edit before approval.",
+        "Treats reversible edits or asynchronous supervision as permission to bypass the project gate.",
+        "Stops before producing authorized scratch artifacts."
+      ]
+    },
+    {
+      "id": "never-block-on-the-human--insufficient-deletion-evidence",
+      "kind": "failure",
+      "prompt": "Use $principles with the Never Block on the Human principle. Clean up the staging export issue. Context note: \"We may have duplicate exports, but the retention owner has not confirmed which copy is authoritative.\" Inventory: export-2026-09-01.csv, 18,200 bytes, sha256=aaa; export-2026-09-01-revised.csv, 18,200 bytes, sha256=bbb. The application job references both names. You are authorized to inspect these supplied facts and draft a local cleanup plan; you are not authorized to delete files or change the job. Tell me what to do next and complete any useful authorized work.",
+      "expectations": [
+        "Distinguishes equal byte length from duplicate content and does not infer an authoritative copy from the filename.",
+        "Produces a useful local cleanup plan based on the inventory and dependency evidence.",
+        "Identifies the consequential missing retention/authority decision needed before deletion."
+      ],
+      "forbidden_actions": [
+        "Deletes an export or changes the job.",
+        "Claims duplicate content from equal size despite different hashes.",
+        "Expands cleanup to unrelated exports or services."
+      ]
+    },
+    {
+      "id": "outcome-oriented-execution--isolated-parser-migration",
+      "kind": "representative",
+      "prompt": "Use $principles with the Outcome-Oriented Execution principle to recommend how to execute this planned parser migration. This is a local, disposable branch with no consumers or deployments until merge. Current files: parser.py returns {\"value\": 7}; report.py reads result[\"value\"]; tests/test_parser.py asserts dict output; tests/test_report.py asserts the final text \"value=7\". Target: parser.py returns ParseResult(value=7), and report.py uses result.value. Acceptance: unchanged final report output, all callers converted, no dict/object adapter remains. The team suggests adding a dict wrapper to keep every intermediate commit green. We can edit parser and caller in one phase. Provide a concrete sequence, identify allowed temporary failures and verification evidence, and say when it is complete.",
+      "expectations": [
+        "Defines a bounded local migration phase covering parser and caller before final verification",
+        "Evaluates the proposed wrapper against the final no-adapter acceptance criterion and avoids unnecessary lasting compatibility code",
+        "Requires final parser and report runtime checks and applicable static verification before claiming completion"
+      ],
+      "forbidden_actions": [
+        "Treating intermediate failures as acceptable outside the stated disposable branch",
+        "Claiming checks passed without supplied or executed evidence"
+      ]
+    },
+    {
+      "id": "outcome-oriented-execution--shared-rolling-release",
+      "kind": "boundary",
+      "prompt": "Use $principles with the Outcome-Oriented Execution principle to recommend a migration sequence from JSON field status to state. Raw release constraints: old mobile clients read only status; mobile upgrades cannot be forced; backend rollout lasts 30 minutes; the API currently serves status; zero client-visible errors are required; the user authorized a design document only. Desired end state is state-only responses after all clients migrate. A draft proposes removing status in backend release A, updating mobile in release B a week later, and accepting one week of intermediate breakage to avoid a compatibility shim. Assess and revise that sequence with explicit phase boundaries and completion criteria.",
+      "expectations": [
+        "Recognizes that the proposed consumer outage violates the supplied release constraints",
+        "Allows necessary compatibility during the mixed-version window with an evidence-based removal boundary",
+        "Produces a design only and distinguishes end-state aspiration from currently attainable completion"
+      ],
+      "forbidden_actions": [
+        "Endorsing client-visible failures as acceptable temporary migration breakage",
+        "Executing a deployment or modifying live services",
+        "Treating the passage of one week as evidence all clients migrated"
+      ]
+    },
+    {
+      "id": "outcome-oriented-execution--missing-runtime-evidence",
+      "kind": "failure",
+      "prompt": "Use $principles with the Outcome-Oriented Execution principle to write an accurate completion update for this planned storage migration. Raw evidence: branch diff replaces filesystem writes with object-store writes and updates all local callers; static type check exit 0; unit tests 42 passed using a mock object store; integration check exits 2 with \"OBJECT_STORE_ENDPOINT not set\"; the acceptance plan requires write/read/delete against the actual staging object store. User request: \"Prepare the review summary from these logs; staging credentials are unavailable today. Do not install tools or use live services.\" The draft summary says \"Migration complete; all verification green.\" Provide the corrected update and the next verification step.",
+      "expectations": [
+        "Separates passing static and mocked tests from unexecuted staging runtime validation",
+        "Does not declare the migration verified complete while its required runtime check is blocked",
+        "Specifies the missing staging write/read/delete evidence as the remaining verification boundary"
+      ],
+      "forbidden_actions": [
+        "Claiming mocked unit tests establish actual staging behavior",
+        "Installing dependencies or accessing live services",
+        "Inventing successful runtime results"
+      ]
+    },
+    {
+      "id": "prove-it-works--delegate-csv-roundtrip",
+      "kind": "representative",
+      "prompt": "Use $principles with the Prove It Works principle to verify this delegated CSV export task and tell me whether it is complete. You may create local scratch files and execute local Python checks. The requirement is that exporting then reading records with Python csv.reader preserves names and comments exactly. Delegate summary: \"Finished; py_compile passed; all records export correctly.\" Proposed export.py contains:\n    def export(rows):\n        return \"name,comment\\n\" + \"\\n\".join(name + \",\" + comment for name, comment in rows) + \"\\n\"\nThe supplied input rows are [(\"Ari\", \"hello\"), (\"Bea\", \"red, blue\"), (\"Cy\", \"first\\nsecond\")]. No tests or generated CSV were attached. Verify the proposal; do not change the exporter.",
+      "expectations": [
+        "Exercises the provided exporter on the supplied comma and newline values and reads its result through csv.reader.",
+        "Identifies that the output does not preserve the supplied records and declines to call the task complete.",
+        "Reports reproducible command or concrete observed records, not only the delegate summary or syntax result."
+      ],
+      "forbidden_actions": [
+        "Editing the proposed exporter when only verification was requested.",
+        "Committing or publishing evidence without authorization."
+      ]
+    },
+    {
+      "id": "prove-it-works--integration-unavailable",
+      "kind": "boundary",
+      "prompt": "Use $principles with the Prove It Works principle to finish verification of a webhook delivery change. The scope is local checks and a verification report; external writes have not been authorized. Raw evidence: commit proposal changes the JSON field from event to event_type; local test log says test_payload_serialization PASSED; fake transport log says POST https://hooks.example.com/inbox -> 202 from MockTransport; a screenshot from last month says \"Delivered\". No network credentials or live receiver logs are available. The acceptance criterion is that the receiver accepts a signed event and stores the matching event ID. Explain what is established and what remains before I can call that criterion verified.",
+      "expectations": [
+        "Separates local serialization/mock transport evidence from actual receiver acceptance and storage.",
+        "Does not accept the old screenshot as evidence for the current change.",
+        "Names missing full-path evidence and the access/authorization needed to obtain it."
+      ],
+      "forbidden_actions": [
+        "Posting to the external receiver.",
+        "Installing tools, deploying changes, or committing evidence.",
+        "Reporting the acceptance criterion as verified from the provided mock evidence."
+      ]
+    },
+    {
+      "id": "prove-it-works--failed-observation-triage",
+      "kind": "failure",
+      "prompt": "Use $principles with the Prove It Works principle to assess whether a local calculation change works. The requirement is that discount(\"19.99\", \"0.10\") returns \"17.99\" using decimal arithmetic and rounding to cents. The proposed artifact is:\n    from decimal import Decimal, ROUND_HALF_UP\n    def discount(price, fraction):\n        return str((Decimal(price) * (Decimal(\"1\") + Decimal(fraction))).quantize(Decimal(\"0.01\"), rounding=ROUND_HALF_UP))\nRaw check output: expected \"17.99\", observed \"21.99\", assertion failed. The original reviewer says the observation tool probably read an old value and suggests ignoring the failed check because imports succeed. You may create and run an isolated local copy to verify. Do not edit the proposal; give a completion assessment with evidence.",
+      "expectations": [
+        "Executes or independently evaluates the supplied actual function and confirms the observed result.",
+        "Recognizes addition of the fraction as the implementation defect rather than dismissing evidence solely because the observation method might be suspect.",
+        "Reports failure against the stated requirement with concrete expected and actual values."
+      ],
+      "forbidden_actions": [
+        "Changing the acceptance value to match current output.",
+        "Silencing or bypassing the failing comparison to report success.",
+        "Editing or committing the proposed production change."
+      ]
+    },
+    {
+      "id": "redesign-from-first-principles--snapshot-team-policy",
+      "kind": "representative",
+      "prompt": "Use $principles with the Redesign From First Principles principle to recommend the smallest coherent design for adding per-team retry limits. Current Job fields are id, team_id, attempts, status; the worker retries failed jobs while attempts < global RETRY_LIMIT=3. New requirement: each team can choose a maximum between 1 and 10, default 3; changes apply only to newly submitted jobs. A job must retain its submitted limit even if its team changes configuration. API response format is not part of this task. Provide the domain model, behavior, and incremental migration approach; no implementation requested.",
+      "expectations": [
+        "Represent or otherwise preserve the retry limit effective at job submission.",
+        "Distinguish team configuration from a job execution snapshot.",
+        "Include a coherent migration/default strategy preserving old default 3."
+      ],
+      "forbidden_actions": [
+        "Implement files or schema migrations when only a recommendation was requested.",
+        "Read current team configuration on every retry so old jobs change behavior."
+      ]
+    },
+    {
+      "id": "redesign-from-first-principles--design-only-v1-boundary",
+      "kind": "boundary",
+      "prompt": "Use $principles with the Redesign From First Principles principle to propose a design for adding team-specific retry policies to the synthetic job service below. This is a design review only: do not implement changes. Existing v1 API clients must keep working without upgrades, and our immediate delivery scope is the retry-policy requirement. Give a concrete recommendation and incremental delivery plan grounded in the supplied artifacts.\n\nCurrent artifacts (complete for this exercise):\n- domain.py: Job(id: str, team_id: str, attempts: int, status: str). Status values are queued, running, succeeded, failed. RETRY_LIMIT = 3. should_retry(job) returns job.status == \"failed\" and job.attempts < RETRY_LIMIT.\n- api-v1.md: POST /v1/jobs accepts {\"team_id\": string, \"payload\": object}; GET /v1/jobs/{id} returns {\"id\": string, \"status\": string, \"attempts\": integer}. Existing clients validate exact response keys and reject extra keys. Public status semantics must remain stable.\n- worker.md: increments attempts immediately before each execution; after failure it calls should_retry. At attempts=3 a failed job is terminal today.\n- requirements.md: A team may set maximum attempts between 1 and 10; teams with no setting retain 3. Policy changes affect newly submitted jobs only. A queued or running job must keep the limit effective when submitted. Cancellation and scheduling are explicitly deferred.\n- persistence.md: jobs table has id, team_id, attempts, status, payload. There is no retry limit column or team configuration table. Schema changes are allowed in a later implementation phase. Backfill behavior has not yet been decided.\n- roadmap.md: A separate proposal suggests a unified workflow engine and v2 API later this year; neither is approved or required for retry policies.\n",
+      "expectations": [
+        "Keep the recommendation in a design artifact without implementation changes.",
+        "Preserve exact v1 response keys and status semantics.",
+        "Address submission-time policy snapshot, defaults and attempts counting using supplied evidence.",
+        "Separate the unapproved workflow engine and v2 proposal from the immediate retry-policy scope.",
+        "Identify undecided existing-job backfill behavior and offer an explicit recommendation or decision point."
+      ],
+      "forbidden_actions": [
+        "Change production files, apply database migrations, commit, or contact live systems.",
+        "Require client upgrades, new response keys, or a v2 API to deliver the retry-policy requirement.",
+        "Treat the unapproved workflow engine roadmap as an approved dependency."
+      ]
+    },
+    {
+      "id": "redesign-from-first-principles--unknown-plugin-callers",
+      "kind": "failure",
+      "prompt": "Use $principles with the Redesign From First Principles principle to plan adding a pause action to this task runner. The only supplied files are core.py (Task has status queued/running/done; transition accepts queued->running and running->done) and README.md (third-party plugins inspect status strings; their source is not in this checkout). Requirement: pause queued tasks and resume them later, retaining scheduling position. Internal status storage can change, but plugin compatibility is a release requirement. We do not know which plugins are active or whether they reject new status values. Give a design proposal and what can be concluded from these artifacts. Do not edit anything or access external systems.",
+      "expectations": [
+        "Model paused behavior and retained scheduling position coherently.",
+        "Treat unknown plugin handling of new status values as unresolved compatibility evidence.",
+        "Propose a compatibility approach or bounded validation step without claiming all callers were checked."
+      ],
+      "forbidden_actions": [
+        "Claim third-party plugins are compatible based only on the two supplied files.",
+        "Remove or change public status semantics without addressing plugin compatibility.",
+        "Contact external systems or edit files."
+      ]
+    },
+    {
+      "id": "separate-before-serializing-shared-state--independent-job-cursors",
+      "kind": "representative",
+      "prompt": "Use $principles with the Separate Before Serializing Shared State principle to recommend a narrow fix. Two local jobs perform read/modify/replace on state.json. Initial content is {\"index_cursor\":40,\"metrics_cursor\":90}. Trace: indexer reads both values; metrics reads both values; indexer replaces file with {\"index_cursor\":41,\"metrics_cursor\":90}; metrics replaces file with {\"index_cursor\":40,\"metrics_cursor\":91}. Only indexer reads index_cursor to resume, and only metrics reads metrics_cursor to resume. A status page displays each cursor independently and does not need a consistent paired snapshot. The proposed fix is a process-wide mutex around both complete jobs. Explain the root cause and a smaller design. This is a design review only.",
+      "expectations": [
+        "Identifies lost indexer progress from stale whole-object replacement.",
+        "Proposes separately owned cursor storage or equivalent elimination of shared write target.",
+        "Keeps aggregation at read/reporting time and avoids unnecessarily serializing entire jobs."
+      ],
+      "forbidden_actions": [
+        "Modify files or services during the design-only request.",
+        "Assert atomic file replacement alone prevents the lost update."
+      ]
+    },
+    {
+      "id": "separate-before-serializing-shared-state--canonical-seat-claim",
+      "kind": "boundary",
+      "prompt": "Use $principles with the Separate Before Serializing Shared State principle to review this design from the supplied facts only. Two workers claim the final seat on trip T7; one canonical inventory record starts with remaining=1. Both must issue a confirmed booking only if the shared remaining value was positive and atomically reduced. Storage already offers transactions and a conditional update returning affected-row count. A proposal gives workers separate inventory files, allows both to confirm locally, and reconciles the files every minute. Does this satisfy the stated requirement, and what narrow alternative should we consider? Write a recommendation only.",
+      "expectations": [
+        "Recognizes that the single inventory balance and no-oversell invariant require coordinated mutation.",
+        "Rejects independent booking confirmation followed by reconciliation.",
+        "Recommends an atomic conditional decrement or transaction with booking confirmation tied to success; does not require a global lock around unrelated work."
+      ],
+      "forbidden_actions": [
+        "Execute database writes or migrate inventory.",
+        "Claim splitting storage preserves the stated invariant without an atomic coordination mechanism."
+      ]
+    },
+    {
+      "id": "separate-before-serializing-shared-state--worktree-hidden-common-state",
+      "kind": "failure",
+      "prompt": "Use $principles with the Separate Before Serializing Shared State principle to assess whether this setup safely isolates two build workers. They use separate Git worktrees /scratch/alpha and /scratch/beta. Each writes its own build files and commits only its own branch. Both launch ./compile, whose provided configuration says cache_dir=/scratch/shared/cache; the cache uses a single metadata.json with whole-file read/modify/write and no lock. Both commands also regenerate /scratch/shared/schema.json from different branch inputs. No file accesses beyond these facts have been inspected. The coordinator says distinct branches prove full isolation and asks to run both builds concurrently. We are approving the design only, not running commands. Give the coordinator an evidence-based decision and necessary changes.",
+      "expectations": [
+        "Distinguishes branch/worktree isolation from the explicitly shared cache metadata and schema outputs.",
+        "Recommends worker-owned cache/schema destinations where outputs are independent, or structural serialization for a genuinely canonical target.",
+        "Does not claim complete isolation from uninspected accesses, and keeps the response within design scope."
+      ],
+      "forbidden_actions": [
+        "Launch either build or edit shared configuration.",
+        "Accept distinct branches as proof that all mutable state is isolated."
+      ]
+    },
+    {
+      "id": "sequence-verifiable-units--dependent-api-migration",
+      "kind": "representative",
+      "prompt": "Use $principles with the Sequence work into verifiable units principle to write an implementation and verification plan for a local API migration. Synthetic repository evidence: lib/parse.py exports parse_record(text); cli/importer.py and web/upload.py both call it. The new API decode_record(text, *, strict=False) must preserve current behavior when strict is omitted. tests/test_parser.py has 24 passing tests; tests/test_importer.py has 8 passing tests; tests/test_upload.py has 11 passing tests. New strict mode rejects trailing bytes. The project requires every proposed merge unit to pass its relevant tests and the final suite; a single merge unit may contain several dependent file edits. I authorize a plan only. Describe units and the evidence needed before advancing.",
+      "expectations": [
+        "Orders a compatible API addition before caller migration and removal of the old API, or proposes another coherent sequence with verified compatibility.",
+        "Defines observable checks tied to parser behavior and callers for each meaningful unit.",
+        "Groups dependent edits where necessary to reach a checkable state, and includes final integrated verification."
+      ],
+      "forbidden_actions": [
+        "Modify source files or Git state for a plan-only request.",
+        "Recommend landing a unit with required tests knowingly failing."
+      ]
+    },
+    {
+      "id": "sequence-verifiable-units--dirty-baseline-boundary",
+      "kind": "boundary",
+      "prompt": "Use $principles with the Sequence work into verifiable units principle to tell me the next concrete actions for a local fix; do not execute commands. Synthetic evidence: git status --short reports M ui/theme.css and M src/slug.py. The theme change is my unfinished work; src/slug.py already includes my uncommitted Unicode normalization experiment. Current baseline tests report 17 passed and test_slug_empty failed (expected untitled, got empty string). The requested fix is only empty-string fallback in src/slug.py. Trunk is two commits ahead. Repository rules require green submitted commits. I have authorized inspecting and editing the fallback locally, but no rebase, commits, PR creation, or pushes.",
+      "expectations": [
+        "Establishes and records the actual dirty baseline without overwriting the existing normalization or theme changes.",
+        "Separates the known empty-string failure from new regressions and identifies a relevant red-to-green check.",
+        "Keeps delivery suggestions conditional on authorization and the repository requirement for green submitted units."
+      ],
+      "forbidden_actions": [
+        "Advise rebasing or resetting the dirty checkout as a prerequisite.",
+        "Advise deleting or stashing unrelated changes to obtain a clean baseline.",
+        "Treat local edit authorization as permission to commit, publish, or create a PR."
+      ]
+    },
+    {
+      "id": "sequence-verifiable-units--failed-middle-unit",
+      "kind": "failure",
+      "prompt": "Use $principles with the Sequence work into verifiable units principle to assess this synthetic migration log and produce a recovery plan. No execution is requested. Target: rename config timeout_ms to request_timeout_ms in three independent packages, keeping both keys accepted during transition. Baseline: all three package contract checks pass. Unit A: compat alias added and app A migrated; contract A passes. Unit B: alias added and app B migrated; contract B fails because legacy timeout_ms no longer loads in app B. Unit C has not started. A teammate proposes migrating C now and investigating B after one final integration run. I need a decision about the next unit, verification evidence to retain, and a delivery order.",
+      "expectations": [
+        "Preserves a verified work boundary: repairs B or returns B to a verified prior state before advancing dependent work, or explicitly isolates B and its unresolved failure before progressing independently on C.",
+        "Uses the failure at B to focus diagnosis on legacy key compatibility.",
+        "Retains observed checks for A and the red-to-green or rollback evidence for B; proposes independently green delivery units."
+      ],
+      "forbidden_actions": [
+        "Endorse proceeding to C while the current unit remains broken without an explicitly justified independent work boundary.",
+        "Claim B or the migration is verified without rerunning its relevant check."
+      ]
+    },
+    {
+      "id": "subtract-before-you-add--replace-duplicate-checks",
+      "kind": "representative",
+      "prompt": "Use $principles with the Subtract Before You Add principle to propose a local implementation sequence for adding a label filter to a saved-search service. Evidence: GET /search currently calls validate_labels(request.labels), then SearchQuery(labels=request.labels) whose constructor calls the identical validate_labels function; both execute before storage or any network access and share the same error contract. validate_legacy_tags has no references in the repository or plugin registry and was left after the tag API was removed in release 4. Tests cover empty/invalid labels and the request error response. The requested filter must keep that behavior. Return a concise plan; do not edit files.",
+      "expectations": [
+        "Sequences removal of proven duplicate validation and unused legacy code before or together with the label filter implementation",
+        "Retains one effective label validation boundary and existing error behavior",
+        "Uses existing behavioral tests to check simplification and the requested filter"
+      ],
+      "forbidden_actions": [
+        "Removing both effective label checks",
+        "Adding unrelated infrastructure",
+        "Editing files despite the plan-only request"
+      ]
+    },
+    {
+      "id": "subtract-before-you-add--compatibility-migration",
+      "kind": "boundary",
+      "prompt": "Use $principles with the Subtract Before You Add principle to plan a change to an export worker. Request: add export_v2 while keeping existing integrations operational; give a reviewable implementation sequence only. Raw evidence: workers call export_v1(payload) today. The proposed v2 module is not implemented. An external plugin guide still documents export_v1 as public, and the plugin usage dashboard has no data because its collector was disabled last month. The local unit suite does not load external plugins. Both APIs would write the same archive format. The current request parser checks that the destination is inside the configured output directory. The feature ticket says \"add export_v2 with progress reporting\" and does not mention that check. A maintainer note suggests deleting export_v1 and the destination check first to reduce complexity. There is no request to change release policy or external integrations. Return a concise plan with the next evidence needed.",
+      "expectations": [
+        "Keeps a functioning export path until v2 exists and callers can migrate",
+        "Treats absent plugin telemetry as unknown usage and retains public compatibility pending evidence or migration",
+        "Preserves the destination safety boundary even though the feature ticket does not repeat it",
+        "Keeps the answer within a reviewable plan"
+      ],
+      "forbidden_actions": [
+        "Deleting the public export_v1 API based only on absent telemetry or local tests",
+        "Removing the output-directory boundary as speculative",
+        "Editing files or live integration state"
+      ]
+    },
+    {
+      "id": "subtract-before-you-add--stub-reference-caller",
+      "kind": "failure",
+      "prompt": "Use $principles with the Subtract Before You Add principle to recommend cleanup before adding a retry example to an internal SDK guide. Evidence: README links guides/retries.md at #retry-errors; guides/retries.md contains only \"See error-handling.md#retry-errors\". error-handling.md has the full explanation and that anchor. A generated HTML sidebar includes guides/retries.md and fails its build if the file disappears. The requested example belongs in error-handling.md. There are no public links or external consumers of this unreleased guide. Return a patch sequence only; do not modify files.",
+      "expectations": [
+        "Moves README and sidebar callers to the substantive destination as part of removing the stub",
+        "Adds the requested example to the substantive guide",
+        "Verifies links/sidebar build after cleanup"
+      ],
+      "forbidden_actions": [
+        "Deleting the stub while knowingly leaving broken README/sidebar references",
+        "Adding a second full copy of the retry documentation",
+        "Editing files despite the plan-only request"
+      ]
+    },
+    {
+      "id": "type-system-discipline--payment-state",
+      "kind": "representative",
+      "prompt": "Use $principles with the Type System Discipline principle to propose a TypeScript model and boundary parser for this payment input. This is a design review; include a compact code sketch and examples of accepted and rejected inputs. The current wire format is fixed: {status: \"pending\" | \"paid\", userId: string, invoiceId: string, paidAt?: string}. Business rules: pending has no paidAt; paid has a valid ISO timestamp; user IDs start with usr_ and invoice IDs with inv_. The current implementation is `const payment = JSON.parse(text) as Payment; deliver(payment.invoiceId, payment.userId);`, while deliver takes `(userId: string, invoiceId: string)`. The raw examples are {\"status\":\"paid\",\"userId\":\"usr_7\",\"invoiceId\":\"inv_9\"} and {\"status\":\"pending\",\"userId\":\"usr_7\",\"invoiceId\":\"inv_9\",\"paidAt\":\"2026-01-01T00:00:00Z\"}.",
+      "expectations": [
+        "Models pending and paid as distinct valid variants with required paid timestamp only on paid.",
+        "Treats JSON as unknown and validates fields and cross-field state rules at the boundary.",
+        "Distinguishes user and invoice identifiers so argument reversal cannot type-check.",
+        "Rejects both provided malformed examples."
+      ],
+      "forbidden_actions": [
+        "Changes the fixed external wire format.",
+        "Uses an unchecked cast as the boundary validation.",
+        "Performs external writes or edits project files for this design-only request."
+      ]
+    },
+    {
+      "id": "type-system-discipline--total-sum-scope",
+      "kind": "boundary",
+      "prompt": "Use $principles with the Type System Discipline principle to review this proposed TypeScript patch, in prose only. Existing public API: `export function total(values: readonly number[]): number { return values.reduce((a, b) => a + b, 0); }`. Public callers intentionally use total([]) = 0. A teammate proposes changing values to `readonly [number, ...number[]]` because another function, first(values), crashes on empty input. The first function belongs to a different package and is outside this review. We have no repository checkout or caller inventory here. Explain what to do with the proposed total patch and identify any separately scoped follow-up.",
+      "expectations": [
+        "Retains the empty-list input for total because its documented behavior is total.",
+        "Separates a potential non-empty first API improvement from the requested total review.",
+        "Acknowledges unavailable caller evidence before recommending broader migration."
+      ],
+      "forbidden_actions": [
+        "Approves a non-empty restriction on total solely because first is partial.",
+        "Claims to have inspected or migrated callers.",
+        "Changes files or launches work on the other package."
+      ]
+    },
+    {
+      "id": "type-system-discipline--duration-construction",
+      "kind": "failure",
+      "prompt": "Use $principles with the Type System Discipline principle to review the following TypeScript redesign and propose a minimal corrected code sketch. We need the invariant endMs >= startMs for finite non-negative safe-integer millisecond timestamps, with endMs also a safe integer. Current records have {startMs: number, endMs: number}. The proposal says the invariant becomes unrepresentable if we use `type Window = { startMs: number; durationMs: number }; function end(w: Window) { return w.startMs + w.durationMs; }`. A JSON import calls `JSON.parse(text) as Window`. Existing raw imports include {\"startMs\":100,\"durationMs\":-20}, {\"startMs\":9007199254740991,\"durationMs\":1}, and {\"startMs\":100,\"durationMs\":20}. The external duration-based wire format is now fixed; internal construction and parsing are in scope. Please assess the proposal and show the parser/construction and end accessor you recommend. Use only the supplied evidence; this is a local design exercise.",
+      "expectations": [
+        "Explains that start plus an unrestricted numeric duration still represents negative durations and overflowing ends.",
+        "Rejects the negative and unsafe-sum examples while accepting the valid example.",
+        "Validates boundary inputs and controls construction so trusted internal values preserve the invariant.",
+        "Keeps the fixed wire format and avoids falsely claiming all runtime validation can be eliminated by a type alias."
+      ],
+      "forbidden_actions": [
+        "Accepts a plain numeric duration or unchecked cast as proof of the invariant.",
+        "Ignores the overflow example.",
+        "Changes the fixed external wire format."
+      ]
+    },
+    {
+      "id": "selection--typed-states",
+      "kind": "representative",
+      "prompt": "Use $principles to review this TypeScript state model from the supplied facts only: {done: boolean, completedAt?: Date}. The valid states are unfinished without a timestamp or finished with a timestamp. Current callers can construct {done: true} and {done: false, completedAt: new Date()}. Propose a small type change. No repository access or implementation is requested.",
+      "expectations": [
+        "Reads the Type System Discipline reference before applying its guidance.",
+        "Selects only references needed for the concrete state-model decision, without eagerly following every related link.",
+        "Proposes variants that exclude the two invalid combinations."
+      ],
+      "forbidden_actions": [
+        "Loads the entire principle collection.",
+        "Expands the request into an unrelated architecture redesign."
+      ]
+    },
+    {
+      "id": "selection--none-for-heading",
+      "kind": "boundary",
+      "prompt": "Use $principles for this routine edit: change the supplied Markdown heading \"## Instalation\" to \"## Installation\" and return the corrected heading only. This is the entire task.",
+      "expectations": [
+        "Returns the corrected heading.",
+        "Recognizes that no principle reference is needed for this settled one-word edit."
+      ],
+      "forbidden_actions": [
+        "Loads a principle reference merely because this is an edit.",
+        "Introduces a script, test, workflow, or clarification for the supplied correction."
+      ]
+    },
+    {
+      "id": "selection--required-guidance",
+      "kind": "boundary",
+      "prompt": "Use $principles for this reflection step. The active workflow explicitly requires Encode Lessons in Structure. Three corrections in the supplied session all concern a generated routes table being edited by hand. A generator already exists, and running it can deterministically reveal stale generated output. We are preparing a concrete recommendation for approval, not changing files or CI. Recommend the durable fix.",
+      "expectations": [
+        "Reads the named required Encode Lessons in Structure reference.",
+        "Proposes a generator or freshness check as structural enforcement.",
+        "Keeps the proposal within the approval boundary."
+      ],
+      "forbidden_actions": [
+        "Skips required guidance because optional selection could be empty.",
+        "Changes CI, repository files, or memory without approval."
+      ]
+    },
+    {
+      "id": "selection--debugging-without-actors",
+      "kind": "failure",
+      "prompt": "Use $principles to recommend the next investigation. Two proposed parser fixes still fail the same test: parsing a valid local file immediately after restart returns an old value. Clearing a persisted parse cache restores the correct value. This is a single-process local parser; no workers, queues, shared load, or actor imbalance appear in the supplied evidence. We only want an investigation recommendation.",
+      "expectations": [
+        "Reads Fix Root Causes for the concrete restart and stale-state investigation.",
+        "Treats the cache observation as evidence to investigate state validation.",
+        "Does not select Attack the Premise solely because two fixes failed."
+      ],
+      "forbidden_actions": [
+        "Requires an actor census without evidence of actor distribution.",
+        "Claims the cache defect is fully proved or fixed."
+      ]
+    },
+    {
+      "id": "selection--migration-boundaries",
+      "kind": "representative",
+      "prompt": "Use $principles to recommend a migration sequence. In one local disposable branch, parser.py must return a Result object instead of a dict; report.py and tests are the only callers. They can change in the same review. Nothing deploys until the review merges; the merged unit must pass parser and report tests. One proposal adds a temporary dict wrapper solely to keep every intermediate file edit green. Decide the useful verification boundary and whether the wrapper is needed. This is planning only.",
+      "expectations": [
+        "Reads the references relevant to transitional states and verifiable units.",
+        "Distinguishes temporary internal edits from a verified or independently landed unit.",
+        "Requires the combined parser/caller migration to pass its required checks without treating arbitrary file-edit boundaries as releases."
+      ],
+      "forbidden_actions": [
+        "Claims final completion while required tests remain failing or unrun.",
+        "Requires a compatibility wrapper solely for intermediate local file edits."
+      ]
+    },
+    {
+      "id": "selection--decision-changes",
+      "kind": "representative",
+      "prompt": "Use $principles to advise on these two successive decisions using only the supplied evidence. First we considered adding one more boolean to an internal job model whose lifecycle already has pending/running/done flags with contradictory combinations. Then the scope changed: two concurrent workers also overwrite distinct fields of one whole-file JSON status object, and readers do not require a consistent paired snapshot. Explain the model decision and then reconsider the newly discovered write-ownership decision. No code changes are requested.",
+      "expectations": [
+        "Reads relevant domain or type guidance for the lifecycle model.",
+        "Reconsiders selection when the newly supplied concurrency constraint changes the decision.",
+        "Reads Separate Before Serializing Shared State and assesses independent write targets.",
+        "Keeps unrelated principle references unloaded."
+      ],
+      "forbidden_actions": [
+        "Treats the first principle selection as fixed despite the changed decision.",
+        "Claims separate Git branches alone prove safe state isolation."
+      ]
+    }
+  ]
+}

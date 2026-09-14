@@ -1,0 +1,41 @@
+--- a/SKILL.md
++++ b/SKILL.md
+@@ -10,5 +10,7 @@
+ a base, incorporate the strongest compatible ideas, and verify the result.
+
+ Read the [shared execution and result contract](../../references/agent-workflows.md).
++Read each of the four named principle references at its phase below; these
++are required guidance even when the registry selects no additional principles.
+ Keep a short plan for Frame, Fan out, Cross-judge, Pick, Graft, and Verify using
+ the available planning tool or a local note.
+@@ -24,6 +26,6 @@
+    Choose native runners under the shared contract. Disclose repeated models.
+ 4. Assign independent workspaces and output locations. For code, verify each
+    copy includes the same base and relevant uncommitted input. Follow
+-   [Separate Before Serializing Shared State](../principle-separate-before-serializing-shared-state/SKILL.md).
++   [Separate Before Serializing Shared State](../principles/references/separate-before-serializing-shared-state/reference.md).
+
+ ## Phase B: Fan out
+@@ -59,12 +61,12 @@
+ Choose the artifact a future maintainer can extend while preserving its
+ invariants. Prefer a simpler boundary or smaller API when the rubric is otherwise
+-tied, following the [Laziness Protocol](../principle-laziness-protocol/SKILL.md).
++tied, following the [Laziness Protocol](../principles/references/laziness-protocol/reference.md).
+ Record the base, criteria, judge's verdict, and any unresolved uncertainty.
+
+ ## Phase E: Graft
+
+ Read the other candidates again for ideas worth incorporating. Adapt each useful
+ part coherently rather than pasting competing designs together, following
+-[Redesign From First Principles](../principle-redesign-from-first-principles/SKILL.md).
++[Redesign From First Principles](../principles/references/redesign-from-first-principles/reference.md).
+ Keep frozen candidates intact and record what was incorporated, its source,
+ and what was rejected with reasons.
+@@ -76,6 +78,6 @@
+ ## Phase F: Verify and return
+
+ Check the synthesized artifact against the task and rubric using
+-[Prove It Works](../principle-prove-it-works/SKILL.md). Inspect the actual artifact
++[Prove It Works](../principles/references/prove-it-works/reference.md). Inspect the actual artifact
+ and run appropriate checks within authorization. If a check fails, revisit the
+ framing, base, or graft that caused it.

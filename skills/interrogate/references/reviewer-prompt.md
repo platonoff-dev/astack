@@ -32,6 +32,15 @@ Use the assigned frozen input and permitted surrounding context. Read only; do n
 
 {CODE_QUALITY_CONTENTS}
 
+## Relevant Principles
+
+{PRINCIPLES_REGISTRY_PATH_AND_SELECTED_REFERENCE_PATHS_OR_GUIDANCE}
+
+Read the supplied registry and any selected references needed for your review
+decisions; do not assume the lead's reads are present in this context. Select
+additional guidance only when the registry criterion fits. Principles do not
+establish defects without evidence from the reviewed code and its contracts.
+
 ## Instructions
 
 Review the code through every lens in the rubric and the code-quality lens above that you find relevant. Do not force lenses that don't apply. A simple bug fix does not need paragraphs about architectural integrity.

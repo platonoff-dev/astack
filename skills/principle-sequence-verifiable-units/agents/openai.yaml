@@ -1,6 +1,0 @@
-interface:
-  display_name: 'Principle sequence verifiable units'
-  short_description: 'Sequence work into independently verifiable units'
-  default_prompt: 'Use $principle-sequence-verifiable-units as the user asked.'
-policy:
-  allow_implicit_invocation: false

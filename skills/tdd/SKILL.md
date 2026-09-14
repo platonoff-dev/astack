@@ -12,7 +12,7 @@ Do not force a test when it would be impractical. If the available test would re
 
 ## Workflow
 
-1. **Understand the bug.** Identify the intended behavior, current behavior, affected path, and smallest observable reproduction.
+1. **Understand the bug.** Identify the intended behavior, current behavior, affected path, and smallest observable reproduction. If a root-cause or fix-design decision needs guidance, consult the [principles registry](../principles/SKILL.md) and read only the relevant references; keep the focused regression scope.
 2. **Choose the narrowest executable check.** Prefer the closest unit, component, integration, or regression test already used for that codepath. If no practical test path is obvious, do not create one from scratch just to satisfy the workflow.
 3. **Write the failing test first.** Add the smallest focused test that would have caught the bug. The test should encode intended behavior, not mirror the current implementation.
 4. **Run the new test before fixing.** Confirm it fails for the intended reason. If it passes or fails for an unrelated reason, correct the test or reproduction before editing the implementation.

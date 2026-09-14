@@ -20,6 +20,11 @@ Preserve existing work. Dependency installation, live service mutations,
 publication, and merging require their own authorization. If execution needs
 unavailable access or approval, report the blocker and leave the fact unproven.
 
+When an unresolved boundary, compatibility, or verification decision needs
+guidance, consult the [principles registry](../principles/SKILL.md) and read
+only the relevant references. Principles guide the decision; source evidence
+must still establish each safety claim.
+
 ## Don't trust your own writeup
 
 A blast-radius writeup that sounds right is worthless. It reads as convincing whether or not it's true. So don't hand back the writeup. Find the one or two facts the whole thing depends on and prove them by running code.

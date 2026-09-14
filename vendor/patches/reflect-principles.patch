@@ -1,0 +1,9 @@
+--- a/SKILL.md
++++ b/SKILL.md
+@@ -45,5 +45,5 @@
+ ### 4. Structural enforcement check
+
+-Sanity-check the synthesizer's Accepted list. For any item that would be enforced more reliably by a lint rule, script, metadata flag, or runtime check, move it from Accepted to Backlog. Use the decision rule in the bundled [Encode Lessons in Structure](../principle-encode-lessons-in-structure/SKILL.md) skill; it does not authorize implementing backlog items.
++Sanity-check the synthesizer's Accepted list. For any item that would be enforced more reliably by a lint rule, script, metadata flag, or runtime check, move it from Accepted to Backlog. Read the [principles registry](../principles/SKILL.md) and its [Encode Lessons in Structure](../principles/references/encode-lessons-in-structure/reference.md) reference, then apply that decision rule. This named principle is required; it does not authorize implementing backlog items.
+
+ ### 5. Prepare and apply approved changes

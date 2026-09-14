@@ -43,7 +43,9 @@ repair model configuration as a review side effect.
 
 Read and fill [reviewer-prompt.md](references/reviewer-prompt.md) with the intent,
 frozen input and context, [rubric.md](references/rubric.md), and the relevant
-[code-quality lens](references/code-quality-review.md). Send the same substantive
+[code-quality lens](references/code-quality-review.md). Fill the principles
+section with resolved absolute registry and reference paths or full guidance needed
+for this review, following the shared contract. Send the same substantive
 brief to every reviewer, changing only its identity and assigned output. Apply
 code-quality concerns proportionally; a broad maintainability audit must be
 explicitly selected. Keep peer findings and the lead's tentative verdict out of

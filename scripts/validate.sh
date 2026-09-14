@@ -180,6 +180,12 @@ sys.exit(1 if seen else 0)
 PY
 then pass "no dangling /skill references"; else fail "a skill references a slash-name nothing ships"; fi
 
+if out=$(python3 -B scripts/check_skill_links.py 2>&1); then
+  pass "$out"
+else
+  fail "local Markdown links"; printf '%s\n' "$out" | sed 's/^/           /'
+fi
+
 # --------------------------------------------- organisation-specific content
 # Organisation values belong in the tracker adapter outside this public repo.
 head_ "no organisation-specific content"
@@ -263,7 +269,7 @@ if out=$(python3 -B scripts/vendor.py verify 2>&1); then
 else
   fail "vendor registry"; printf '%s\n' "$out" | sed 's/^/           /'
 fi
-for t in scripts/test_vendor.py skills/setup-astack/scripts/test_tracker_adapter.py skills/setup-astack/scripts/test_astack_adapter.py; do
+for t in scripts/test_vendor.py scripts/test_skill_links.py skills/setup-astack/scripts/test_tracker_adapter.py skills/setup-astack/scripts/test_astack_adapter.py; do
   if out=$(python3 -B "$t" 2>&1); then
     pass "$(basename "$t"): $(printf '%s' "$out" | grep -oE 'Ran [0-9]+ tests?' | head -1)"
   else

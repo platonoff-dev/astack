@@ -1,6 +1,0 @@
-interface:
-  display_name: 'Principle separate before serializing shared state'
-  short_description: 'Separate independent writes before adding synchronization'
-  default_prompt: 'Use $principle-separate-before-serializing-shared-state as the user asked.'
-policy:
-  allow_implicit_invocation: false

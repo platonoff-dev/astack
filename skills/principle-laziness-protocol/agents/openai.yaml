@@ -1,6 +1,0 @@
-interface:
-  display_name: 'Principle laziness protocol'
-  short_description: 'Reduce code and complexity with focused simplification'
-  default_prompt: 'Use $principle-laziness-protocol as the user asked.'
-policy:
-  allow_implicit_invocation: false

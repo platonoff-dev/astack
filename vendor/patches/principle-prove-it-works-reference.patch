@@ -1,0 +1,70 @@
+--- a/SKILL.md
++++ /dev/null
+@@ -1,35 +0,0 @@
+----
+-name: principle-prove-it-works
+-description: "Apply after completing a task, before declaring done. Verify against the real artifact (run the feature, read the actual value, inspect the diff), not a proxy, self-report, or 'it compiles.'"
+-disable-model-invocation: true
+----
+-
+-# Prove It Works
+-
+-Verify every task output by checking the real thing directly. Do not infer from proxies, self-reports, or "it compiles."
+-
+-**Why:** Unverified work has unknown correctness. Indirect verification (file mtimes, output freshness, agent self-reports, cached screenshots) feels cheaper than direct observation. Acting on a wrong inference costs far more than checking the source.
+-
+-**Pattern:** After completing any task, ask: "how do I prove this actually works?"
+-
+-Run checks within the authorized task scope and follow the project's `CLAUDE.md` / `AGENTS.md`. Verification does not itself authorize live service writes, deployment, installation, or commits. If access or approval prevents a required check, report what was checked, what remains unverified, and what is needed to finish; do not claim the feature works.
+-
+-Check the real thing, not a proxy:
+-- Check process liveness directly, not indirectly through derived state
+-- Read the actual value, not a cached or derived representation
+-- When verification fails, suspect the observation method before suspecting the system
+-
+-Code and features:
+-1. Build it (necessary but not sufficient)
+-2. Run it and exercise the actual feature path
+-3. Check the full chain: does data flow from input to output?
+-4. For integrations, test the full communication path end-to-end
+-
+-Delegation: trust artifacts, not self-reports.
+-When verifying delegated work, inspect the actual output artifact (git diff, file contents, runtime behavior), not the delegate's summary.
+-
+-## Script the check when you can
+-
+-Prefer a deterministic check that re-runs the same comparison. Use an existing check when it proves the relevant behavior; add a script when it provides useful repeatable evidence. Run the check and keep its command and output as reviewable evidence in the project's permitted working area.
+-
+-Keep the evidence visible for the human. For large or complex work, such as a port or migration, retain an auditable trail when the project requires it. Commit evidence only when committing is authorized and the artifact belongs in the repository.
+--- /dev/null
++++ b/reference.md
+@@ -0,0 +1,29 @@
++# Prove It Works
++
++Verify every task output by checking the real thing directly. Do not infer from proxies, self-reports, or "it compiles."
++
++**Why:** Unverified work has unknown correctness. Indirect verification (file mtimes, output freshness, agent self-reports, cached screenshots) feels cheaper than direct observation. Acting on a wrong inference costs far more than checking the source.
++
++**Pattern:** After completing any task, ask: "how do I prove this actually works?"
++
++Run checks within the authorized task scope and follow the project's `CLAUDE.md` / `AGENTS.md`. Verification does not itself authorize live service writes, deployment, installation, or commits. If access or approval prevents a required check, report what was checked, what remains unverified, and what is needed to finish; do not claim the feature works.
++
++Check the real thing, not a proxy:
++- Check process liveness directly, not indirectly through derived state
++- Read the actual value, not a cached or derived representation
++- When verification fails, suspect the observation method before suspecting the system
++
++Code and features:
++1. Build it (necessary but not sufficient)
++2. Run it and exercise the actual feature path
++3. Check the full chain: does data flow from input to output?
++4. For integrations, test the full communication path end-to-end
++
++Delegation: trust artifacts, not self-reports.
++When verifying delegated work, inspect the actual output artifact (git diff, file contents, runtime behavior), not the delegate's summary.
++
++## Script the check when you can
++
++Prefer a deterministic check that re-runs the same comparison. Use an existing check when it proves the relevant behavior; add a script when it provides useful repeatable evidence. Run the check and keep its command and output as reviewable evidence in the project's permitted working area.
++
++Keep the evidence visible for the human. For large or complex work, such as a port or migration, retain an auditable trail when the project requires it. Commit evidence only when committing is authorized and the artifact belongs in the repository.

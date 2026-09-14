@@ -25,6 +25,14 @@ for code, identify the base and diff or a snapshot that includes the relevant
 authorized uncommitted work. A default worktree may start from the wrong branch
 or omit that work. Verify the baseline in each workspace before dispatch.
 
+For task-specific design, execution, or verification decisions, consult the
+[principles registry](../skills/principles/SKILL.md) and read the smallest relevant
+set. Preserve any principle the active workflow names as required. Include the
+resolved absolute registry and selected reference paths, or the full selected
+guidance, in each worker brief that needs them; a fresh worker does not inherit
+the lead's reads or working directory.
+Selection supplements the mandatory execution rules here and the task's rubric.
+
 Use fresh worker contexts containing the brief and required source context, not
 the lead's tentative verdict or other workers' outputs. Queue or batch within
 native capacity. Sequential fresh-context attempts can retain independence;

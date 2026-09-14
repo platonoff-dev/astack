@@ -14,22 +14,12 @@ The repo is both a plugin and its marketplace. `.claude-plugin/` and
 `.codex-plugin/` contain the plugin manifests; `.claude-plugin/marketplace.json`
 and `.agents/plugins/marketplace.json` point to this repo with source `./`.
 
-Thirty-nine skills ship: `task-interview`, `validate-claims`, `setup-astack`, `pick-next`,
-`merge-brief`, `arena`, `swarm`, `interrogate`, `blast-radius`, `weekly-report`, `reflect`, `technical-writing`, `why`, `how`, `teach`, `unslop`, `bro`, `tdd`, `harden-tests`,
-`principle-attack-the-premise`, `principle-boundary-discipline`, `principle-build-the-lever`, `principle-encode-lessons-in-structure`,
-`principle-experience-first`,
-`principle-fix-root-causes`, `principle-foundational-thinking`,
-`principle-guard-the-context-window`, `principle-laziness-protocol`,
-`principle-minimize-reader-load`, `principle-migrate-callers-then-delete-legacy-apis`,
-`principle-model-the-domain`,
-`principle-never-block-on-the-human`,
-`principle-outcome-oriented-execution`,
-`principle-prove-it-works`,
-`principle-redesign-from-first-principles`,
-`principle-separate-before-serializing-shared-state`,
-`principle-sequence-verifiable-units`,
-`principle-subtract-before-you-add`, and
-`principle-type-system-discipline`. There are no
+Twenty skills ship: `task-interview`, `validate-claims`, `setup-astack`, `pick-next`,
+`merge-brief`, `arena`, `swarm`, `interrogate`, `blast-radius`, `weekly-report`,
+`reflect`, `technical-writing`, `why`, `how`, `teach`, `unslop`, `bro`, `tdd`,
+`harden-tests`, and `principles`. The automatically discoverable `principles`
+skill selects from twenty ordinary principle references; these are not separate
+skill registrations. There are no
 bundled agent definitions or automations; skills may delegate through the harness
 when available.
 
@@ -85,13 +75,14 @@ Keep private tracker adapters outside this plugin, including its ignored tree.
 
 ## Vendoring
 
-Use `python3 -B scripts/vendor.py` to import third-party skills. `vendor.json`
-records each source repository, skill path, tracked ref, exact commit, license,
-and ordered compatibility patches. See [docs/vendoring.md](docs/vendoring.md)
+Use `python3 -B scripts/vendor.py` to import third-party skills and principle
+references. `vendor.json` records each source repository, source path, tracked
+ref, exact commit, license, and ordered compatibility patches. References have
+separate owned target directories under a skill's `references/` tree. See [docs/vendoring.md](docs/vendoring.md)
 for `add`, `check`, `update`, and `sync` usage.
 
 Use `check` to inspect upstream changes; update only the requested skills.
-Do not hand-edit registered skill directories. Keep adaptations in
+Do not hand-edit registered skill or reference directories. Keep adaptations in
 `vendor/patches/<name>.patch`, then reproduce with `sync`; preserve upstream
 licenses and invocation policies. `--force` explicitly discards local edits,
 so save any wanted changes as a patch first. Review imported instructions and

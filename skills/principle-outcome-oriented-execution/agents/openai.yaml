@@ -1,6 +1,0 @@
-interface:
-  display_name: 'Principle outcome oriented execution'
-  short_description: 'Converge on verified migration outcomes'
-  default_prompt: 'Use $principle-outcome-oriented-execution as the user asked.'
-policy:
-  allow_implicit_invocation: false

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Import, audit, update and reproduce skills from Git repositories.
+"""Import, audit, update and reproduce skills and references from Git repositories.
 
 Requires Python 3.10+ and Git; no third-party Python dependencies. All staging
 is under .local/tmp. Upstream code is copied, never executed by this tool.
@@ -68,19 +68,31 @@ def local_path(root: Path, value: str) -> Path:
     return path
 
 
-def validate_entry(root: Path, entry: dict) -> None:
+def target_path(root: Path, entry: dict) -> Path:
+    return local_path(root, entry.get("target", f"skills/{entry['name']}"))
+
+
+def validate_entry(root: Path, entry: dict, *, reference: bool = False) -> None:
     for key in ("name", "repo", "path", "ref", "commit", "license", "license_path"):
         if not isinstance(entry.get(key), str) or not entry[key].strip():
             raise VendorError(f"entry requires a nonempty {key}")
     if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", entry["name"]):
-        raise VendorError(f"invalid skill name: {entry['name']}")
+        raise VendorError(f"invalid component name: {entry['name']}")
     if not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", entry["commit"]):
         raise VendorError(f"{entry['name']}: commit must be a full Git object id")
     if entry["repo"].startswith("-") or entry["ref"].startswith("-"):
         raise VendorError("repository and ref cannot start with '-'")
     relative(entry["path"], allow_root=True)
     relative(entry["license_path"])
-    local_path(root, f"skills/{entry['name']}")
+    if reference:
+        target = entry.get("target")
+        if not isinstance(target, str) or not re.fullmatch(
+            r"skills/[a-z0-9]+(?:-[a-z0-9]+)*/references/[a-z0-9]+(?:-[a-z0-9]+)*", target
+        ):
+            raise VendorError("reference target must be skills/<skill>/references/<name>")
+    elif "target" in entry:
+        raise VendorError("only reference entries may set target")
+    target_path(root, entry)
     patches = entry.get("patches", [])
     if not isinstance(patches, list) or not all(isinstance(p, str) for p in patches):
         raise VendorError("patches must be a list of repository-relative paths")
@@ -96,19 +108,26 @@ def load(root: Path) -> dict:
     data = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(data, dict) or data.get("version") != 1 or not isinstance(data.get("skills"), list):
         raise VendorError("vendor.json requires version 1 and a skills list")
-    names = set()
-    for entry in data["skills"]:
-        if not isinstance(entry, dict):
-            raise VendorError("each skills entry must be an object")
-        validate_entry(root, entry)
-        if entry["name"] in names:
-            raise VendorError(f"duplicate skill: {entry['name']}")
-        names.add(entry["name"])
+    if not isinstance(data.get("references", []), list):
+        raise VendorError("references must be a list")
+    names, targets = set(), []
+    for collection in ("skills", "references"):
+        for entry in data.get(collection, []):
+            if not isinstance(entry, dict):
+                raise VendorError(f"each {collection} entry must be an object")
+            validate_entry(root, entry, reference=collection == "references")
+            if entry["name"] in names:
+                raise VendorError(f"duplicate component: {entry['name']}")
+            names.add(entry["name"])
+            target = target_path(root, entry)
+            if any(target.is_relative_to(other) or other.is_relative_to(target) for other in targets):
+                raise VendorError(f"overlapping vendor target: {target.relative_to(root)}")
+            targets.append(target)
     return data
 
 
 def select(data: dict, names: list[str]) -> list[dict]:
-    entries = {entry["name"]: entry for entry in data["skills"]}
+    entries = {entry["name"]: entry for key in ("skills", "references") for entry in data.get(key, [])}
     unknown = set(names) - entries.keys()
     if unknown:
         raise VendorError(f"not in vendor.json: {', '.join(sorted(unknown))}")
@@ -186,7 +205,16 @@ def materialise(root: Path, entry: dict, revision: str, work: Path) -> tuple[str
         patch_path = str(local_path(root, patch))
         git("apply", "--check", patch_path, cwd=staged)
         git("apply", patch_path, cwd=staged)
-    snapshot(staged)  # Reject links introduced by patches before reading files.
+    files = snapshot(staged)  # Reject links introduced by patches before reading files.
+    if "target" in entry:
+        # References deliberately have no skill registration or invocation metadata.
+        # Patches, rather than an implicit conversion, own the source adaptation.
+        if set(files) - {"reference.md", "LICENSE", "LICENSE.upstream"} or not {"reference.md", "LICENSE"} <= files.keys():
+            raise VendorError("reference output requires reference.md and LICENSE, with optional LICENSE.upstream only; use a compatibility patch")
+        text = (staged / "reference.md").read_text(encoding="utf-8")
+        if not text.strip() or text.startswith("---\n"):
+            raise VendorError("reference.md must be nonempty ordinary Markdown without skill frontmatter")
+        return commit, staged, upstream
     fm = frontmatter((staged / "SKILL.md").read_text(encoding="utf-8"))
     if unquote(fm.get("name", "")) != entry["name"] or not fm.get("description"):
         raise VendorError("SKILL.md needs a matching name and description; use a compatibility patch")
@@ -207,21 +235,21 @@ def differences(before: dict, after: dict) -> list[str]:
 
 def publish(root: Path, data: dict, prepared: list[tuple[dict, Path, dict]], work: Path,
             original_manifest: bytes) -> None:
-    """Stage all skills first; roll back the entire batch on ordinary write errors."""
+    """Stage all components first; roll back the batch on ordinary write errors."""
     manifest = local_path(root, "vendor.json")
     pending = work / "vendor.json"
     pending.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
     if manifest.read_bytes() != original_manifest:
         raise VendorError("vendor.json changed during preparation; retry after reviewing that change")
     for entry, _, before in prepared:
-        target = local_path(root, f"skills/{entry['name']}")
+        target = target_path(root, entry)
         if snapshot(target) != before:
             raise VendorError(f"{entry['name']}: local files changed during preparation; nothing replaced")
     replaced = []
     try:
         for entry, staged, _ in prepared:
-            target = local_path(root, f"skills/{entry['name']}")
-            target.parent.mkdir(exist_ok=True)
+            target = target_path(root, entry)
+            target.parent.mkdir(parents=True, exist_ok=True)
             backup = work / f"backup-{entry['name']}"
             exists = target.exists()
             if exists:
@@ -242,23 +270,30 @@ def execute(root: Path, args: argparse.Namespace) -> int:
     data = load(root)
     original_manifest = (root / "vendor.json").read_bytes()
     if args.command == "verify":
-        print(f"vendor.json: {len(data['skills'])} valid entries (offline; no upstream audit)")
+        print(f"vendor.json: {len(data['skills'])} skills, {len(data.get('references', []))} references (offline; no upstream audit)")
         return 0
     if args.command == "add":
-        if any(entry["name"] == args.name for entry in data["skills"]):
+        if any(entry["name"] == args.name for entry in select(data, [])):
             raise VendorError(f"{args.name}: already registered; use update")
         entry = {key: getattr(args, key) for key in
                  ("name", "repo", "path", "ref", "license", "license_path")}
         entry.update(commit="0" * 40, patches=args.patch)
-        validate_entry(root, entry)
-        if local_path(root, f"skills/{args.name}").exists():
-            raise VendorError(f"skills/{args.name} already exists; will not overwrite it")
-        data["skills"].append(entry)
+        if args.target:
+            entry["target"] = args.target
+        validate_entry(root, entry, reference=bool(args.target))
+        target = target_path(root, entry)
+        if target.exists():
+            raise VendorError(f"{target.relative_to(root)} already exists; will not overwrite it")
+        for other in select(data, []):
+            existing = target_path(root, other)
+            if target.is_relative_to(existing) or existing.is_relative_to(target):
+                raise VendorError(f"overlapping vendor target: {target.relative_to(root)}")
+        data.setdefault("references" if args.target else "skills", []).append(entry)
         entries = [entry]
     else:
         entries = select(data, args.name)
     if not entries:
-        print("No vendored skills. Use add to import one.")
+        print("No vendored components. Use add to import one.")
         return 0
     scratch = root / ".local" / "tmp"
     if (root / ".local").is_symlink() or scratch.is_symlink():
@@ -270,7 +305,7 @@ def execute(root: Path, args: argparse.Namespace) -> int:
         work = Path(tmp)
         for index, entry in enumerate(entries):
             try:
-                target = local_path(root, f"skills/{entry['name']}")
+                target = target_path(root, entry)
                 current = snapshot(target)
                 pin = entry["commit"]
                 at_pin = None
@@ -297,7 +332,7 @@ def execute(root: Path, args: argparse.Namespace) -> int:
                             print("\n".join(f"  {line}" for line in moved))
                             problems = max(problems, 1)
                         else:
-                            print(f"CURRENT {entry['name']}: upstream skill and license unchanged ({entry['ref']})")
+                            print(f"CURRENT {entry['name']}: upstream source and license unchanged ({entry['ref']})")
                         continue
                 entry["commit"] = commit
                 prepared.append((entry, staged, current))
@@ -311,7 +346,7 @@ def execute(root: Path, args: argparse.Namespace) -> int:
                 problems = 2
         if args.command != "check":
             publish(root, data, prepared, work, original_manifest)
-            print("Saved skills and vendor.json. Review the diff, sync Codex policy, bump both plugin versions,")
+            print("Saved components and vendor.json. Review the diff, sync Codex policy, bump both plugin versions,")
             print("run scripts/validate.sh, and reinstall the plugin to refresh harness caches.")
     return problems
 
@@ -320,9 +355,9 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
     for command, help_text in (
-        ("check", "report local edits and available upstream skill/license changes"),
-        ("update", "repin selected skills to their tracked refs (default: all)"),
-        ("sync", "reproduce selected skills from their exact pins (default: all)"),
+        ("check", "report local edits and available upstream source/license changes"),
+        ("update", "repin selected components to their tracked refs (default: all)"),
+        ("sync", "reproduce selected components from their exact pins (default: all)"),
     ):
         child = sub.add_parser(command, help=help_text)
         child.add_argument("name", nargs="*")
@@ -336,6 +371,7 @@ def main(argv: list[str] | None = None) -> int:
     child.add_argument("--commit", help="initial revision to pin while tracking --ref for future updates")
     child.add_argument("--license-path", default="LICENSE", help="upstream license file, relative to repository root")
     child.add_argument("--patch", action="append", default=[], help="repeatable path under vendor/patches/")
+    child.add_argument("--target", help="import as ordinary reference at skills/<skill>/references/<name>; requires a packaging patch")
     args = parser.parse_args(argv)
     try:
         return execute(ROOT, args)

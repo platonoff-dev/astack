@@ -57,249 +57,8 @@
       "license_path": "pstack/LICENSE",
       "commit": "f5bdd6826fd0a0d9cbc4347134c3a74a200b9d9d",
       "patches": [
-        "vendor/patches/tdd-skill-audit.patch"
-      ]
-    },
-    {
-      "name": "principle-boundary-discipline",
-      "repo": "https://github.com/cursor/plugins.git",
-      "path": "pstack/skills/principle-boundary-discipline",
-      "ref": "refs/heads/main",
-      "license": "MIT",
-      "license_path": "pstack/LICENSE",
-      "commit": "f5bdd6826fd0a0d9cbc4347134c3a74a200b9d9d",
-      "patches": [
-        "vendor/patches/principle-boundary-discipline.patch",
-        "vendor/patches/principle-boundary-discipline-skill-audit.patch"
-      ]
-    },
-    {
-      "name": "principle-experience-first",
-      "repo": "https://github.com/cursor/plugins.git",
-      "path": "pstack/skills/principle-experience-first",
-      "ref": "refs/heads/main",
-      "license": "MIT",
-      "license_path": "pstack/LICENSE",
-      "commit": "f5bdd6826fd0a0d9cbc4347134c3a74a200b9d9d",
-      "patches": []
-    },
-    {
-      "name": "principle-foundational-thinking",
-      "repo": "https://github.com/cursor/plugins.git",
-      "path": "pstack/skills/principle-foundational-thinking",
-      "ref": "refs/heads/main",
-      "license": "MIT",
-      "license_path": "pstack/LICENSE",
-      "commit": "f5bdd6826fd0a0d9cbc4347134c3a74a200b9d9d",
-      "patches": [
-        "vendor/patches/principle-foundational-thinking-skill-audit.patch"
-      ]
-    },
-    {
-      "name": "principle-laziness-protocol",
-      "repo": "https://github.com/cursor/plugins.git",
-      "path": "pstack/skills/principle-laziness-protocol",
-      "ref": "refs/heads/main",
-      "license": "MIT",
-      "license_path": "pstack/LICENSE",
-      "commit": "f5bdd6826fd0a0d9cbc4347134c3a74a200b9d9d",
-      "patches": [
-        "vendor/patches/principle-laziness-protocol-skill-audit.patch"
-      ]
-    },
-    {
-      "name": "principle-minimize-reader-load",
-      "repo": "https://github.com/cursor/plugins.git",
-      "path": "pstack/skills/principle-minimize-reader-load",
-      "ref": "refs/heads/main",
-      "license": "MIT",
-      "license_path": "pstack/LICENSE",
-      "commit": "f5bdd6826fd0a0d9cbc4347134c3a74a200b9d9d",
-      "patches": [
-        "vendor/patches/principle-minimize-reader-load.patch"
-      ]
-    },
-    {
-      "name": "principle-model-the-domain",
-      "repo": "https://github.com/cursor/plugins.git",
-      "path": "pstack/skills/principle-model-the-domain",
-      "ref": "refs/heads/main",
-      "license": "MIT",
-      "license_path": "pstack/LICENSE",
-      "commit": "f5bdd6826fd0a0d9cbc4347134c3a74a200b9d9d",
-      "patches": [
-        "vendor/patches/principle-model-the-domain-skill-audit.patch"
-      ]
-    },
-    {
-      "name": "principle-redesign-from-first-principles",
-      "repo": "https://github.com/cursor/plugins.git",
-      "path": "pstack/skills/principle-redesign-from-first-principles",
-      "ref": "refs/heads/main",
-      "license": "MIT",
-      "license_path": "pstack/LICENSE",
-      "commit": "f5bdd6826fd0a0d9cbc4347134c3a74a200b9d9d",
-      "patches": []
-    },
-    {
-      "name": "principle-separate-before-serializing-shared-state",
-      "repo": "https://github.com/cursor/plugins.git",
-      "path": "pstack/skills/principle-separate-before-serializing-shared-state",
-      "ref": "refs/heads/main",
-      "license": "MIT",
-      "license_path": "pstack/LICENSE",
-      "commit": "f5bdd6826fd0a0d9cbc4347134c3a74a200b9d9d",
-      "patches": [
-        "vendor/patches/principle-separate-before-serializing-shared-state-skill-audit.patch"
-      ]
-    },
-    {
-      "name": "principle-subtract-before-you-add",
-      "repo": "https://github.com/cursor/plugins.git",
-      "path": "pstack/skills/principle-subtract-before-you-add",
-      "ref": "refs/heads/main",
-      "license": "MIT",
-      "license_path": "pstack/LICENSE",
-      "commit": "f5bdd6826fd0a0d9cbc4347134c3a74a200b9d9d",
-      "patches": []
-    },
-    {
-      "name": "principle-never-block-on-the-human",
-      "repo": "https://github.com/cursor/plugins.git",
-      "path": "pstack/skills/principle-never-block-on-the-human",
-      "ref": "refs/heads/main",
-      "license": "MIT",
-      "license_path": "pstack/LICENSE",
-      "commit": "889ec4b68fa5aab0e867dad71ec3fdf386ae48f3",
-      "patches": [
-        "vendor/patches/principle-never-block-on-the-human.patch"
-      ]
-    },
-    {
-      "name": "principle-encode-lessons-in-structure",
-      "repo": "https://github.com/cursor/plugins.git",
-      "path": "pstack/skills/principle-encode-lessons-in-structure",
-      "ref": "refs/heads/main",
-      "license": "MIT",
-      "license_path": "pstack/LICENSE",
-      "commit": "889ec4b68fa5aab0e867dad71ec3fdf386ae48f3",
-      "patches": [
-        "vendor/patches/principle-encode-lessons-in-structure.patch",
-        "vendor/patches/principle-encode-lessons-in-structure-skill-audit.patch"
-      ]
-    },
-    {
-      "name": "principle-fix-root-causes",
-      "repo": "https://github.com/cursor/plugins.git",
-      "path": "pstack/skills/principle-fix-root-causes",
-      "ref": "refs/heads/main",
-      "license": "MIT",
-      "license_path": "pstack/LICENSE",
-      "commit": "889ec4b68fa5aab0e867dad71ec3fdf386ae48f3",
-      "patches": [
-        "vendor/patches/principle-fix-root-causes.patch",
-        "vendor/patches/principle-fix-root-causes-skill-audit.patch"
-      ]
-    },
-    {
-      "name": "principle-guard-the-context-window",
-      "repo": "https://github.com/cursor/plugins.git",
-      "path": "pstack/skills/principle-guard-the-context-window",
-      "ref": "refs/heads/main",
-      "license": "MIT",
-      "license_path": "pstack/LICENSE",
-      "commit": "889ec4b68fa5aab0e867dad71ec3fdf386ae48f3",
-      "patches": [
-        "vendor/patches/principle-guard-the-context-window.patch",
-        "vendor/patches/principle-guard-the-context-window-skill-audit.patch"
-      ]
-    },
-    {
-      "name": "principle-migrate-callers-then-delete-legacy-apis",
-      "repo": "https://github.com/cursor/plugins.git",
-      "path": "pstack/skills/principle-migrate-callers-then-delete-legacy-apis",
-      "ref": "refs/heads/main",
-      "license": "MIT",
-      "license_path": "pstack/LICENSE",
-      "commit": "889ec4b68fa5aab0e867dad71ec3fdf386ae48f3",
-      "patches": [
-        "vendor/patches/principle-migrate-callers-then-delete-legacy-apis-skill-audit.patch"
-      ]
-    },
-    {
-      "name": "principle-outcome-oriented-execution",
-      "repo": "https://github.com/cursor/plugins.git",
-      "path": "pstack/skills/principle-outcome-oriented-execution",
-      "ref": "refs/heads/main",
-      "license": "MIT",
-      "license_path": "pstack/LICENSE",
-      "commit": "889ec4b68fa5aab0e867dad71ec3fdf386ae48f3",
-      "patches": [
-        "vendor/patches/principle-outcome-oriented-execution-skill-audit.patch"
-      ]
-    },
-    {
-      "name": "principle-sequence-verifiable-units",
-      "repo": "https://github.com/cursor/plugins.git",
-      "path": "pstack/skills/principle-sequence-verifiable-units",
-      "ref": "refs/heads/main",
-      "license": "MIT",
-      "license_path": "pstack/LICENSE",
-      "commit": "889ec4b68fa5aab0e867dad71ec3fdf386ae48f3",
-      "patches": [
-        "vendor/patches/principle-sequence-verifiable-units.patch",
-        "vendor/patches/principle-sequence-verifiable-units-skill-audit.patch"
-      ]
-    },
-    {
-      "name": "principle-prove-it-works",
-      "repo": "https://github.com/cursor/plugins.git",
-      "path": "pstack/skills/principle-prove-it-works",
-      "ref": "refs/heads/main",
-      "license": "MIT",
-      "license_path": "pstack/LICENSE",
-      "commit": "889ec4b68fa5aab0e867dad71ec3fdf386ae48f3",
-      "patches": [
-        "vendor/patches/principle-prove-it-works.patch"
-      ]
-    },
-    {
-      "name": "principle-build-the-lever",
-      "repo": "https://github.com/cursor/plugins.git",
-      "path": "pstack/skills/principle-build-the-lever",
-      "ref": "refs/heads/main",
-      "license": "MIT",
-      "license_path": "pstack/LICENSE",
-      "commit": "889ec4b68fa5aab0e867dad71ec3fdf386ae48f3",
-      "patches": [
-        "vendor/patches/principle-build-the-lever.patch",
-        "vendor/patches/principle-build-the-lever-skill-audit.patch"
-      ]
-    },
-    {
-      "name": "principle-attack-the-premise",
-      "repo": "https://github.com/cursor/plugins.git",
-      "path": "pstack/skills/principle-attack-the-premise",
-      "ref": "refs/heads/main",
-      "license": "MIT",
-      "license_path": "pstack/LICENSE",
-      "commit": "889ec4b68fa5aab0e867dad71ec3fdf386ae48f3",
-      "patches": [
-        "vendor/patches/principle-attack-the-premise.patch",
-        "vendor/patches/principle-attack-the-premise-skill-audit.patch"
-      ]
-    },
-    {
-      "name": "principle-type-system-discipline",
-      "repo": "https://github.com/cursor/plugins.git",
-      "path": "pstack/skills/principle-type-system-discipline",
-      "ref": "refs/heads/main",
-      "license": "MIT",
-      "license_path": "pstack/LICENSE",
-      "commit": "889ec4b68fa5aab0e867dad71ec3fdf386ae48f3",
-      "patches": [
-        "vendor/patches/principle-type-system-discipline.patch",
-        "vendor/patches/principle-type-system-discipline-skill-audit.patch"
+        "vendor/patches/tdd-skill-audit.patch",
+        "vendor/patches/tdd-principles.patch"
       ]
     },
     {
@@ -338,7 +97,8 @@
       "commit": "5bf2b1544db739998121a306340631963c2ff3de",
       "patches": [
         "vendor/patches/blast-radius-claude-codex.patch",
-        "vendor/patches/blast-radius-skill-audit.patch"
+        "vendor/patches/blast-radius-skill-audit.patch",
+        "vendor/patches/blast-radius-principles.patch"
       ]
     },
     {
@@ -351,7 +111,8 @@
       "commit": "5bf2b1544db739998121a306340631963c2ff3de",
       "patches": [
         "vendor/patches/reflect-claude-codex.patch",
-        "vendor/patches/reflect-skill-audit.patch"
+        "vendor/patches/reflect-skill-audit.patch",
+        "vendor/patches/reflect-principles.patch"
       ]
     },
     {
@@ -364,7 +125,8 @@
       "commit": "1a92eede509dc12addcc5a7b2fa1195980051b48",
       "patches": [
         "vendor/patches/arena-claude-codex.patch",
-        "vendor/patches/arena-skill-audit.patch"
+        "vendor/patches/arena-skill-audit.patch",
+        "vendor/patches/arena-principles.patch"
       ]
     },
     {
@@ -390,8 +152,296 @@
       "commit": "1a92eede509dc12addcc5a7b2fa1195980051b48",
       "patches": [
         "vendor/patches/interrogate-claude-codex.patch",
-        "vendor/patches/interrogate-skill-audit.patch"
+        "vendor/patches/interrogate-skill-audit.patch",
+        "vendor/patches/interrogate-principles.patch"
       ]
+    }
+  ],
+  "references": [
+    {
+      "name": "principle-boundary-discipline",
+      "repo": "https://github.com/cursor/plugins.git",
+      "path": "pstack/skills/principle-boundary-discipline",
+      "ref": "refs/heads/main",
+      "license": "MIT",
+      "license_path": "pstack/LICENSE",
+      "commit": "f5bdd6826fd0a0d9cbc4347134c3a74a200b9d9d",
+      "patches": [
+        "vendor/patches/principle-boundary-discipline.patch",
+        "vendor/patches/principle-boundary-discipline-skill-audit.patch",
+        "vendor/patches/principle-boundary-discipline-reference.patch"
+      ],
+      "target": "skills/principles/references/boundary-discipline"
+    },
+    {
+      "name": "principle-experience-first",
+      "repo": "https://github.com/cursor/plugins.git",
+      "path": "pstack/skills/principle-experience-first",
+      "ref": "refs/heads/main",
+      "license": "MIT",
+      "license_path": "pstack/LICENSE",
+      "commit": "f5bdd6826fd0a0d9cbc4347134c3a74a200b9d9d",
+      "patches": [
+        "vendor/patches/principle-experience-first-reference.patch"
+      ],
+      "target": "skills/principles/references/experience-first"
+    },
+    {
+      "name": "principle-foundational-thinking",
+      "repo": "https://github.com/cursor/plugins.git",
+      "path": "pstack/skills/principle-foundational-thinking",
+      "ref": "refs/heads/main",
+      "license": "MIT",
+      "license_path": "pstack/LICENSE",
+      "commit": "f5bdd6826fd0a0d9cbc4347134c3a74a200b9d9d",
+      "patches": [
+        "vendor/patches/principle-foundational-thinking-skill-audit.patch",
+        "vendor/patches/principle-foundational-thinking-reference.patch"
+      ],
+      "target": "skills/principles/references/foundational-thinking"
+    },
+    {
+      "name": "principle-laziness-protocol",
+      "repo": "https://github.com/cursor/plugins.git",
+      "path": "pstack/skills/principle-laziness-protocol",
+      "ref": "refs/heads/main",
+      "license": "MIT",
+      "license_path": "pstack/LICENSE",
+      "commit": "f5bdd6826fd0a0d9cbc4347134c3a74a200b9d9d",
+      "patches": [
+        "vendor/patches/principle-laziness-protocol-skill-audit.patch",
+        "vendor/patches/principle-laziness-protocol-reference.patch"
+      ],
+      "target": "skills/principles/references/laziness-protocol"
+    },
+    {
+      "name": "principle-minimize-reader-load",
+      "repo": "https://github.com/cursor/plugins.git",
+      "path": "pstack/skills/principle-minimize-reader-load",
+      "ref": "refs/heads/main",
+      "license": "MIT",
+      "license_path": "pstack/LICENSE",
+      "commit": "f5bdd6826fd0a0d9cbc4347134c3a74a200b9d9d",
+      "patches": [
+        "vendor/patches/principle-minimize-reader-load.patch",
+        "vendor/patches/principle-minimize-reader-load-reference.patch"
+      ],
+      "target": "skills/principles/references/minimize-reader-load"
+    },
+    {
+      "name": "principle-model-the-domain",
+      "repo": "https://github.com/cursor/plugins.git",
+      "path": "pstack/skills/principle-model-the-domain",
+      "ref": "refs/heads/main",
+      "license": "MIT",
+      "license_path": "pstack/LICENSE",
+      "commit": "f5bdd6826fd0a0d9cbc4347134c3a74a200b9d9d",
+      "patches": [
+        "vendor/patches/principle-model-the-domain-skill-audit.patch",
+        "vendor/patches/principle-model-the-domain-reference.patch"
+      ],
+      "target": "skills/principles/references/model-the-domain"
+    },
+    {
+      "name": "principle-redesign-from-first-principles",
+      "repo": "https://github.com/cursor/plugins.git",
+      "path": "pstack/skills/principle-redesign-from-first-principles",
+      "ref": "refs/heads/main",
+      "license": "MIT",
+      "license_path": "pstack/LICENSE",
+      "commit": "f5bdd6826fd0a0d9cbc4347134c3a74a200b9d9d",
+      "patches": [
+        "vendor/patches/principle-redesign-from-first-principles-reference.patch"
+      ],
+      "target": "skills/principles/references/redesign-from-first-principles"
+    },
+    {
+      "name": "principle-separate-before-serializing-shared-state",
+      "repo": "https://github.com/cursor/plugins.git",
+      "path": "pstack/skills/principle-separate-before-serializing-shared-state",
+      "ref": "refs/heads/main",
+      "license": "MIT",
+      "license_path": "pstack/LICENSE",
+      "commit": "f5bdd6826fd0a0d9cbc4347134c3a74a200b9d9d",
+      "patches": [
+        "vendor/patches/principle-separate-before-serializing-shared-state-skill-audit.patch",
+        "vendor/patches/principle-separate-before-serializing-shared-state-reference.patch"
+      ],
+      "target": "skills/principles/references/separate-before-serializing-shared-state"
+    },
+    {
+      "name": "principle-subtract-before-you-add",
+      "repo": "https://github.com/cursor/plugins.git",
+      "path": "pstack/skills/principle-subtract-before-you-add",
+      "ref": "refs/heads/main",
+      "license": "MIT",
+      "license_path": "pstack/LICENSE",
+      "commit": "f5bdd6826fd0a0d9cbc4347134c3a74a200b9d9d",
+      "patches": [
+        "vendor/patches/principle-subtract-before-you-add-reference.patch"
+      ],
+      "target": "skills/principles/references/subtract-before-you-add"
+    },
+    {
+      "name": "principle-never-block-on-the-human",
+      "repo": "https://github.com/cursor/plugins.git",
+      "path": "pstack/skills/principle-never-block-on-the-human",
+      "ref": "refs/heads/main",
+      "license": "MIT",
+      "license_path": "pstack/LICENSE",
+      "commit": "889ec4b68fa5aab0e867dad71ec3fdf386ae48f3",
+      "patches": [
+        "vendor/patches/principle-never-block-on-the-human.patch",
+        "vendor/patches/principle-never-block-on-the-human-reference.patch"
+      ],
+      "target": "skills/principles/references/never-block-on-the-human"
+    },
+    {
+      "name": "principle-encode-lessons-in-structure",
+      "repo": "https://github.com/cursor/plugins.git",
+      "path": "pstack/skills/principle-encode-lessons-in-structure",
+      "ref": "refs/heads/main",
+      "license": "MIT",
+      "license_path": "pstack/LICENSE",
+      "commit": "889ec4b68fa5aab0e867dad71ec3fdf386ae48f3",
+      "patches": [
+        "vendor/patches/principle-encode-lessons-in-structure.patch",
+        "vendor/patches/principle-encode-lessons-in-structure-skill-audit.patch",
+        "vendor/patches/principle-encode-lessons-in-structure-reference.patch"
+      ],
+      "target": "skills/principles/references/encode-lessons-in-structure"
+    },
+    {
+      "name": "principle-fix-root-causes",
+      "repo": "https://github.com/cursor/plugins.git",
+      "path": "pstack/skills/principle-fix-root-causes",
+      "ref": "refs/heads/main",
+      "license": "MIT",
+      "license_path": "pstack/LICENSE",
+      "commit": "889ec4b68fa5aab0e867dad71ec3fdf386ae48f3",
+      "patches": [
+        "vendor/patches/principle-fix-root-causes.patch",
+        "vendor/patches/principle-fix-root-causes-skill-audit.patch",
+        "vendor/patches/principle-fix-root-causes-reference.patch"
+      ],
+      "target": "skills/principles/references/fix-root-causes"
+    },
+    {
+      "name": "principle-guard-the-context-window",
+      "repo": "https://github.com/cursor/plugins.git",
+      "path": "pstack/skills/principle-guard-the-context-window",
+      "ref": "refs/heads/main",
+      "license": "MIT",
+      "license_path": "pstack/LICENSE",
+      "commit": "889ec4b68fa5aab0e867dad71ec3fdf386ae48f3",
+      "patches": [
+        "vendor/patches/principle-guard-the-context-window.patch",
+        "vendor/patches/principle-guard-the-context-window-skill-audit.patch",
+        "vendor/patches/principle-guard-the-context-window-reference.patch"
+      ],
+      "target": "skills/principles/references/guard-the-context-window"
+    },
+    {
+      "name": "principle-migrate-callers-then-delete-legacy-apis",
+      "repo": "https://github.com/cursor/plugins.git",
+      "path": "pstack/skills/principle-migrate-callers-then-delete-legacy-apis",
+      "ref": "refs/heads/main",
+      "license": "MIT",
+      "license_path": "pstack/LICENSE",
+      "commit": "889ec4b68fa5aab0e867dad71ec3fdf386ae48f3",
+      "patches": [
+        "vendor/patches/principle-migrate-callers-then-delete-legacy-apis-skill-audit.patch",
+        "vendor/patches/principle-migrate-callers-then-delete-legacy-apis-reference.patch"
+      ],
+      "target": "skills/principles/references/migrate-callers-then-delete-legacy-apis"
+    },
+    {
+      "name": "principle-outcome-oriented-execution",
+      "repo": "https://github.com/cursor/plugins.git",
+      "path": "pstack/skills/principle-outcome-oriented-execution",
+      "ref": "refs/heads/main",
+      "license": "MIT",
+      "license_path": "pstack/LICENSE",
+      "commit": "889ec4b68fa5aab0e867dad71ec3fdf386ae48f3",
+      "patches": [
+        "vendor/patches/principle-outcome-oriented-execution-skill-audit.patch",
+        "vendor/patches/principle-outcome-oriented-execution-reference.patch"
+      ],
+      "target": "skills/principles/references/outcome-oriented-execution"
+    },
+    {
+      "name": "principle-sequence-verifiable-units",
+      "repo": "https://github.com/cursor/plugins.git",
+      "path": "pstack/skills/principle-sequence-verifiable-units",
+      "ref": "refs/heads/main",
+      "license": "MIT",
+      "license_path": "pstack/LICENSE",
+      "commit": "889ec4b68fa5aab0e867dad71ec3fdf386ae48f3",
+      "patches": [
+        "vendor/patches/principle-sequence-verifiable-units.patch",
+        "vendor/patches/principle-sequence-verifiable-units-skill-audit.patch",
+        "vendor/patches/principle-sequence-verifiable-units-reference.patch"
+      ],
+      "target": "skills/principles/references/sequence-verifiable-units"
+    },
+    {
+      "name": "principle-prove-it-works",
+      "repo": "https://github.com/cursor/plugins.git",
+      "path": "pstack/skills/principle-prove-it-works",
+      "ref": "refs/heads/main",
+      "license": "MIT",
+      "license_path": "pstack/LICENSE",
+      "commit": "889ec4b68fa5aab0e867dad71ec3fdf386ae48f3",
+      "patches": [
+        "vendor/patches/principle-prove-it-works.patch",
+        "vendor/patches/principle-prove-it-works-reference.patch"
+      ],
+      "target": "skills/principles/references/prove-it-works"
+    },
+    {
+      "name": "principle-build-the-lever",
+      "repo": "https://github.com/cursor/plugins.git",
+      "path": "pstack/skills/principle-build-the-lever",
+      "ref": "refs/heads/main",
+      "license": "MIT",
+      "license_path": "pstack/LICENSE",
+      "commit": "889ec4b68fa5aab0e867dad71ec3fdf386ae48f3",
+      "patches": [
+        "vendor/patches/principle-build-the-lever.patch",
+        "vendor/patches/principle-build-the-lever-skill-audit.patch",
+        "vendor/patches/principle-build-the-lever-reference.patch"
+      ],
+      "target": "skills/principles/references/build-the-lever"
+    },
+    {
+      "name": "principle-attack-the-premise",
+      "repo": "https://github.com/cursor/plugins.git",
+      "path": "pstack/skills/principle-attack-the-premise",
+      "ref": "refs/heads/main",
+      "license": "MIT",
+      "license_path": "pstack/LICENSE",
+      "commit": "889ec4b68fa5aab0e867dad71ec3fdf386ae48f3",
+      "patches": [
+        "vendor/patches/principle-attack-the-premise.patch",
+        "vendor/patches/principle-attack-the-premise-skill-audit.patch",
+        "vendor/patches/principle-attack-the-premise-reference.patch"
+      ],
+      "target": "skills/principles/references/attack-the-premise"
+    },
+    {
+      "name": "principle-type-system-discipline",
+      "repo": "https://github.com/cursor/plugins.git",
+      "path": "pstack/skills/principle-type-system-discipline",
+      "ref": "refs/heads/main",
+      "license": "MIT",
+      "license_path": "pstack/LICENSE",
+      "commit": "889ec4b68fa5aab0e867dad71ec3fdf386ae48f3",
+      "patches": [
+        "vendor/patches/principle-type-system-discipline.patch",
+        "vendor/patches/principle-type-system-discipline-skill-audit.patch",
+        "vendor/patches/principle-type-system-discipline-reference.patch"
+      ],
+      "target": "skills/principles/references/type-system-discipline"
     }
   ]
 }

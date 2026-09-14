@@ -1,6 +1,0 @@
-interface:
-  display_name: 'Principle attack the premise'
-  short_description: 'Question shared premises after repeated failed fixes'
-  default_prompt: 'Use $principle-attack-the-premise as the user asked.'
-policy:
-  allow_implicit_invocation: false

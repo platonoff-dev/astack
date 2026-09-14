@@ -2,6 +2,7 @@
 """Exercise vendoring against real local Git repositories; no network needed."""
 
 from contextlib import redirect_stderr, redirect_stdout
+import difflib
 import io
 import json
 from pathlib import Path
@@ -269,6 +270,120 @@ class VendorTests(unittest.TestCase):
             self.command("update", code=2)
         self.assertEqual((self.root / "vendor.json").read_bytes(), manifest)
         self.assertIn("Work written", (self.root / "skills/demo/run.sh").read_text())
+
+    def reference_patch(self, *, keep_script=False, keep_frontmatter=False):
+        source = self.upstream / "pack/skills/demo"
+        before = {p.name: p.read_text() for p in source.iterdir()}
+        after = {"reference.md": before["SKILL.md"] if keep_frontmatter else "# Demo\n\nOriginal body.\n"}
+        if keep_script:
+            after["run.sh"] = before["run.sh"]
+        chunks = []
+        for name in sorted(before.keys() | after.keys()):
+            chunks.extend(difflib.unified_diff(
+                before.get(name, "").splitlines(keepends=True),
+                after.get(name, "").splitlines(keepends=True),
+                fromfile=f"a/{name}" if name in before else "/dev/null",
+                tofile=f"b/{name}" if name in after else "/dev/null",
+            ))
+        path = self.root / "vendor/patches/demo-reference.patch"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("".join(chunks))
+        return str(path.relative_to(self.root))
+
+    def add_reference(self, **kwargs):
+        patch_path = self.reference_patch(**kwargs)
+        return self.add(extra=("--target", "skills/principles/references/demo", "--patch", patch_path))
+
+    def test_reference_add_check_update_sync_preserve_parent_and_license(self):
+        parent = self.root / "skills/principles"
+        parent.mkdir(parents=True)
+        (parent / "SKILL.md").write_text("Owned registry\n")
+        self.add_reference()
+        target = parent / "references/demo"
+        self.assertEqual(set(vendor.snapshot(target)), {"reference.md", "LICENSE"})
+        self.assertEqual((target / "LICENSE").read_text(), "Fixture license text\n")
+        data = vendor.load(self.root)
+        self.assertEqual(data["skills"], [])
+        self.assertEqual(data["references"][0]["name"], "demo")
+        self.assertIn("CURRENT demo", self.command("check"))
+        (self.upstream / "LICENSE").write_text("New license\n")
+        head = self.commit(self.upstream)
+        self.assertIn("changed LICENSE", self.command("check", code=1))
+        self.command("update", "demo")
+        self.assertEqual(vendor.load(self.root)["references"][0]["commit"], head)
+        self.assertEqual((target / "LICENSE").read_text(), "New license\n")
+        expected = self.state()
+        shutil.rmtree(target)
+        self.command("sync", "demo")
+        self.assertEqual(self.state(), expected)
+        self.assertEqual((parent / "SKILL.md").read_text(), "Owned registry\n")
+
+    def test_reference_drift_force_and_concurrent_edits(self):
+        self.add_reference()
+        body = self.root / "skills/principles/references/demo/reference.md"
+        body.write_text("Local changes\n")
+        before = self.state()
+        self.assertIn("EDITED demo", self.command("check", code=1))
+        self.command("sync", code=2)
+        self.assertEqual(self.state(), before)
+        self.command("sync", "demo", "--force")
+        self.assertIn("Original body.", body.read_text())
+        original = vendor.materialise
+
+        def concurrent_edit(*args):
+            result = original(*args)
+            body.write_text("Concurrent work\n")
+            return result
+
+        with patch.object(vendor, "materialise", concurrent_edit):
+            self.command("sync", "--force", code=2)
+        self.assertEqual(body.read_text(), "Concurrent work\n")
+
+    def test_reference_write_failure_rolls_back_batch(self):
+        self.add_reference()
+        other = self.make_upstream("other", "second")
+        self.add("second", other)
+        (self.upstream / "LICENSE").write_text("New license\n")
+        self.commit(self.upstream)
+        self.upstream_body("New body.", "second", other)
+        before = self.state()
+        original = Path.replace
+
+        def fail_manifest(path, target):
+            if target == self.root / "vendor.json":
+                raise OSError("simulated manifest write failure")
+            return original(path, target)
+
+        with patch.object(Path, "replace", fail_manifest):
+            self.command("update", code=2)
+        self.assertEqual(self.state(), before)
+
+    def test_reference_rejects_registration_metadata_or_extra_source_files(self):
+        for kwargs in ({"keep_frontmatter": True}, {"keep_script": True}):
+            with self.subTest(kwargs=kwargs):
+                path = self.reference_patch(**kwargs)
+                before = self.state()
+                self.add(extra=("--target", "skills/principles/references/demo", "--patch", path), code=2)
+                self.assertEqual(self.state(), before)
+        self.add(extra=("--target", "skills/principles/references/demo"), code=2)
+
+    def test_reference_targets_reject_escape_overlap_and_symlink(self):
+        for target in ("../outside", "skills/principles", "skills/principles/references", "skills/principles/references/demo/nested"):
+            self.add(extra=("--target", target), code=2)
+        self.add_reference()
+        before = self.state()
+        other = self.make_upstream("other", "principles")
+        self.add("principles", other, code=2)
+        self.assertEqual(self.state(), before)
+        data = vendor.load(self.root)
+        data["references"].append(dict(data["references"][0], name="duplicate-target"))
+        (self.root / "vendor.json").write_text(json.dumps(data))
+        self.command("verify", code=2)
+        (self.root / "vendor.json").write_bytes(before[0])
+        target = self.root / "skills/principles/references/demo"
+        shutil.rmtree(target)
+        target.symlink_to(self.upstream, target_is_directory=True)
+        self.command("sync", "--force", code=2)
 
 
 class SummaryTests(unittest.TestCase):

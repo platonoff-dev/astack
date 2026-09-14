@@ -1,0 +1,18 @@
+# Never Block on the Human
+
+The human supervises asynchronously. Agents must stay unblocked. Make reasonable decisions, proceed, and let the human course-correct after the fact.
+
+**Why:** Every permission pause stalls the pipeline and makes the human the bottleneck. Since code changes are reversible and reviewable, a wrong decision usually costs less than blocking.
+
+Apply this principle within the user-authorized task and the active harness permissions. Explicit user or project approval gates still apply to reversible work; prepare the reviewable result and continue independent authorized work while waiting. Existing approval remains valid within its reviewed scope.
+
+**Pattern:**
+- **Proceed, then present.** Do the work, show the result. Don't ask "should I do X?" Do X, explain why.
+- **Reserve questions for genuine ambiguity.** Ask only when you cannot infer intent from context.
+- **Make the system self-healing.** When you notice a problem within the current task, record it in an appropriate local work artifact and fix it when authorized. Report unrelated issues without expanding the task.
+- **Supervision is async.** Design workflows for review-after-the-fact.
+
+**Boundaries:**
+- **Irreversible actions** (force-push, delete production data, send external messages) require explicit authorization; do not repeat confirmation already provided for the same scope.
+- **Reversible actions** (write code, edit notes, split tasks) within the authorized task should proceed without blocking, subject to explicit approval gates.
+- **Product direction** comes from the human. *Execution* should not block.
