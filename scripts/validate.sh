@@ -291,6 +291,12 @@ else
   fail "week_window.py did not run"; printf '%s\n' "$out" | tail -10 | sed 's/^/           /'
 fi
 
+if out=$(python3 -B scripts/test_weekly_report.py 2>&1); then
+  pass "weekly-report helper regressions"
+else
+  fail "weekly-report helper regressions"; printf '%s\n' "$out" | tail -20 | sed 's/^/           /'
+fi
+
 # --------------------------------------------------------------- summary
 say ""
 if [[ $RC -eq 0 ]]; then

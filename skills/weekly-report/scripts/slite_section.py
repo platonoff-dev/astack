@@ -5,8 +5,8 @@ A full squad note is about 100 KB of markdown, so get-note spills it to a
 file. Read the section you need from that file instead of the whole note.
 
 Usage:
-    slite_section.py FILE "Anatolii Platonov"          # markdown of that section
-    slite_section.py FILE "Anatolii Platonov" --block "Next week"   # one block only
+    slite_section.py FILE "Morgan Reed"          # markdown of that section
+    slite_section.py FILE "Morgan Reed" --block "Next week"   # one block only
     slite_section.py FILE --list                        # names of all sections
 
 FILE may be: the persisted tool output ([{"type":"text","text":"<json>"}]),

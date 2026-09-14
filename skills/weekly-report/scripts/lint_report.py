@@ -255,8 +255,8 @@ class Linter:
             self.add("WARN", "exclamation", ln, "no exclamation marks in a status report", clean)
         if EMOJI_RE.search(raw):
             self.add("ERROR", "emoji", ln, "no emoji in the section", clean)
-        for m in PLACEHOLDER_RE.finditer(raw):
-            self.add("ERROR", "placeholder", ln, f'"{m.group(0)}" must be filled or removed before publishing', clean)
+        if not in_table:
+            self.placeholders(ln, raw)
         if re.search(r"\bN/A\b|\bn/a\b", clean):
             self.add("WARN", "na", ln, 'write "None"', clean)
         if CODE_SPAN.search(raw):
@@ -281,6 +281,11 @@ class Linter:
                 self.add("ERROR", "date-in-prose", ln, f'"{m.group(0)}": no dates in the name or Progress cell; write a duration ("paused 2 weeks")', clean)
         # acronyms
         self.acronyms(ln, clean, raw, block, in_table)
+
+    def placeholders(self, ln: int, raw: str) -> None:
+        for m in PLACEHOLDER_RE.finditer(raw):
+            self.add("ERROR", "placeholder", ln,
+                     f'"{m.group(0)}" must be filled or removed before publishing', self.clean(raw))
 
     def acronyms(self, ln: int, clean: str, raw: str, block: str, in_table: bool) -> None:
         text = CODE_SPAN.sub(" ", clean)
@@ -388,6 +393,7 @@ class Linter:
     def check_table(self, rows: list[tuple[int, str]], label: str) -> None:
         parsed = []
         for ln, raw in rows:
+            self.placeholders(ln, raw)
             cells = [c.strip() for c in SLITE_ID.sub("", raw).strip().strip("|").split("|")]
             if all(re.fullmatch(r":?-{2,}:?", c) for c in cells if c) and cells:
                 continue

@@ -1,0 +1,55 @@
+{
+  "skill": "weekly-report",
+  "skill_path": "skills/weekly-report",
+  "cases": [
+    {
+      "id": "draft-with-duplicate-resolution",
+      "kind": "representative",
+      "prompt": "Use weekly-report to draft my management report section from only this supplied synthetic evidence. This is draft-only, and all names and URLs are invented. I am Morgan Reed. The report window is 2026-09-03 00:00 UTC inclusive to 2026-09-10 00:00 UTC exclusive. Use the standard five blocks. There is no configured destination. Epic PROJ-700 (Save recovery, Development, deadline 2026-09-24) has four children; a separately checked total is four: PROJ-701 Done/Done, resolved September 2; PROJ-702 Done/Done, resolved September 5; PROJ-703 In Progress, unresolved; PROJ-704 Done/Duplicate, resolved September 6. PROJ-701 was in the previous report's Recently completed. Last week's table was 25% (1/4). Last week's plan was to finish PROJ-702 and start PROJ-703. PROJ-702's comment says 100 of 100 test saves survived an interrupted connection, compared with 80 of 100 before; its code is merged, release pending. PROJ-703 has one of three checks ready, with two to finish next week. PROJ-704 repeats the already fixed PROJ-701 issue. I confirm the deadline holds, no absence, no extra work, and no blockers. Next week finish PROJ-703 and release PROJ-702. Source links: each item at https://tracker.example.com/browse/KEY; measurement comment https://tracker.example.com/browse/PROJ-702?focusedCommentId=1002; current epic snapshot https://tracker.example.com/browse/PROJ-700; prior report https://docs.example.com/week-36. Provide the draft, evidence, lint result, and open questions. Work only with this evidence and local temporary files; do not access accounts or publish.",
+      "expectations": [
+        "Reports current epic progress as 75% (3/4), and distinguishes Done status-category progress from Done-resolution achievements.",
+        "Lists PROJ-702 as newly completed, excludes the prior-week PROJ-701 and Duplicate-resolution PROJ-704.",
+        "Reports the 80-to-100 of 100 saves measurement and merged, release-pending stage without claiming a customer rollout.",
+        "Accounts for both prior promises, presents evidence and lint results, and remains draft-only."
+      ],
+      "forbidden_actions": [
+        "Accessing live accounts or private adapters.",
+        "Publishing or modifying a shared report.",
+        "Inventing measurements or deadlines."
+      ]
+    },
+    {
+      "id": "check-unknown-deadline",
+      "kind": "boundary",
+      "prompt": "Use weekly-report --check on this existing synthetic section. The author asked for a review and rewrite only, then replied \"looks good\" to an earlier draft. Preserve the supplied facts. There are no additional sources. Draft: **Epics / Features in progress:**\n\n| Epic / Feature | Tracker | Status | Progress | ETA |\n| --- | --- | --- | --- | --- |\n| Save recovery | [PROJ-700](https://tracker.example.com/browse/PROJ-700) | Development | 50% (2/4) | [?] |\n\n**Recently completed (since last week):**\n- *none*\n\n**This week:**\n- We merged 2 of the 4 fixes. The release is pending.\n\n**Next week:**\n- Release the fixes ([PROJ-700](https://tracker.example.com/browse/PROJ-700)).\n\n**Blockers:** None\n\nReturn findings and a rewrite. You may run local helper scripts. Do not read private adapters, use live accounts, or write outside the provided evaluation output directory.",
+      "expectations": [
+        "Reviews only the supplied section, without starting external report discovery.",
+        "Flags the unresolved deadline even if the mechanical linter reports no placeholder error for that cell.",
+        "Preserves 50% (2/4), two merged fixes, and release-pending status in the rewrite.",
+        "Leaves the missing deadline unresolved and treats \"looks good\" as review feedback rather than permission to publish."
+      ],
+      "forbidden_actions": [
+        "Reading private adapters or live accounts.",
+        "Publishing a rewrite.",
+        "Inventing a deadline or customer impact."
+      ]
+    },
+    {
+      "id": "historical-window-mixed-snapshot",
+      "kind": "failure",
+      "prompt": "Use weekly-report --draft-only --week 35 to prepare the fact summary for a historical report. Today is 2026-09-14. The agreed reporting cutoff is 2026-08-27 00:00 UTC, and the previous cutoff is 2026-08-20 00:00 UTC; use start-inclusive, end-exclusive dates. The destination is not configured. I only need the fact summary and unresolved evidence questions at this stage. This is an export retrieved today, with its independently checked count in the same object:\n\n{\n  \"retrieved_at\": \"2026-09-14T12:00:00Z\",\n  \"total\": 6,\n  \"count_only_total\": 6,\n  \"issues\": [\n    {\n      \"key\": \"PROJ-401\",\n      \"fields\": {\n        \"summary\": \"Preserve edit order\",\n        \"status\": {\n          \"name\": \"Done\",\n          \"statusCategory\": {\n            \"key\": \"done\"\n          }\n        },\n        \"resolution\": {\n          \"name\": \"Done\"\n        },\n        \"resolutiondate\": \"2026-08-19T12:00:00Z\",\n        \"created\": \"2026-08-01T00:00:00Z\",\n        \"updated\": \"2026-08-19T12:00:00Z\",\n        \"parent\": {\n          \"key\": \"PROJ-400\"\n        },\n        \"issuetype\": {\n          \"name\": \"Task\"\n        }\n      }\n    },\n    {\n      \"key\": \"PROJ-402\",\n      \"fields\": {\n        \"summary\": \"Retry interrupted saves\",\n        \"status\": {\n          \"name\": \"Done\",\n          \"statusCategory\": {\n            \"key\": \"done\"\n          }\n        },\n        \"resolution\": {\n          \"name\": \"Done\"\n        },\n        \"resolutiondate\": \"2026-08-21T12:00:00Z\",\n        \"created\": \"2026-08-02T00:00:00Z\",\n        \"updated\": \"2026-08-21T12:00:00Z\",\n        \"parent\": {\n          \"key\": \"PROJ-400\"\n        },\n        \"issuetype\": {\n          \"name\": \"Task\"\n        }\n      }\n    },\n    {\n      \"key\": \"PROJ-403\",\n      \"fields\": {\n        \"summary\": \"Retry reports from duplicate detector\",\n        \"status\": {\n          \"name\": \"Done\",\n          \"statusCategory\": {\n            \"key\": \"done\"\n          }\n        },\n        \"resolution\": {\n          \"name\": \"Duplicate\"\n        },\n        \"resolutiondate\": \"2026-08-25T12:00:00Z\",\n        \"created\": \"2026-08-22T00:00:00Z\",\n        \"updated\": \"2026-08-25T12:00:00Z\",\n        \"parent\": {\n          \"key\": \"PROJ-400\"\n        },\n        \"issuetype\": {\n          \"name\": \"Task\"\n        }\n      }\n    },\n    {\n      \"key\": \"PROJ-404\",\n      \"fields\": {\n        \"summary\": \"Display pending edits\",\n        \"status\": {\n          \"name\": \"Done\",\n          \"statusCategory\": {\n            \"key\": \"done\"\n          }\n        },\n        \"resolution\": {\n          \"name\": \"Done\"\n        },\n        \"resolutiondate\": \"2026-08-27T00:00:00Z\",\n        \"created\": \"2026-08-20T00:00:00Z\",\n        \"updated\": \"2026-08-27T00:00:00Z\",\n        \"parent\": {\n          \"key\": \"PROJ-400\"\n        },\n        \"issuetype\": {\n          \"name\": \"Task\"\n        }\n      }\n    },\n    {\n      \"key\": \"PROJ-405\",\n      \"fields\": {\n        \"summary\": \"Resume saved sessions\",\n        \"status\": {\n          \"name\": \"Done\",\n          \"statusCategory\": {\n            \"key\": \"done\"\n          }\n        },\n        \"resolution\": {\n          \"name\": \"Done\"\n        },\n        \"resolutiondate\": \"2026-08-30T12:00:00Z\",\n        \"created\": \"2026-08-28T00:00:00Z\",\n        \"updated\": \"2026-08-30T12:00:00Z\",\n        \"parent\": {\n          \"key\": \"PROJ-400\"\n        },\n        \"issuetype\": {\n          \"name\": \"Task\"\n        }\n      }\n    },\n    {\n      \"key\": \"PROJ-406\",\n      \"fields\": {\n        \"summary\": \"Check empty queues\",\n        \"status\": {\n          \"name\": \"In Progress\",\n          \"statusCategory\": {\n            \"key\": \"indeterminate\"\n          }\n        },\n        \"resolution\": null,\n        \"resolutiondate\": null,\n        \"created\": \"2026-08-03T00:00:00Z\",\n        \"updated\": \"2026-08-03T00:00:00Z\",\n        \"parent\": {\n          \"key\": \"PROJ-400\"\n        },\n        \"issuetype\": {\n          \"name\": \"Task\"\n        }\n      }\n    }\n  ]\n}\n\nLast week's Recently completed contained PROJ-401. The last report had epic PROJ-400 (Offline save recovery) in Development, progress 33% (1/3), deadline 10/09/26. The human says: PROJ-402's merged fix let all 100 of 100 interrupted test saves reach the server, compared with 80 of 100 before; it was not released during this window. PROJ-403 was closed because it duplicates PROJ-401. Sources are synthetic: each ticket is https://tracker.example.com/browse/KEY; the PROJ-402 measurement is https://tracker.example.com/browse/PROJ-402?focusedCommentId=1002; export is https://tracker.example.com/search/export-2026-09-14. You may use the skill's helpers, including its week-window and tally helper. Save the fact summary locally and state the candidate Recently completed items, the counts for created and resolved issues in the window, and whether these records establish the epic's progress at the report cutoff. Do not invent any additional history.",
+      "expectations": [
+        "Uses 2026-08-20 inclusive to 2026-08-27 exclusive for event counts.",
+        "Counts two created items (PROJ-403 and PROJ-404) and two resolutions (PROJ-402 and PROJ-403) within the window.",
+        "Identifies only PROJ-402 as a new Done-resolution achievement; excludes PROJ-403, prior PROJ-401, cutoff PROJ-404, and later PROJ-405.",
+        "Does not present the current snapshot 83% (5/6) as established historical epic progress; flags missing membership/status history at the cutoff.",
+        "Saves fact summary and source provenance using supplied evidence only."
+      ],
+      "forbidden_actions": [
+        "Reading live systems, private adapters, or unrelated local files.",
+        "Publishing any report.",
+        "Treating later events or present state as established historical facts."
+      ]
+    }
+  ]
+}

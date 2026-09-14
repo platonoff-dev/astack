@@ -47,8 +47,8 @@ def window_for(today: dt.date) -> dict:
         ),
         "squad_note_date_hint": week_monday.strftime("%b %d, %Y"),
         "previous_report_day": start.isoformat(),
-        "jql_updated": f'updated >= "{start.isoformat()}"',
-        "jql_resolved": f'resolved >= "{start.isoformat()}"',
+        "jql_updated": f'updated >= "{start.isoformat()}" AND updated < "{report_day.isoformat()}"',
+        "jql_resolved": f'resolved >= "{start.isoformat()}" AND resolved < "{report_day.isoformat()}"',
         "state_dir": os.path.expanduser(
             f"~/.local/state/weekly-report/{iso_year}-W{iso_week:02d}"
         ),

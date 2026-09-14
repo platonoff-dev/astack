@@ -115,6 +115,19 @@ python3 <skill>/scripts/week_window.py            # add --week N for another wee
 It prints the window, the ISO week, the document title hints, the tracker date
 literals and the working directory. Create the working directory.
 
+Use an inclusive start and exclusive end in the reporting timezone. Explicit
+human cutoffs override the default Thursday date boundaries. Tracker date
+literals use the tracker's timezone; pass the same IANA zone to `jira_tally.py`
+(its default is UTC), or pass cutoffs with explicit UTC offsets.
+
+For a past report, today's status and parent fields do not establish progress
+at the cutoff. Use an archived snapshot or status and membership history; if
+unavailable, mark historical progress and deltas unknown. The helper's bounded
+`updated` and `resolved` queries filter current field values, so they cannot
+recover earlier events hidden by later updates or reopenings. Use history for
+historical activity, and distinguish counts from a supplied export from a
+complete event history.
+
 ### 1. Find the documents
 
 Locate this week's destination document from the adapter's hints, then your own
@@ -137,9 +150,10 @@ continue as `--draft-only`.
 Save every result under the working directory. Large results spill to a file;
 feed the file to the tally script instead of reading it.
 
-1. **My activity in the window.** Everything assigned to you and updated since
-   the window start, newest first, with summary, status, resolution, resolution
-   date, parent, issue type, due date, fix versions, created and updated. Add a
+1. **My activity in the window.** Everything assigned to you and updated from
+   the inclusive start to the exclusive end, newest first, with summary, status,
+   resolution, resolution date, parent, issue type, due date, fix versions,
+   created and updated. Add a
    *status changed by me in the window* query when you own a release or moved
    items you do not hold.
 2. **My epics in progress.** Epics you own whose status is one of the
@@ -154,11 +168,12 @@ feed the file to the tally script instead of reading it.
    Then:
 
    ```bash
-   python3 <skill>/scripts/jira_tally.py <spill-file> --parent <EPIC-KEY> --since <window_start>
+   python3 <skill>/scripts/jira_tally.py <spill-file> --parent <EPIC-KEY> --since <window_start> --until <window_end> --timezone <reporting_timezone>
    ```
 
    It prints the TSV and one line per epic: `EPIC-KEY 86% (31/36) done=31 …
-   3 resolved since <date> [keys]`. That percentage is the Progress cell.
+   3 resolved since <start> before <end> [keys]`. That percentage describes the
+   supplied snapshot; use it in the Progress cell only for that snapshot's time.
    Children closed without a Done resolution are listed separately; they are
    not achievements and never go under Recently completed. Items decided
    against *after* being built are the clearest example — listing them as

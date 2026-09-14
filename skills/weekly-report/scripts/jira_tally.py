@@ -5,7 +5,8 @@ The Jira MCP tools spill large results to a file. Point this at the file
 instead of re-reading it into the conversation.
 
 Usage:
-    jira_tally.py RESULT.json [MORE.json ...] [--since YYYY-MM-DD]
+    jira_tally.py RESULT.json [MORE.json ...] [--since START] [--until END]
+                  [--timezone UTC]
                   [--parent PROJ-N] [--tsv-only] [--tally-only]
 
 Accepted shapes:
@@ -20,16 +21,24 @@ Output:
         PROJ-400  86% (31/36)  done=31 resolved-Done=27 closed-no-resolution=4
                    in-progress=2 to-do=3  +1 created since 2026-08-27  3 resolved since 2026-08-27
 
-Progress = children whose status category is Done, over all children.
+Event counts use an inclusive start and exclusive end. Bounds accept ISO dates
+or timestamps. Date-only values and timestamps without an offset use --timezone
+(an IANA zone, UTC by default); explicit timestamp offsets are respected.
+
+Progress = children whose status category is Done, over all supplied children.
+This is snapshot progress: event bounds do not reconstruct historical epic
+membership, statuses, or repeated resolution events.
 That is the number for the "Progress" cell. Anything else in the cell needs
 six words or fewer of explanation, and the tally lines tell you what to say.
 """
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import json
 import sys
 from collections import defaultdict
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 
 def load_any(path: str):
@@ -82,6 +91,13 @@ def category_of(status) -> str:
     return "indeterminate"
 
 
+def timestamp(value: str, timezone: ZoneInfo) -> dt.datetime:
+    parsed = dt.datetime.fromisoformat(value.replace("Z", "+00:00"))
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone)
+    return parsed.astimezone(dt.timezone.utc)
+
+
 def normalize(issue: dict) -> dict:
     f = issue.get("fields") if isinstance(issue.get("fields"), dict) else issue
     status = f.get("status")
@@ -104,8 +120,8 @@ def normalize(issue: dict) -> dict:
         "status": name_of(status),
         "category": cat,
         "resolution": name_of(f.get("resolution")) or "",
-        "resolved": (pick(f, "resolutiondate", "resolution_date", "resolved", default="") or "")[:10],
-        "created": (f.get("created") or "")[:10],
+        "resolved": pick(f, "resolutiondate", "resolution_date", "resolved", default="") or "",
+        "created": f.get("created") or "",
         "parent": parent_key or "",
         "parent_summary": parent_summary,
         "type": name_of(f.get("issuetype") or f.get("issue_type")),
@@ -118,11 +134,23 @@ def normalize(issue: dict) -> dict:
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("files", nargs="+")
-    p.add_argument("--since", help="YYYY-MM-DD, start of the report window")
+    p.add_argument("--since", help="inclusive start: ISO date or timestamp")
+    p.add_argument("--until", help="exclusive end: ISO date or timestamp; requires --since")
+    p.add_argument("--timezone", default="UTC", help="IANA zone for dates and offset-free timestamps (default: UTC)")
     p.add_argument("--parent", help="treat every row as a child of this epic (for a 'parent = X' query)")
     p.add_argument("--tsv-only", action="store_true")
     p.add_argument("--tally-only", action="store_true")
     a = p.parse_args()
+    try:
+        timezone = ZoneInfo(a.timezone)
+        since = timestamp(a.since, timezone) if a.since else None
+        until = timestamp(a.until, timezone) if a.until else None
+    except (ValueError, ZoneInfoNotFoundError) as e:
+        p.error(str(e))
+    if until and not since:
+        p.error("--until requires --since")
+    if until and since >= until:
+        p.error("--until must be after --since")
 
     rows = []
     seen = set()
@@ -136,14 +164,23 @@ def main() -> None:
                 n["parent"] = a.parent
             rows.append(n)
 
+    if since:
+        for row in rows:
+            for field in ("created", "resolved"):
+                try:
+                    event = timestamp(row[field], timezone) if row[field] else None
+                except (ValueError, TypeError, AttributeError) as e:
+                    p.error(f"{row['key']} {field}: {e}")
+                row[field + "_in_window"] = event is not None and event >= since and (until is None or event < until)
+
     rows.sort(key=lambda r: (r["parent"], r["resolved"] or "9999", r["key"]))
 
     if not a.tally_only:
         print("\t".join(["key", "status", "category", "resolution", "resolved", "created",
                          "parent", "type", "fixVersions", "summary"]))
         for r in rows:
-            print("\t".join([r["key"], r["status"], r["category"], r["resolution"], r["resolved"],
-                             r["created"], r["parent"], r["type"], r["fixVersions"], r["summary"]]))
+            print("\t".join([r["key"], r["status"], r["category"], r["resolution"], r["resolved"][:10],
+                             r["created"][:10], r["parent"], r["type"], r["fixVersions"], r["summary"]]))
 
     if a.tsv_only:
         return
@@ -170,9 +207,10 @@ def main() -> None:
         line = (f"{parent}  {pct}% ({done}/{total})  done={done} resolved-Done={resolved_done} "
                 f"closed-no-resolution={closed_no_res} in-progress={inprog} to-do={todo}")
         if a.since:
-            created = [k["key"] for k in kids if k["created"] and k["created"] >= a.since]
-            resolved = [k["key"] for k in kids if k["resolved"] and k["resolved"] >= a.since]
-            line += f"  +{len(created)} created since {a.since}  {len(resolved)} resolved since {a.since}"
+            created = [k["key"] for k in kids if k["created_in_window"]]
+            resolved = [k["key"] for k in kids if k["resolved_in_window"]]
+            interval = f"since {a.since}" + (f" before {a.until}" if a.until else "")
+            line += f"  +{len(created)} created {interval}  {len(resolved)} resolved {interval}"
             if resolved:
                 line += "  [" + ", ".join(resolved) + "]"
         title = next((k["parent_summary"] for k in kids if k["parent_summary"]), "")
