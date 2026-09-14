@@ -14,18 +14,18 @@ The repo is both a plugin and its marketplace. `.claude-plugin/` and
 `.codex-plugin/` contain the plugin manifests; `.claude-plugin/marketplace.json`
 and `.agents/plugins/marketplace.json` point to this repo with source `./`.
 
-Thirty-six skills ship: `task-interview`, `validate-claims`, `setup-astack`, `pick-
-next`, `merge-brief`, `arena`, `swarm`, `interrogate`, `weekly-report`, `why`, `how`,
-`teach`, `unslop`, `bro`, `tdd`, `harden-tests`, `principle-attack-the-premise`,
-`principle-boundary-discipline`, `principle-build-the-lever`, `principle-encode-lessons-
-in-structure`, `principle-experience-first`, `principle-fix-root-causes`, `principle-
-foundational-thinking`, `principle-guard-the-context-window`, `principle-laziness-
-protocol`, `principle-minimize-reader-load`, `principle-migrate-callers-then-delete-
-legacy-apis`, `principle-model-the-domain`, `principle-never-block-on-the-human`,
-`principle-outcome-oriented-execution`, `principle-prove-it-works`, `principle-redesign-
-from-first-principles`, `principle-separate-before-serializing-shared-state`,
-`principle-sequence-verifiable-units`, `principle-subtract-before-you-add`, and
-`principle-type-system-discipline`. There are no
+Thirty-seven skills ship: `task-interview`, `validate-claims`, `setup-astack`, `pick-
+next`, `merge-brief`, `arena`, `swarm`, `interrogate`, `weekly-report`, `technical-
+writing`, `why`, `how`, `teach`, `unslop`, `bro`, `tdd`, `harden-tests`, `principle-
+attack-the-premise`, `principle-boundary-discipline`, `principle-build-the-lever`,
+`principle-encode-lessons-in-structure`, `principle-experience-first`, `principle-fix-
+root-causes`, `principle-foundational-thinking`, `principle-guard-the-context-window`,
+`principle-laziness-protocol`, `principle-minimize-reader-load`, `principle-migrate-
+callers-then-delete-legacy-apis`, `principle-model-the-domain`, `principle-never-block-
+on-the-human`, `principle-outcome-oriented-execution`, `principle-prove-it-works`,
+`principle-redesign-from-first-principles`, `principle-separate-before-serializing-
+shared-state`, `principle-sequence-verifiable-units`, `principle-subtract-before-you-
+add`, and `principle-type-system-discipline`. There are no
 bundled agent definitions or automations; skills may delegate through the harness
 when available.
 

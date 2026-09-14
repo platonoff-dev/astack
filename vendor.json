@@ -292,6 +292,18 @@
       ]
     },
     {
+      "name": "technical-writing",
+      "repo": "https://github.com/cursor/plugins.git",
+      "path": "pstack/skills/technical-writing",
+      "ref": "refs/heads/main",
+      "license": "MIT",
+      "license_path": "pstack/LICENSE",
+      "commit": "5bf2b1544db739998121a306340631963c2ff3de",
+      "patches": [
+        "vendor/patches/technical-writing-claude-codex.patch"
+      ]
+    },
+    {
       "name": "arena",
       "repo": "https://github.com/cursor/plugins.git",
       "path": "pstack/skills/arena",

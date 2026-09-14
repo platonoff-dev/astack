@@ -22,6 +22,7 @@ plugin, built one useful component at a time.
 | [bro](skills/bro/SKILL.md) | Restate the last assistant message simply and concisely, without jargon. |
 | [tdd](skills/tdd/SKILL.md) | Fix a bug through a focused failing-then-passing regression test, or explain and use a practical verification alternative. |
 | [harden-tests](skills/harden-tests/SKILL.md) | Check test quality through regression checks, assertion audits, invariants, and optional targeted mutation. |
+| [technical-writing](skills/technical-writing/SKILL.md) | Write and review technical prose with document modes, plain sentences, and unambiguous instructions. |
 | [unslop](skills/unslop/SKILL.md) | Remove AI writing patterns while preserving meaning and intended tone. |
 | [principle-attack-the-premise](skills/principle-attack-the-premise/SKILL.md) | Reconsider a shared premise after repeated failed fixes, using a rerunnable census and testing suspected role assignments. |
 | [principle-boundary-discipline](skills/principle-boundary-discipline/SKILL.md) | Place validation at boundaries, preserve domain invariants, and keep business logic independent of framework wiring. |
