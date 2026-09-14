@@ -1,0 +1,9 @@
+--- /dev/null
++++ b/agents/openai.yaml
+@@ -0,0 +1,6 @@
++interface:
++  display_name: 'Principle foundational thinking'
++  short_description: 'Choose data shapes and sequence shared foundations'
++  default_prompt: 'Use $principle-foundational-thinking as the user asked.'
++policy:
++  allow_implicit_invocation: false

@@ -257,7 +257,8 @@ in Claude Code when debugging. Its explicit-only policy is preserved in both
 harnesses.
 
 `principle-foundational-thinking` is vendored from pstack under MIT with its
-instruction text unchanged and no compatibility patch. Invoke
+instruction text unchanged. Its compatibility patch maintains concise Codex UI
+metadata. Invoke
 `$principle-foundational-thinking` in Codex or
 `/astack:principle-foundational-thinking` in Claude Code. Its explicit-only policy
 is preserved in both harnesses.
