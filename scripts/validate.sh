@@ -253,6 +253,11 @@ fi
 
 # ------------------------------------------------------------- unit tests
 head_ "bundled tests"
+if out=$(python3 -B scripts/skill_evals.py validate 2>&1); then
+  pass "$out"
+else
+  fail "skill eval fixtures"; printf '%s\n' "$out" | sed 's/^/           /'
+fi
 if out=$(python3 -B scripts/vendor.py verify 2>&1); then
   pass "$out"
 else
