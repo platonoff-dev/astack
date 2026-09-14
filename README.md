@@ -41,6 +41,7 @@ plugin, built one useful component at a time.
 | [principle-separate-before-serializing-shared-state](skills/principle-separate-before-serializing-shared-state/SKILL.md) | Separate independent write targets before adding structural serialization for genuinely shared state. |
 | [principle-sequence-verifiable-units](skills/principle-sequence-verifiable-units/SKILL.md) | Sequence work into checked units and reviewable delivery while preserving the working baseline and required checks. |
 | [principle-subtract-before-you-add](skills/principle-subtract-before-you-add/SKILL.md) | Remove unnecessary complexity before additions, refactors, or rewrites, and build on the simpler base. |
+| [principle-type-system-discipline](skills/principle-type-system-discipline/SKILL.md) | Model valid states, distinguish semantic primitives, parse external data, exhaust variants, and derive types from authoritative schemas. |
 
 No bundled router, agent definitions, or automations. Each skill owns its own
 workflow and can use the harness's available delegation tools.
@@ -280,6 +281,13 @@ instruction text unchanged and no compatibility patch. Invoke
 `$principle-model-the-domain` in Codex or `/astack:principle-model-the-domain`
 in Claude Code when designing stateful logic or consolidating scattered domain
 rules. Its explicit-only policy is preserved in both harnesses.
+
+`principle-type-system-discipline` is vendored from pstack under MIT. Its patch
+removes an optional reference to an unbundled TypeScript skill and links the two
+related principles to their astack files. Invoke `$principle-type-system-discipline`
+in Codex or `/astack:principle-type-system-discipline` in Claude Code. Its
+explicit-only policy is preserved in both harnesses; it does not activate
+automatically for typed-language work.
 
 `principle-subtract-before-you-add` is vendored from pstack under MIT with its
 instruction text unchanged and no compatibility patch. Invoke
