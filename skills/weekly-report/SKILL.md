@@ -244,9 +244,9 @@ thin one does; length is not thoroughness, it is the reader's time.
 1. **Simplified Technical English** (`references/language.md`): sentence
    length, active voice, simple tenses, plain words from the substitution
    table, articles, no noun piles, one name per thing.
-2. **Unslop**: run the `unslop` skill's pattern list over the draft. Skip its
-   "Adding soul" section; a status report has no opinions. The rest applies
-   verbatim.
+2. **Unslop**: run the `unslop` skill's pattern list over the draft. Preserve
+   meaning and match the intended factual report tone. Keep personal opinions
+   and feelings out of the report.
 3. **Reader test** (`references/reader-test.md`): per sentence, who, how many,
    at what stage, compared to what, so what. Rewrite every sentence that fails
    one.

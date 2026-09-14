@@ -166,9 +166,9 @@ them, rephrase it in the report.
 Run the unslop skill's pattern list over the draft as the
 second editing pass. Two adaptations for this document:
 
-- Skip unslop's "Adding soul" section. A status report has no opinions and no
-  first-person feelings. Its voice comes from specific numbers, dates and
-  honest statements about what slipped.
+- Follow unslop's instruction to preserve meaning and match the intended tone.
+  A status report has no personal opinions or feelings. Its voice comes from
+  specific numbers, dates and honest statements about what slipped.
 - "I" and "we" are both fine. "I" for what you did alone, "we" for the team
   or the product. The report asks for human language; the passive is not it.
 

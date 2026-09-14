@@ -1,0 +1,54 @@
+{
+  "skill": "unslop",
+  "skill_path": "skills/unslop",
+  "cases": [
+    {
+      "id": "release-note-with-evidence",
+      "kind": "representative",
+      "prompt": "Use $unslop to edit this release note for customers. Return only the edited note. Draft: \"We are thrilled to unveil a pivotal enhancement to the export landscape. The exporter now boasts retry support, showcasing our commitment to resilience. In order to recover from temporary HTTP 503 errors, it retries twice. The retry delay is 2 seconds, followed by 4 seconds. Additionally, the central component, export engine, and exporter now write failed row numbers to errors.csv. This is not just a performance improvement, but a testament to reliability. The future looks bright!\" Supporting release facts: all three component names refer to the exporter; retries apply only to HTTP 503; the limit is two retries after the initial attempt; errors.csv contains failed row numbers. No throughput measurements are available.",
+      "expectations": [
+        "Removes promotional filler and repeated component names while using complete readable sentences.",
+        "Preserves HTTP 503-only applicability, two retries after the initial attempt, ordered delays of 2 and 4 seconds, and errors.csv row-number behavior.",
+        "Does not assert a measured performance or reliability improvement."
+      ],
+      "forbidden_actions": [
+        "Inventing benchmark results or expanding retry applicability.",
+        "Editing a repository or publishing the note."
+      ]
+    },
+    {
+      "id": "technical-and-source-boundaries",
+      "kind": "boundary",
+      "prompt": "Use $unslop to edit the prose in this README excerpt. Return the edited excerpt, including its code block and quotation. Audience: developers using a vector-search client. The API names, code block, and direct quotation are contractual examples and must remain byte-for-byte unchanged. Draft:\n\n## Getting Started With Vector Search\n\nIt is important to note that the client boasts a vibrant vector interface, enabling developers to seamlessly leverage embeddings. A vector is an ordered list of numbers. The cosine distance is a number between 0 and 2. Lower values mean the vectors point in more similar directions. The client sends requests over HTTPS. Keep your API key secret.\n\nIn order to use the client, call search(vector, top_k=3). The endpoint is /v1/vector-search. It returns at most 3 matches; each match has a score and document_id.\n\n```python\nresult = search(vector=[0.1, 0.2], top_k=3)\nprint(result[\"matches\"])\n```\n\nThe archived design note says: \"The vector API\u2014still experimental\u2014returns at most three matches (never four).\"\n\nThe timeout may be caused by the proxy; we have not reproduced it without the proxy. Due to the fact that the cause is unknown, the release does not include a timeout fix.",
+      "expectations": [
+        "Keeps the literal mathematical term vector and its meaning, the distance range and direction explanation, HTTPS behavior, and the API-key warning.",
+        "Preserves API names, endpoint, code block and direct quotation exactly as requested.",
+        "Preserves the three-match maximum and returned score/document_id fields.",
+        "Retains uncertainty about the proxy and clearly states no timeout fix is included.",
+        "Removes filler and promotional wording from editable prose without making the explanation terse or fragmentary."
+      ],
+      "forbidden_actions": [
+        "Applying punctuation normalization inside the protected quotation or code.",
+        "Replacing literal technical vector with way or method.",
+        "Deleting useful instructions merely because they apply to other projects.",
+        "Running the code or calling a live API."
+      ]
+    },
+    {
+      "id": "unsupported-attribution",
+      "kind": "failure",
+      "prompt": "Use $unslop to rewrite the following internal update as one clear paragraph using only the evidence below. Draft: \"Industry reports suggest our cache delivers a pivotal performance boost. It could potentially possibly be argued that the new implementation significantly improves requests. We have found the smoking gun! The underlying substrate has been evacuated into a new layer, ensuring a seamless future.\" Evidence: we moved the cache into cache_store.py; a local trial ran 40 requests against the old implementation and 40 against the new one; median latency was 15 ms before and 12 ms after; the input set was identical; there has been no production measurement; the cause of a separate intermittent timeout remains unknown. No industry report is available.",
+      "expectations": [
+        "Reports the cache move and observed local before/after latency with the limited trial scope.",
+        "Does not fabricate attribution or convert the small local trial into a production claim.",
+        "Does not imply the separate timeout was diagnosed or fixed.",
+        "Uses plain concrete language while retaining uncertainty."
+      ],
+      "forbidden_actions": [
+        "Searching for substitute reports to justify the draft attribution.",
+        "Claiming the new implementation fixed the timeout.",
+        "Editing or publishing external records."
+      ]
+    }
+  ]
+}
