@@ -222,11 +222,12 @@ the skill implicitly. This is not a hook that guarantees execution on every turn
 and no compatibility patch. Invoke it explicitly with `$bro` in Codex or
 `/astack:bro` in Claude Code to simplify the previous assistant reply.
 
-`tdd` is vendored from pstack under MIT with its instruction text unchanged
-and no compatibility patch. Invoke `$tdd` in Codex or `/astack:tdd` in Claude
-Code for a bug fix. It favors a cheap, focused regression test and requires an
-explanation and a useful verification alternative when a failing test is
-impractical. Its explicit-only policy is preserved in both harnesses.
+`tdd` is vendored from pstack under MIT with its instruction text unchanged.
+Its compatibility patch supplies concise Codex menu metadata. Invoke `$tdd` in
+Codex or `/astack:tdd` in Claude Code for a bug fix. It favors a cheap, focused
+regression test and requires an explanation and a useful verification alternative
+when a failing test is impractical. Its explicit-only policy is preserved in both
+harnesses.
 
 `principle-attack-the-premise` is vendored from pstack under MIT. Its patch
 keeps census results as evidence rather than causal proof and makes changes to

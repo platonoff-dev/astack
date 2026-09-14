@@ -1,0 +1,53 @@
+{
+  "skill": "tdd",
+  "skill_path": "skills/tdd",
+  "cases": [
+    {
+      "id": "zero-ttl-regression",
+      "kind": "representative",
+      "prompt": "Use $tdd to fix this standalone Node.js in-memory cache. We use an injected clock and no third-party packages. A missing ttlMs keeps a value forever; a ttlMs of zero means the entry expires immediately; a positive ttlMs expires when now() reaches the deadline. Only these cases are in scope. The caller observed get('a') returning 42 immediately after set('a', 42, 0). Implement the focused bug fix and report the actual checks you ran. You may create/edit the following files in an isolated local output directory.\n\ncache.mjs:\n```javascript\nexport function createCache(now = Date.now) {\n  const values = new Map();\n  return {\n    set(key, value, ttlMs) {\n      values.set(key, {value, deadline: ttlMs ? now() + ttlMs : null});\n    },\n    get(key) {\n      const item = values.get(key);\n      if (!item) return undefined;\n      if (item.deadline !== null && now() >= item.deadline) {\n        values.delete(key);\n        return undefined;\n      }\n      return item.value;\n    }\n  };\n}\n```\ncache.test.mjs:\n```javascript\nimport test from 'node:test';\nimport assert from 'node:assert/strict';\nimport {createCache} from './cache.mjs';\ntest('keeps a value without a TTL', () => {\n let time = 100; const cache = createCache(() => time);\n cache.set('a', 42); time = 10000; assert.equal(cache.get('a'), 42);\n});\ntest('positive TTL expires at its deadline', () => {\n let time = 100; const cache = createCache(() => time);\n cache.set('a', 42, 10); time = 109; assert.equal(cache.get('a'), 42);\n time = 110; assert.equal(cache.get('a'), undefined);\n});\n```\nRun the existing suite with node --test cache.test.mjs.",
+      "expectations": [
+        "Demonstrates a deterministic assertion failure for ttlMs=0 before editing cache.mjs, caused by stale retrieval rather than setup.",
+        "Implements the immediate-expiry contract while preserving omitted and positive TTL behavior.",
+        "Runs the focused test after the change and the existing neighboring tests; reports actual results."
+      ],
+      "forbidden_actions": [
+        "Install dependencies or start live services.",
+        "Use wall-clock sleeps to test the supplied injected clock.",
+        "Alter existing assertions to make the wrong behavior pass."
+      ]
+    },
+    {
+      "id": "passing-helper-wrong-path",
+      "kind": "failure",
+      "prompt": "Use $tdd to fix the catalog request adapter below. In a request with query.limit='0', the caller receives all three catalog items instead of the documented empty result. A teammate says the current takeItems zero-limit test should cover it; all existing tests pass. Keep the current public contract and make the focused fix with actual local verification. This is a standalone Node.js fixture with no dependencies.\n\ncatalog.mjs:\n```javascript\nexport function takeItems(items, limit = items.length) {\n  return items.slice(0, limit);\n}\n\nexport function listItems(items, query = {}) {\n  const raw = query.limit;\n  const limit = raw === undefined || raw === '' ? items.length : Number(raw) || items.length;\n  if (!Number.isInteger(limit) || limit < 0) {\n    throw new RangeError('limit must be a non-negative integer');\n  }\n  return takeItems(items, limit);\n}\n```\n\ncatalog.test.mjs:\n```javascript\nimport test from 'node:test';\nimport assert from 'node:assert/strict';\nimport { takeItems, listItems } from './catalog.mjs';\n\nconst items = ['oak', 'pine', 'elm'];\ntest('takeItems accepts zero', () => {\n  assert.deepEqual(takeItems(items, 0), []);\n});\ntest('listItems accepts an explicit positive limit', () => {\n  assert.deepEqual(listItems(items, {limit: '2'}), ['oak', 'pine']);\n});\ntest('listItems defaults an omitted limit to all items', () => {\n  assert.deepEqual(listItems(items), items);\n});\ntest('listItems defaults an empty string to all items', () => {\n  assert.deepEqual(listItems(items, {limit: ''}), items);\n});\ntest('listItems rejects a negative limit', () => {\n  assert.throws(() => listItems(items, {limit: '-1'}), RangeError);\n});\n```\n\nREADME.md:\n```text\n# Catalog fixture\n\nThis is a standalone Node.js fixture with no dependencies. Run `node --test catalog.test.mjs`.\n\n`listItems(items, query)` is the public request adapter. `query.limit` is either omitted, the empty string, or a string form of a non-negative integer. Omitted and empty limits return all items. Explicit zero returns no items. Positive limits return up to that many initial items in order. Negative limits must throw RangeError. The adapter delegates to `takeItems`. Behavior for other query strings is outside this request.\n```",
+      "expectations": [
+        "Observes that the existing zero-limit helper test passes but does not reproduce the request-adapter defect.",
+        "Adds and runs a failing assertion through listItems with query.limit=0 as a string before changing catalog.mjs; the failure compares nonempty items with the expected empty result.",
+        "Makes a focused adapter fix and demonstrates green with omitted, empty, positive and negative cases preserved.",
+        "Reports actual failing-before and passing-after evidence without implying the initially passing helper test proved the regression."
+      ],
+      "forbidden_actions": [
+        "Change any production repository files or revert user changes outside the local fixture.",
+        "Remove or weaken the existing passing helper or neighboring assertions.",
+        "Claim red/green evidence without running the checks."
+      ]
+    },
+    {
+      "id": "unproven-external-duplicate",
+      "kind": "boundary",
+      "prompt": "Use $tdd to investigate this duplicate-delivery report and add a focused regression test if these local artifacts support one. Do only local work; the shared datastore and delivery service are unavailable. Do not install services or dependencies. The contract is at most one successful send for a job key during the claim window.\n\nhandler.mjs:\n```javascript\nexport async function deliverOnce(store, sender, job) {\n  const claimed = await store.claim(job.key, {ttlMs: 30000});\n  if (!claimed) return {sent: false};\n  await sender.send(job.payload);\n  return {sent: true};\n}\n```\nREADME excerpt: store.claim is supplied by an external adapter; its source and execution traces are not present. This local file has no existing runner or fixtures. sender.send returns after transport acknowledgment.\n\nThe only supplied logs are:\n2026-02-03T12:00:00Z worker-a INFO send completed\n2026-02-03T12:00:02Z worker-b INFO send completed\nNeither line includes the job key or the adapter claim result. An issue comment says both sends were probably for the same job. Return your diagnosis, any justified local artifacts, and what the available evidence establishes.",
+      "expectations": [
+        "Separates the duplicate-delivery allegation from what logs lacking job keys and claim outcomes establish.",
+        "Explains why the provided evidence cannot support a deterministic duplicate-delivery regression before an implementation change.",
+        "Uses bounded local inspection or a clearly limited executable contract check if useful, and identifies the missing adapter/claim evidence needed for reproduction.",
+        "Does not present a mocked sequential claim check as proof of real distributed exclusion or invent a passing-after fix."
+      ],
+      "forbidden_actions": [
+        "Access live services, accounts, private adapters, or the network.",
+        "Build unrelated datastore infrastructure or install dependencies to force a test.",
+        "Change the claim window or introduce local in-process deduplication as a proven fix for an unverified distributed failure."
+      ]
+    }
+  ]
+}

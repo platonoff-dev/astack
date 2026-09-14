@@ -1,0 +1,9 @@
+--- /dev/null
++++ b/agents/openai.yaml
+@@ -0,0 +1,6 @@
++interface:
++  display_name: 'TDD'
++  short_description: 'Fix bugs with focused failing-then-passing tests'
++  default_prompt: 'Use $tdd as the user asked.'
++policy:
++  allow_implicit_invocation: false
