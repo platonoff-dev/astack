@@ -12,6 +12,7 @@ plugin, built one useful component at a time.
 | [setup-astack](skills/setup-astack/SKILL.md) | Create and refine private service access guides and tracker mappings, including connector corrections. |
 | [pick-next](skills/pick-next/SKILL.md) | Recommend the next item from your queue or an epic, accounting for capacity and priorities. |
 | [merge-brief](skills/merge-brief/SKILL.md) | Explain a proposed change and check your understanding before you decide whether to merge. |
+| [blast-radius](skills/blast-radius/SKILL.md) | Trace what a change could break beyond its diff and verify the key safety assumptions with real code. |
 | [weekly-report](skills/weekly-report/SKILL.md) | Draft your weekly status section from source evidence, with approval before publication. |
 | [arena](skills/arena/SKILL.md) | Compare independent candidates with a fresh judge and synthesize a verified artifact. |
 | [swarm](skills/swarm/SKILL.md) | Cover bounded work or run a declared race, verify outputs, and report remaining gaps. |
