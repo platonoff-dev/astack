@@ -1,6 +1,6 @@
 ---
 name: architect
-description: "Sketch types, signatures, and module structure before code, then stay in the loop while implementation fills in. Use when explicitly asked to architect or design a change whose shape would otherwise be locked in by jumping to code."
+description: "Sketch types, signatures, and module boundaries before code. Compare structurally distinct candidates, synthesize one, then implement against the chosen sketch. Use when explicitly asked to architect or design a change whose shape would otherwise be locked in by jumping to code."
 disable-model-invocation: true
 ---
 
@@ -12,6 +12,8 @@ Read the active project's `CLAUDE.md` / `AGENTS.md` and the [shared execution an
 
 For design decisions this skill does not name, consult the [principles registry](../principles/SKILL.md) and read only the relevant references. The principle references linked below are required guidance at their phase even when the registry selects nothing else.
 
+The how, why, arena, and interrogate skills named below are explicit-only. Load and follow their `SKILL.md` and reachable references; use a native skill invocation interface when one is available, otherwise execute their workflows from the files.
+
 ## Phase A: Ground the problem
 
 Build a real mental model of every system the new code touches. Run the [how](../how/SKILL.md) skill over the relevant subsystems.
@@ -22,7 +24,7 @@ Skip Phase A only when the work is genuinely greenfield with no surrounding syst
 
 ## Phase B: Sketch
 
-Run the [arena](../arena/SKILL.md) skill with the design-sketch task and the Phase A grounding artifacts. Include the full text of [`references/runner-prompt.md`](references/runner-prompt.md) in each candidate's brief, with the resolved absolute paths it asks for. Each candidate produces a design package shaped per [`references/rationale-template.md`](references/rationale-template.md).
+Run the [arena](../arena/SKILL.md) skill with the design-sketch task and the Phase A grounding artifacts. Include the full text of [`references/runner-prompt.md`](references/runner-prompt.md) in each candidate's brief, with the resolved absolute paths it asks for. Each candidate produces a design package shaped per [`references/rationale-template.md`](references/rationale-template.md). Give arena [`references/design-red-flags.md`](references/design-red-flags.md), interface depth, and the discipline list in the runner prompt as its fixed rubric, so the judge scores the same axes the lead uses.
 
 Use the harness's native delegation under the shared contract. Omit model and effort overrides unless the user selected an available, exact value; repeated runs of one model are independent attempts, not model diversity. When fresh delegation is unavailable, fall back to sequential parent-only sketching: write each candidate to its own output location before starting the next, do not reread an earlier candidate while drafting a later one, and record in the synthesis decision that the candidates shared one context. That fallback loses candidate independence and the fresh judge; name that loss instead of presenting the result as a completed arena.
 
@@ -40,7 +42,7 @@ Default: proceed directly to implementation with the synthesized design. No huma
 
 Opt in to a checkpoint when the invoker explicitly asks: "architect with checkpoint," "stop and show me before implementing," or similar. Then surface the synthesized design and pause for sign-off.
 
-The synthesis can ship as its own commit either way, as the "scaffold first" mode of [Foundational Thinking](../principles/references/foundational-thinking/reference.md). Planned and scoped breakage during fill-in is fine, per [Outcome-Oriented Execution](../principles/references/outcome-oriented-execution/reference.md). Committing still needs the authorization the active project requires. For adversarial pressure on the design before implementing, run the [interrogate](../interrogate/SKILL.md) skill on the synthesized sketch, choosing a design rubric explicitly since its default rubric reviews code.
+The synthesis can ship as its own commit either way, as the "scaffold first" mode of [Foundational Thinking](../principles/references/foundational-thinking/reference.md). Planned and scoped breakage during fill-in is fine, per [Outcome-Oriented Execution](../principles/references/outcome-oriented-execution/reference.md). Committing still needs the authorization the active project requires. For adversarial pressure on the design before implementing, run a second [arena](../arena/SKILL.md) judge pass over the synthesized sketch with [`references/design-red-flags.md`](references/design-red-flags.md) and interface depth as the rubric. [interrogate](../interrogate/SKILL.md) reviews code, not design documents, so use it after Phase D if the diff needs review.
 
 If the human pushes back on the shape (in a checkpoint or after the fact), treat that as Phase A evidence. Re-ground and re-run Phase B before writing more code.
 
@@ -58,7 +60,7 @@ The signal is a *pattern*, not single instances. Tells:
 
 - The same shape of workaround appearing repeatedly across unrelated code.
 - Multiple unrelated edge cases that all need special-case branches.
-- Types that need escape hatches (`any`, casts, optional fields always set in practice) to compile.
+- Types that need escape hatches (`any`, `interface{}`, `mixed`, casts, `type: ignore`, optional fields always set in practice) to type-check.
 - The "we need a lock" reflex when the sketch said the state wasn't shared.
 - Callers having to know the abstraction's internal rules to use it.
 - Two or more independent Phase D deviations of the same shape across the implementation.
@@ -74,4 +76,4 @@ When you scrap:
 
 ## Outputs
 
-The caller's usage is written first and the type sketch derived from it. One file with new types and signatures for small changes. Module map plus type definitions for larger work. The rationale ships alongside, shaped per [`references/rationale-template.md`](references/rationale-template.md), including the usage sketch and the synthesis decision. Report which candidates were independent, which runner produced each when known (otherwise `unknown`), whether a fresh judge ran, and any phase that was skipped or fell back.
+The caller's usage is written first and the type sketch derived from it. One file with new types and signatures for small changes. Module map plus type definitions for larger work. The rationale ships alongside, shaped per [`references/rationale-template.md`](references/rationale-template.md), including the usage sketch and the synthesis decision. Write the sketch and rationale under the active project's permitted working area (the sketch dir), and name that path in the report. Report which candidates were independent, which runner produced each when known (otherwise `unknown`), whether a fresh judge ran, and any phase that was skipped or fell back.

@@ -75,11 +75,12 @@ source-path trials do not establish discovery in installed harness caches.
 
 ## Native agent workflows
 
-Invoke `$arena`, `$swarm`, or `$interrogate` in Codex, or
-`/astack:arena`, `/astack:swarm`, or `/astack:interrogate` in Claude Code.
-These three explicit-only skills use the active harness's native agents and
-[shared execution and result contract](references/agent-workflows.md). A run stays
-within one harness and uses its available capacity and authorized runners.
+Invoke `$arena`, `$swarm`, `$interrogate`, or `$architect` in Codex, or
+`/astack:arena`, `/astack:swarm`, `/astack:interrogate`, or `/astack:architect`
+in Claude Code. These four explicit-only skills use the active harness's native
+agents and [shared execution and result contract](references/agent-workflows.md).
+A run stays within one harness and uses its available capacity and authorized
+runners.
 Arena combines alternatives, Swarm verifies coverage or a declared race, and
 Interrogate reviews code without applying changes. Architect runs its design
 comparison through Arena under the same contract. Missing workers, unverified
