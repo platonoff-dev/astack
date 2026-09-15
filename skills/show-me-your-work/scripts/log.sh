@@ -16,7 +16,8 @@ if [ -n "$logdir" ] && [ "$logdir" != "." ] && [ ! -d "$logdir" ]; then
 	mkdir -p "$logdir"
 fi
 
-if [ ! -f "$logfile" ]; then
+# -s, not -f: a pre-created empty file still needs the header.
+if [ ! -s "$logfile" ]; then
 	printf 'ts\tphase\tdecision\twhy\tevidence\tresult\n' > "$logfile"
 fi
 
@@ -26,10 +27,12 @@ ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 # with a single quote. The skill expects this log to be read in
 # spreadsheets, so attacker-controlled evidence (PR titles, filenames,
 # generated text) must not become formula execution when a reviewer
-# opens the file.
+# opens the file. LC_ALL=C makes tr work on bytes: in a UTF-8 locale
+# (the macOS default) tr aborts on an invalid byte and silently truncates
+# the cell while this script still exits 0.
 clean() {
 	local v
-	v=$(printf '%s' "$1" | tr '\t\n\r' '   ')
+	v=$(printf '%s' "$1" | LC_ALL=C tr '\t\n\r' '   ')
 	case "$v" in
 		=*|+*|-*|@*) printf "'%s" "$v" ;;
 		*) printf '%s' "$v" ;;
