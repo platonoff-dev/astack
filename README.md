@@ -27,6 +27,7 @@ plugin, built one useful component at a time.
 | [technical-writing](skills/technical-writing/SKILL.md) | Write and review technical prose with document modes, plain sentences, and unambiguous instructions. |
 | [unslop](skills/unslop/SKILL.md) | Remove AI writing patterns while preserving meaning and intended tone. |
 | [principles](skills/principles/SKILL.md) | Select and read relevant engineering guidance for concrete design, implementation, debugging, refactoring, and verification decisions. |
+| [show-me-your-work](skills/show-me-your-work/SKILL.md) | Keep an append-only TSV decision trail for long or unattended runs, audit it against the run, and end with an independently reviewed Attention section. |
 
 No bundled task router, agent definitions, or automations. Each skill owns its own
 workflow and can use the harness's available delegation tools.

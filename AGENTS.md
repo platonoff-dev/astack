@@ -14,12 +14,12 @@ The repo is both a plugin and its marketplace. `.claude-plugin/` and
 `.codex-plugin/` contain the plugin manifests; `.claude-plugin/marketplace.json`
 and `.agents/plugins/marketplace.json` point to this repo with source `./`.
 
-Twenty skills ship: `task-interview`, `validate-claims`, `setup-astack`, `pick-next`,
-`merge-brief`, `arena`, `swarm`, `interrogate`, `blast-radius`, `weekly-report`,
-`reflect`, `technical-writing`, `why`, `how`, `teach`, `unslop`, `bro`, `tdd`,
-`harden-tests`, and `principles`. The automatically discoverable `principles`
-skill selects from twenty ordinary principle references; these are not separate
-skill registrations. There are no
+Twenty-one skills ship: `task-interview`, `validate-claims`, `setup-astack`,
+`pick-next`, `merge-brief`, `arena`, `swarm`, `interrogate`, `blast-radius`,
+`weekly-report`, `reflect`, `technical-writing`, `why`, `how`, `teach`, `unslop`,
+`bro`, `tdd`, `harden-tests`, `principles`, and `show-me-your-work`. The
+automatically discoverable `principles` skill selects from twenty ordinary
+principle references; these are not separate skill registrations. There are no
 bundled agent definitions or automations; skills may delegate through the harness
 when available.
 
