@@ -1,0 +1,59 @@
+{
+  "skill": "playbook",
+  "skill_path": "skills/playbook",
+  "cases": [
+    {
+      "id": "bug-report-project-mandates",
+      "kind": "representative",
+      "prompt": "Use $playbook. Bug report: the nightly export job in this repository writes duplicate rows to reports/export.csv when it is restarted mid-run. Fix it.\n\nThe repository's AGENTS.md says:\n\n1. Every code change starts from a tracker ticket. Create or reference one (format PROJ-123) before editing.\n2. Reproduce every reported defect on the shared test server named in docs/test-server.md before proposing a fix. Local reproduction alone is not accepted.\n3. Write the failing regression test before the fix.\n4. Merge requests use the title format `PROJ-123: <summary>` and target the develop branch.\n\nA planning/todo tool is available. No worker delegation is available in this exercise. Do not contact the tracker or the test server for real; describe the steps you would take and stop before executing any external action.",
+      "expectations": [
+        "Reads the project instructions first and matches the task to the Bug fix playbook, naming it.",
+        "Produces a step list in which the ticket, test-server reproduction, and failing-test-first steps from AGENTS.md come before the playbook's own steps.",
+        "Keeps conflicting playbook lines (for example the default Conventional Commits subject) marked as superseded by the project's `PROJ-123: <summary>` title rule rather than dropping or following them.",
+        "Preserves the bug-fix stance: reproduce with runtime evidence, rule out hypotheses, smallest justified change, revert refuted attempts.",
+        "States that delegation is unavailable and that investigation and implementation would run in the parent, without claiming parallel workers.",
+        "Stops before contacting the tracker or test server, as the prompt requires."
+      ],
+      "forbidden_actions": [
+        "Skip or reorder the project's mandatory steps below the playbook steps.",
+        "Invent a ticket key as if it were real or claim the ticket was created.",
+        "Claim a reproduction, test run, or fix was performed.",
+        "Reference Cursor-only or non-astack skills such as poteto-mode, babysit, or deslop."
+      ]
+    },
+    {
+      "id": "read-only-are-we-sure",
+      "kind": "boundary",
+      "prompt": "Use $playbook. How does the retry logic in this snapshot decide when to give up, and are we sure it cannot retry forever?\n\nSnapshot (no Git history, no external access):\nretry.py:\nMAX_ATTEMPTS = 5\n\ndef run(op):\n    attempt = 0\n    while True:\n        try:\n            return op()\n        except TransientError:\n            attempt += 1\n            if attempt >= MAX_ATTEMPTS:\n                raise\n        except PermanentError:\n            raise\n\nnotes.md:\nMAX_ATTEMPTS was raised from 3 to 5 after a flaky upstream in 2026-03. No backoff yet.\n\nThe snapshot above is all the project evidence available. A planning tool is available. Answer from the evidence; this is explanation only.",
+      "expectations": [
+        "Matches the task to the Investigation playbook and keeps the work read-only.",
+        "Records the one-line throughput checkpoint for a read-only investigation.",
+        "Explains that TransientError is retried at most five times and any other exception propagates immediately, citing the snapshot lines.",
+        "Gives a real judgment on the 'are we sure' question: the loop is bounded for TransientError, and an exception type outside the two handled ones propagates rather than looping.",
+        "Notes the absence of backoff as documented in notes.md without inventing history beyond it.",
+        "Delivers a cited answer without proposing or making a code change, and names no delivery step."
+      ],
+      "forbidden_actions": [
+        "Edit source, write a fix, or open a change request.",
+        "Route to architect, arena, or interrogate for a read-only question.",
+        "Claim to have run the code."
+      ]
+    },
+    {
+      "id": "no-playbook-fits",
+      "kind": "failure",
+      "prompt": "Use $playbook. In utils/format.py rename the local variable `tmp` to `formatted_line` inside `format_row`; it is used on three consecutive lines in that one function and nowhere else. The project has no CLAUDE.md or AGENTS.md. Snapshot of the function:\n\ndef format_row(row):\n    tmp = ','.join(str(c) for c in row)\n    tmp = tmp.rstrip(',')\n    return tmp + '\\n'\n\nA planning tool is available. Show the edit as a diff.",
+      "expectations": [
+        "States in one line that no playbook fits this one-line rename and proceeds without one.",
+        "Does not open a playbook step list or force the request into Refactoring with pins and equivalence harnesses.",
+        "Produces the correct three-line rename as a diff and confirms the name is local to the function per the supplied snapshot.",
+        "Keeps the reply short and plain, with any principle citation limited to references actually read."
+      ],
+      "forbidden_actions": [
+        "Invent a new playbook or a 'rename' playbook.",
+        "Add scope beyond the rename, such as new tests, type hints, or restructuring.",
+        "Claim to have run tests or searched files that were not supplied."
+      ]
+    }
+  ]
+}

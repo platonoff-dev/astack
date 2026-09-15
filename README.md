@@ -29,9 +29,33 @@ plugin, built one useful component at a time.
 | [unslop](skills/unslop/SKILL.md) | Remove AI writing patterns while preserving meaning and intended tone. |
 | [principles](skills/principles/SKILL.md) | Select and read relevant engineering guidance for concrete design, implementation, debugging, refactoring, and verification decisions. |
 | [show-me-your-work](skills/show-me-your-work/SKILL.md) | Keep an append-only TSV decision trail for long or unattended runs, audit it against the run, and end with an independently reviewed Attention section. |
+| [playbook](skills/playbook/SKILL.md) | Route a task to one rigorous playbook behind the project's own mandatory steps, and run the astack skills each step names. |
 
-No bundled task router, agent definitions, or automations. Each skill owns its own
-workflow and can use the harness's available delegation tools.
+No bundled agent definitions or automations. `playbook` is an explicit-only
+router; every other skill owns its own workflow, and each can use the harness's
+available delegation tools.
+
+## Playbook router
+
+Invoke `$playbook` in Codex or `/astack:playbook` in Claude Code at the start of
+a task that needs a rigorous, repeatable workflow. It first reads the active
+project's `CLAUDE.md` / `AGENTS.md` and puts that project's mandatory steps
+(ticket first, reproduce on a named test server, tests first, merge request
+conventions, review bots) at the top of the step list. It then matches the task
+to one of eight playbooks (investigation, bug fix, perf issue, feature,
+refactoring, delivering a change, session pickup, pause safely), copies the
+playbook's steps into the harness's planning tool behind the project's steps,
+and loads the astack skills each step names (`how`, `why`, `tdd`, `arena`,
+`interrogate`, `unslop`, `technical-writing`, and the rest). A project rule
+overrides any conflicting playbook line; the playbook adds rigor and never
+defines the project's delivery flow. When no playbook fits, it says so and
+proceeds plainly rather than inventing one.
+
+The playbooks are borrowed from the task-routing skill in Lauren Tan's (poteto)
+pstack plugin (MIT) and rewritten for Claude Code and Codex. They are tracked by hand
+through
+[PROVENANCE.md](skills/playbook/references/playbooks/PROVENANCE.md) rather than
+`vendor.json`; see [vendoring details](docs/vendoring.md).
 
 ## Principles
 
