@@ -1,7 +1,8 @@
 # Native agent execution and results
 
-Arena, Swarm, and Interrogate use this shared contract. It is an instruction
-protocol for the lead, not an executable runner or an isolation guarantee.
+Arena, Swarm, Interrogate, and Architect use this shared contract. It is an
+instruction protocol for the lead, not an executable runner or an isolation
+guarantee.
 
 ## Frame and dispatch
 

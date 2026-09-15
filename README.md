@@ -18,6 +18,7 @@ plugin, built one useful component at a time.
 | [arena](skills/arena/SKILL.md) | Compare independent candidates with a fresh judge and synthesize a verified artifact. |
 | [swarm](skills/swarm/SKILL.md) | Cover bounded work or run a declared race, verify outputs, and report remaining gaps. |
 | [interrogate](skills/interrogate/SKILL.md) | Review code with independent reviewers and evidence-based lead judgment, without applying findings. |
+| [architect](skills/architect/SKILL.md) | Sketch usage, types, and module boundaries from compared candidate designs, then implement against the chosen sketch. |
 | [why](skills/why/SKILL.md) | Investigate code rationale through available history and sources, separating evidence from inference. |
 | [how](skills/how/SKILL.md) | Explain runtime flow, subsystem boundaries, and code placement from implementation evidence. |
 | [teach](skills/teach/SKILL.md) | Teach code or a change conversationally using how and why investigations, gradual visuals, and plain language. |
@@ -27,9 +28,34 @@ plugin, built one useful component at a time.
 | [technical-writing](skills/technical-writing/SKILL.md) | Write and review technical prose with document modes, plain sentences, and unambiguous instructions. |
 | [unslop](skills/unslop/SKILL.md) | Remove AI writing patterns while preserving meaning and intended tone. |
 | [principles](skills/principles/SKILL.md) | Select and read relevant engineering guidance for concrete design, implementation, debugging, refactoring, and verification decisions. |
+| [show-me-your-work](skills/show-me-your-work/SKILL.md) | Keep an append-only TSV decision trail for long or unattended runs, audit it against the run, and end with an independently reviewed Attention section. |
+| [playbook](skills/playbook/SKILL.md) | Route a task to one rigorous playbook behind the project's own mandatory steps, and run the astack skills each step names. |
 
-No bundled task router, agent definitions, or automations. Each skill owns its own
-workflow and can use the harness's available delegation tools.
+No bundled agent definitions or automations. `playbook` is an explicit-only
+router; every other skill owns its own workflow, and each can use the harness's
+available delegation tools.
+
+## Playbook router
+
+Invoke `$playbook` in Codex or `/astack:playbook` in Claude Code at the start of
+a task that needs a rigorous, repeatable workflow. It first reads the active
+project's `CLAUDE.md` / `AGENTS.md` and puts that project's mandatory steps
+(ticket first, reproduce on a named test server, tests first, merge request
+conventions, review bots) at the top of the step list. It then matches the task
+to one of eight playbooks (investigation, bug fix, perf issue, feature,
+refactoring, delivering a change, session pickup, pause safely), copies the
+playbook's steps into the harness's planning tool behind the project's steps,
+and loads the astack skills each step names (`how`, `why`, `tdd`, `arena`,
+`interrogate`, `unslop`, `technical-writing`, and the rest). A project rule
+overrides any conflicting playbook line; the playbook adds rigor and never
+defines the project's delivery flow. When no playbook fits, it says so and
+proceeds plainly rather than inventing one.
+
+The playbooks are borrowed from the task-routing skill in Lauren Tan's (poteto)
+pstack plugin (MIT) and rewritten for Claude Code and Codex. They are tracked by hand
+through
+[PROVENANCE.md](skills/playbook/references/playbooks/PROVENANCE.md) rather than
+`vendor.json`; see [vendoring details](docs/vendoring.md).
 
 ## Principles
 
@@ -49,13 +75,15 @@ source-path trials do not establish discovery in installed harness caches.
 
 ## Native agent workflows
 
-Invoke `$arena`, `$swarm`, or `$interrogate` in Codex, or
-`/astack:arena`, `/astack:swarm`, or `/astack:interrogate` in Claude Code.
-These three explicit-only skills use the active harness's native agents and
-[shared execution and result contract](references/agent-workflows.md). A run stays
-within one harness and uses its available capacity and authorized runners.
+Invoke `$arena`, `$swarm`, `$interrogate`, or `$architect` in Codex, or
+`/astack:arena`, `/astack:swarm`, `/astack:interrogate`, or `/astack:architect`
+in Claude Code. These four explicit-only skills use the active harness's native
+agents and [shared execution and result contract](references/agent-workflows.md).
+A run stays within one harness and uses its available capacity and authorized
+runners.
 Arena combines alternatives, Swarm verifies coverage or a declared race, and
-Interrogate reviews code without applying changes. Missing workers, unverified
+Interrogate reviews code without applying changes. Architect runs its design
+comparison through Arena under the same contract. Missing workers, unverified
 outputs, and incomplete coverage remain explicit in the result. Fresh contexts
 and separate workspaces depend on the native interface; instruction-only
 restrictions are not enforced isolation. No runner service, model registry,
