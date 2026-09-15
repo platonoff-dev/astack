@@ -1,0 +1,14 @@
+### Bug fix
+
+**You own this task. Plan, review, verify.** Delegate investigation and the fix where delegation is available, and stay in the lead.
+
+Be scientific. Every shipped line traces to runtime evidence. Belt-and-suspenders that "might help" is a hypothesis, not a fix. It does not ship. When evidence refutes a hypothesis, revert what it motivated. The smallest change the evidence justifies ships, nothing more.
+
+1. Reproduce it yourself on the surface the project's instructions name (its test environment, a named test server, a local run when none is named). Drive it yourself where the harness can. Do not hand the repro to the user; a debug protocol that says to ask the user does not override this. Ask only with a stated, specific reason the surface is out of your reach, and only after driving it as far as it goes. Won't reproduce directly, force it: synthesize the trigger, tighten conditions, or instrument until it fires.
+2. Binary-search the cause. Form the candidate hypotheses, then rule them out until one survives. Seed them with [how](../../../how/SKILL.md) over the affected subsystem and [why](../../../why/SKILL.md) for regression history. Each pass, take the split that cuts the most remaining problem space, get runtime evidence, eliminate. When program state is unclear, add instrumentation or logging and read it as the code runs. Don't guess. For a long or stubborn hunt, use the harness's loop facility if one exists, otherwise keep a recurring run going yourself. Confirm the surviving *mechanism* with runtime evidence before planning the fix ([Fix Root Causes](../../../principles/references/fix-root-causes/reference.md)).
+3. Plan the fix. If it crosses a function boundary, load and follow the astack `architect` skill first. Delegate implementation with a specific scope per the Delegation paragraph in `SKILL.md`, or write it yourself when delegation is unavailable. Review the diff either way.
+4. Verify on the same surface. The original repro now passes. "Inconclusive" or wrong-surface is not a pass. Flag it. Unit tests show branch behavior, not bug absence ([Prove It Works](../../../principles/references/prove-it-works/reference.md)).
+5. Stage the commits so the failing repro lands before the fix in git history. Load the [tdd](../../../tdd/SKILL.md) skill for the failing-test-first cadence when the bug has a cheap local test path. Skip it when the test would be expensive, integration-heavy, or unclear, and say which verification stands in. This is the canonical [Sequence Verifiable Units](../../../principles/references/sequence-verifiable-units/reference.md) case: the failing test first, the fix on top. A project rule that mandates tests first already sits ahead of this list.
+6. Run **Delivering a change** (`delivering-a-change.md`).
+
+**Reply:** what was broken, root cause, fix, how you verified. Paste failing-then-passing repro output verbatim.

@@ -156,6 +156,22 @@ Symlinks, special files, and submodules in imported paths are unsupported and
 fail before publication. Referenced files outside the selected skill are not
 imported automatically; review dependencies before using it.
 
+## Borrowed, not vendored
+
+Some components are rewrites of upstream material rather than patched copies:
+every line was reworked for Claude Code and Codex, so a reproducible
+patch chain over the upstream file would be larger than the file itself. These
+components are not registered in `vendor.json` and `vendor.py check` does not
+cover them. Each carries a `PROVENANCE.md` next to a verbatim copy of the
+upstream license, recording the repository, the reviewed commit, the per-file
+source mapping, what the rewrite changed, and the exact `git log` command that
+lists upstream changes since the reviewed commit. Drift is checked by hand: run
+that command, read each change, decide whether the rewrite should absorb it,
+and update the recorded commit and date. The `playbook` skill's playbooks
+([PROVENANCE.md](../skills/playbook/references/playbooks/PROVENANCE.md)) are
+the current example. Use this route only when a rewrite is the intended result;
+an upstream skill kept close to its source still goes through `vendor.py`.
+
 ## Finish an import or update
 
 Inspect the Git diff, including changed instructions, scripts, dependencies,
