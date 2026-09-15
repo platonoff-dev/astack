@@ -158,9 +158,10 @@ imported automatically; review dependencies before using it.
 
 ## Borrowed, not vendored
 
-Some components are rewrites of upstream material rather than patched copies:
-every line was reworked for Claude Code and Codex, so a reproducible
-patch chain over the upstream file would be larger than the file itself. These
+Some components are adaptations of upstream material rather than patched
+copies: each file was rewritten in part for Claude Code and Codex, with several
+passages carried verbatim under the upstream license, so a reproducible patch
+chain over the upstream file would obscure the relationship it records. These
 components are not registered in `vendor.json` and `vendor.py check` does not
 cover them. Each carries a `PROVENANCE.md` next to a verbatim copy of the
 upstream license, recording the repository, the reviewed commit, the per-file

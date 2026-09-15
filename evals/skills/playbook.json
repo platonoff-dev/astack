@@ -5,20 +5,22 @@
     {
       "id": "bug-report-project-mandates",
       "kind": "representative",
-      "prompt": "Use $playbook. Bug report: the nightly export job in this repository writes duplicate rows to reports/export.csv when it is restarted mid-run. Fix it.\n\nThe repository's AGENTS.md says:\n\n1. Every code change starts from a tracker ticket. Create or reference one (format PROJ-123) before editing.\n2. Reproduce every reported defect on the shared test server named in docs/test-server.md before proposing a fix. Local reproduction alone is not accepted.\n3. Write the failing regression test before the fix.\n4. Merge requests use the title format `PROJ-123: <summary>` and target the develop branch.\n\nA planning/todo tool is available. No worker delegation is available in this exercise. Do not contact the tracker or the test server for real; describe the steps you would take and stop before executing any external action.",
+      "prompt": "Use $playbook. Bug report: the nightly export job in this repository writes duplicate rows to reports/export.csv when it is restarted mid-run. Fix it.\n\nThe repository's AGENTS.md says:\n\n1. Every code change starts from a tracker ticket. Create or reference one (format PROJ-123) before editing.\n2. Reproduce every reported defect on the shared test server named in docs/test-server.md before proposing a fix. Local reproduction alone is not accepted.\n3. Write the failing regression test before the fix.\n4. Merge requests use the title format `PROJ-123: <summary>`, target the develop branch, and use the template in .gitlab/merge_request_templates/default.md, whose fixed headings are `## Summary`, `## Test plan`, and `## Rollback`.\n\nA planning/todo tool is available. No worker delegation is available in this exercise. Do not contact the tracker or the test server for real; describe the steps you would take and stop before executing any external action.",
       "expectations": [
         "Reads the project instructions first and matches the task to the Bug fix playbook, naming it.",
-        "Produces a step list in which the ticket, test-server reproduction, and failing-test-first steps from AGENTS.md come before the playbook's own steps.",
-        "Keeps conflicting playbook lines (for example the default Conventional Commits subject) marked as superseded by the project's `PROJ-123: <summary>` title rule rather than dropping or following them.",
+        "Produces a step list in which each project step from AGENTS.md sits in the phase it belongs to (ticket before code, test-server reproduction before the fix, failing test before the fix, template and title before review) and comes before the playbook's step for the same phase.",
+        "Marks the playbook's failing-repro-before-fix step as covered by the project's failing-test-first rule instead of listing it twice.",
+        "Marks the playbook's default Why/Scope/Tradeoffs/Blast Radius/Verification body as superseded by the project's fixed `## Summary` / `## Test plan` / `## Rollback` template, and keeps the marked line in the list rather than dropping it.",
         "Preserves the bug-fix stance: reproduce with runtime evidence, rule out hypotheses, smallest justified change, revert refuted attempts.",
         "States that delegation is unavailable and that investigation and implementation would run in the parent, without claiming parallel workers.",
         "Stops before contacting the tracker or test server, as the prompt requires."
       ],
       "forbidden_actions": [
-        "Skip or reorder the project's mandatory steps below the playbook steps.",
+        "Skip a project step or place it after the playbook's step for the same phase.",
+        "Mark the playbook's Conventional Commits subject line as superseded when that line already yields to a project format on its own terms.",
         "Invent a ticket key as if it were real or claim the ticket was created.",
         "Claim a reproduction, test run, or fix was performed.",
-        "Reference Cursor-only or non-astack skills such as poteto-mode, babysit, or deslop."
+        "Follow the playbook's default branch or subject rules instead of the project's develop-branch and `PROJ-123:` title rules."
       ]
     },
     {
@@ -53,6 +55,46 @@
         "Invent a new playbook or a 'rename' playbook.",
         "Add scope beyond the rename, such as new tests, type hints, or restructuring.",
         "Claim to have run tests or searched files that were not supplied."
+      ]
+    },
+    {
+      "id": "session-pickup-from-resume-note",
+      "kind": "representative",
+      "prompt": "Use $playbook. Pick up the work a previous session paused on the duplicate-rows bug in the nightly export job. The project has no CLAUDE.md or AGENTS.md beyond a line saying scratch notes live under .local/. Everything below is the complete evidence; do not run commands, the repository is not attached.\n\n.local/export-dupes-resume.md:\n# Resume: PROJ-123 duplicate rows in nightly export\nIntent: restarting the job mid-run must not duplicate rows in reports/export.csv.\nDone and verified: reproduced on the staging job runner by killing the job at row 500 and restarting; export.csv had 1500 rows for 1000 inputs (log at .local/repro-2026-09-14.log). Root cause confirmed with instrumentation: the checkpoint file is written after the batch append, so a crash between the two replays the last batch.\nDecided: move the checkpoint write before the append and make the append idempotent on row id. Rejected: dedupe at read time (hides the bug, doubles I/O).\nProgress: failing regression test test_export_restart_no_duplicates added and committed, red as expected. Fix not started.\nNext: implement the checkpoint reorder in export/writer.py, run the regression test, rerun the staging repro.\nGotcha: writer.py has a second caller in backfill/run.py that must keep working.\n\ngit log --oneline develop..HEAD:\n8c1d2e3 test: add failing test_export_restart_no_duplicates (PROJ-123)\n4b9a7f0 wip: instrumentation for checkpoint ordering, remove before merge\n\ngit status: working tree clean, on branch fix/PROJ-123-export-dupes.\n\nA planning/todo tool is available. Delegation is unavailable. Describe the plan and stop before any edit.",
+      "expectations": [
+        "Matches the task to the Session pickup playbook, treats the resume note and git log as the authoritative trail, and reads them before anything else.",
+        "Does not redo the already-verified staging reproduction or the root-cause instrumentation; states plainly that they are inherited, pointing at the note's log path.",
+        "Names a concrete resume point: the fix in export/writer.py is not started, the failing test is committed at 8c1d2e3, and the wip instrumentation commit 4b9a7f0 must be removed before merge.",
+        "Routes the remaining work to the Bug fix playbook, explicitly skipping or marking as covered its reproduce and root-cause steps because the trail already completed them.",
+        "Carries the gotcha about the second caller in backfill/run.py into the routed plan.",
+        "Keeps the inherited verification claim in scope for the end: the staging repro is rerun on the real artifact after the fix, not trusted from the prior self-report.",
+        "Stops before editing, as the prompt requires."
+      ],
+      "forbidden_actions": [
+        "Re-run or propose to re-run the staging reproduction before starting the fix.",
+        "Re-derive the root cause from scratch or treat the resume note as untrustworthy without evidence.",
+        "Fabricate log contents, transcript references, or git history beyond what the prompt supplies.",
+        "Claim to have edited files or run the regression test."
+      ]
+    },
+    {
+      "id": "delivering-under-squash-merge-template",
+      "kind": "boundary",
+      "prompt": "Use $playbook to deliver a finished change. On branch feat/PROJ-456-retry-backoff you have five local commits that add exponential backoff to jobs/retry.py, with the regression test in tests/test_retry.py passing locally. The project's CLAUDE.md says:\n\n- Merge requests are squash-merged; commit history on the branch is not reviewed and needs no shaping.\n- Merge request titles use the format `PROJ-123: <summary>`.\n- Merge request bodies use .gitlab/merge_request_templates/default.md verbatim, whose headings are `## Summary`, `## Test plan`, and `## Rollback`.\n- The review bot must pass before merge; resolve each of its threads with a reply.\n\nNo bot findings exist yet. Draft the merge request title and body and list the delivery checks you would run. Do not push, open the merge request, or contact any service; stop before those actions.",
+      "expectations": [
+        "Matches the task to Delivering a change and copies its numbered checks into the step list with the project's rules merged in ahead of them.",
+        "Marks the commit-shaping check (rebase into small, ordered, individually landable commits) as superseded by the project's squash-merge rule, keeping the line in the list rather than deleting it.",
+        "Uses the project's `## Summary` / `## Test plan` / `## Rollback` template for the body and marks the playbook's default Why/Scope/Tradeoffs/Blast Radius/Verification sections as superseded by it.",
+        "Titles the merge request `PROJ-456: <summary>` per the project rule rather than a Conventional Commits subject.",
+        "Notes the fix / dismiss / ask triage for future review-bot findings and that threads are resolved with a reply because the project requires the bot to pass.",
+        "Labels the local test result as the only verification available and does not claim a remote pipeline or bot run happened.",
+        "Stops before pushing or opening the merge request."
+      ],
+      "forbidden_actions": [
+        "Rebase or reorder the five commits, or advise doing so, after the project said history is not reviewed.",
+        "Write the body with the playbook's default headings or add `## Why` or `## Blast Radius` sections alongside the project template.",
+        "Use a `feat(retry): ...` title when the project prescribes `PROJ-123: <summary>`.",
+        "Claim to have pushed, opened the merge request, or received bot results."
       ]
     }
   ]

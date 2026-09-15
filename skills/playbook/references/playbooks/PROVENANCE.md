@@ -1,9 +1,11 @@
 # Provenance
 
-These playbooks are borrowed, not vendored. They are astack-owned rewrites of
-files from Cursor's pstack plugin, tracked here by hand rather than through
-`vendor.json` and `scripts/vendor.py`, because every file was rewritten for
-Claude Code and Codex rather than patched.
+These playbooks are borrowed, not vendored. They are astack-owned adaptations
+of files from Cursor's pstack plugin, tracked here by hand rather than through
+`vendor.json` and `scripts/vendor.py`. Each file was rewritten in part for
+Claude Code and Codex; several passages are carried verbatim under the MIT
+notice, so a patch chain over the upstream files would obscure rather than
+record the relationship.
 
 ## Upstream
 
@@ -23,8 +25,8 @@ Paths are relative to the upstream repository root.
 | `investigation.md` | `pstack/skills/poteto-mode/playbooks/investigation.md` | Rewritten |
 | `bug-fix.md` | `pstack/skills/poteto-mode/playbooks/bug-fix.md` | Rewritten |
 | `feature.md` | `pstack/skills/poteto-mode/playbooks/feature.md` | Rewritten |
-| `refactoring.md` | `pstack/skills/poteto-mode/playbooks/refactoring.md` | Rewritten |
-| `perf-issue.md` | `pstack/skills/poteto-mode/playbooks/perf-issue.md` | Rewritten |
+| `refactoring.md` | `pstack/skills/poteto-mode/playbooks/refactoring.md` | Adapted; most steps carried with harness-neutral wording |
+| `perf-issue.md` | `pstack/skills/poteto-mode/playbooks/perf-issue.md` | Adapted; most steps carried with harness-neutral wording |
 | `delivering-a-change.md` | `pstack/skills/poteto-mode/playbooks/opening-a-pr.md` | Rewritten and renamed |
 | `session-pickup.md` | `pstack/skills/poteto-mode/playbooks/session-pickup.md` | Rewritten |
 | `pause-safely.md` | `pstack/skills/poteto-mode/playbooks/pause-safely.md` | Rewritten |
@@ -40,10 +42,12 @@ Removed every Cursor and GitHub coupling: `Task` fields, `subagent_type`,
 model slugs, `/loop`, control-skill reproduction, transcript directories, `gh`
 commands, stack and draft semantics, and Cursor-only skills. Delegation now
 follows astack's shared native-delegation contract with no model overrides.
-Principle mentions link into astack's `principles` registry; three upstream
-principles that astack does not carry were dropped or reworded. Project
-instructions (`CLAUDE.md` / `AGENTS.md`) take precedence over every playbook
-line, which upstream does not state.
+Upstream's inline principle registry was replaced by a pointer to astack's
+`principles` registry, which lacks three of its entries
+(exhaust-the-design-space, make-operations-idempotent,
+test-behavior-not-implementation); none of the eight playbooks cited them.
+Project instructions (`CLAUDE.md` / `AGENTS.md`) take precedence over every
+playbook line, which upstream does not state.
 
 ## Checking drift
 
