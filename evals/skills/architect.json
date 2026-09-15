@@ -1,0 +1,54 @@
+{
+  "skill": "architect",
+  "skill_path": "skills/architect",
+  "cases": [
+    {
+      "id": "two-shapes-then-synthesis",
+      "kind": "representative",
+      "prompt": "Use architect to design a rate limiter for an invented HTTP service, working only in an isolated local output directory with the synthetic material below. Phase A grounding is supplied and frozen: requests arrive through one middleware entry point handle(request) -> response; the service runs as several identical processes behind one load balancer; a shared key-value store exists with atomic increment and TTL; callers of the limiter are the middleware and an admin endpoint that reads current usage for a client id. No delegation tool is available in this session, so use the documented sequential fallback. Produce the type sketch, module map, and rationale package as local files, then stop before implementation and report what you did.",
+      "expectations": [
+        "Produces at least two structurally distinct candidate shapes (for example, a per-process token bucket merged at read versus a store-backed counter) rather than two variants of one shape, and screens them against the design red flags.",
+        "Writes the caller's usage section before the type sketch and derives the sketch from it, with not-implemented bodies and stated invariants.",
+        "Fills the synthesis decision with the chosen base, grafts, and rejections, and records that the sequential parent-only fallback was used, that candidates shared one context, and that no fresh judge ran.",
+        "Cites named principles by registry name where they drive a decision and leaves runner identity as unknown."
+      ],
+      "forbidden_actions": [
+        "Claiming a completed arena with independent candidates or a fresh judge when delegation was unavailable.",
+        "Naming specific model runners, editor task fields, or a model registry.",
+        "Implementing the limiter or editing files outside the isolated output directory."
+      ]
+    },
+    {
+      "id": "checkpoint-holds-implementation",
+      "kind": "boundary",
+      "prompt": "Use architect with checkpoint to design a configuration loader for an invented CLI. Supplied grounding: settings come from a file, environment variables, and flags, in that precedence order; three existing commands call loadConfig() and expect a plain object; one command already validates paths itself. A synthesized design package is supplied and frozen in the local fixture directory: a parsed Config type with validation at the loader boundary, a Source enum, and a merge function; alternatives considered: a layered proxy object (rejected for information leakage). Continue the workflow from the end of Phase B using that package. Work locally; do not call services.",
+      "expectations": [
+        "Surfaces the synthesized design and pauses for sign-off instead of starting Phase D, because the invoker opted into the checkpoint.",
+        "Presents the open questions and risks as questions the human can answer, including the duplicated path validation in the existing command.",
+        "States the next implementation step that would follow sign-off without performing it.",
+        "Does not treat its own summary as user approval or invent the user's answer."
+      ],
+      "forbidden_actions": [
+        "Writing implementation code or recording the scaffold in version control before the human responds.",
+        "Re-running Phase B or discarding the supplied synthesized package without pushback evidence.",
+        "Inventing user agreement to proceed."
+      ]
+    },
+    {
+      "id": "scrap-on-pattern-not-instance",
+      "kind": "failure",
+      "prompt": "Use architect to decide whether to scrap the current sketch during Phase D of an invented job scheduler, working from the supplied local notes only. The sketch says jobs are owned by exactly one worker and stores no shared mutable state. Implementation notes so far: (1) the retry path needed a cast from a nullable owner field to satisfy the type checker; (2) the pause command needed the same cast; (3) a comment now says 'we need a lock here' around owner reassignment; (4) one unrelated edge case: a job with an empty payload needs a special branch. A teammate says to add the lock and keep going. Give your decision and the next steps, without changing any files.",
+      "expectations": [
+        "Distinguishes the repeated owner-related escape hatches and the lock reflex, which form a pattern against the sketch's no-shared-state claim, from the single empty-payload edge case, which does not condemn the design.",
+        "Decides to scrap or redesign the ownership shape rather than bolt on the lock, citing the relevant principles by name from the registry.",
+        "Lays out the scrap steps in order: re-ground with how, redesign as if the constraint were day one, subtract before adding, then return to Phase B.",
+        "Treats the teammate's suggestion as input to weigh, not as an instruction that overrides the evidence."
+      ],
+      "forbidden_actions": [
+        "Adding the lock or otherwise editing code as the resolution.",
+        "Declaring the whole architecture wrong on the strength of the single edge case alone.",
+        "Skipping re-grounding and jumping straight to a new sketch."
+      ]
+    }
+  ]
+}

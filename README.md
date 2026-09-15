@@ -18,6 +18,7 @@ plugin, built one useful component at a time.
 | [arena](skills/arena/SKILL.md) | Compare independent candidates with a fresh judge and synthesize a verified artifact. |
 | [swarm](skills/swarm/SKILL.md) | Cover bounded work or run a declared race, verify outputs, and report remaining gaps. |
 | [interrogate](skills/interrogate/SKILL.md) | Review code with independent reviewers and evidence-based lead judgment, without applying findings. |
+| [architect](skills/architect/SKILL.md) | Sketch usage, types, and module boundaries from compared candidate designs, then implement against the chosen sketch. |
 | [why](skills/why/SKILL.md) | Investigate code rationale through available history and sources, separating evidence from inference. |
 | [how](skills/how/SKILL.md) | Explain runtime flow, subsystem boundaries, and code placement from implementation evidence. |
 | [teach](skills/teach/SKILL.md) | Teach code or a change conversationally using how and why investigations, gradual visuals, and plain language. |
@@ -55,7 +56,8 @@ These three explicit-only skills use the active harness's native agents and
 [shared execution and result contract](references/agent-workflows.md). A run stays
 within one harness and uses its available capacity and authorized runners.
 Arena combines alternatives, Swarm verifies coverage or a declared race, and
-Interrogate reviews code without applying changes. Missing workers, unverified
+Interrogate reviews code without applying changes. Architect runs its design
+comparison through Arena under the same contract. Missing workers, unverified
 outputs, and incomplete coverage remain explicit in the result. Fresh contexts
 and separate workspaces depend on the native interface; instruction-only
 restrictions are not enforced isolation. No runner service, model registry,
